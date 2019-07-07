@@ -34,7 +34,7 @@ namespace Crimson
             _world = world;
         }
 
-        public void SetComponent<Component>(Component c)
+        public void AddComponent<Component>(Component c)
         {
             _world.AddComponentToEntity<Component>(_entity, c);
         }

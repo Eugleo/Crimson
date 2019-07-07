@@ -53,7 +53,6 @@ namespace Crimson
         {
             Coords = coords;
             Changed = true;
-            Debug.WriteLine("Create");
         }
     }
 
@@ -81,7 +80,19 @@ namespace Crimson
 
     struct CCamera
     {
+        public int FollowDistance { get; }
+        public Entity Target { get; }
 
+        public (double, double) WorldBounds { get; }
+        public (double, double) ScreenBounds { get; }
+
+        public CCamera(int followDistance, Entity target, (double, double) worldBounds, (double, double) cameraBounds)
+        {
+            FollowDistance = followDistance;
+            Target = target;
+            WorldBounds = worldBounds;
+            ScreenBounds = cameraBounds;
+        }
     }
 
     struct CCollision
@@ -91,16 +102,11 @@ namespace Crimson
 
     struct CTile
     {
-        public enum TileType
-        {
-            Rock, Grass
-        }
 
-        public TileType Type { get; }
+    }
 
-        public CTile(TileType type)
-        {
-            Type = type;
-        }
+    struct GameObject
+    {
+
     }
 }

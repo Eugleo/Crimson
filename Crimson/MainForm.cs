@@ -20,33 +20,93 @@ namespace Crimson
         {
             InitializeComponent();
 
-            renderSystem = new RenderSystem(_world, this);
+            renderSystem = new RenderSystem(_world, mainPanel, mapPanel);
             var movementSystem = new MovementSystem(_world);
             var inputSystem = new InputSystem(_world);
+            var cameraSystem = new CameraSystem(_world);
             _world.AddSystem(renderSystem);
             _world.AddSystem(movementSystem);
             _world.AddSystem(inputSystem);
+            _world.AddSystem(cameraSystem);
 
-            Image playerImage = ResizeImage(Properties.Resources.PlayerCharacter, 64, 64);
+            Image playerImage = ResizeImage(Properties.Resources.Player, 64, 64);
             var player = _world.CreateEntity();
-            player.SetComponent(new CKeyboardNavigation());
-            player.SetComponent(new CMovement((5, 5), (0, 0)));
-            player.SetComponent(new CPosition(100, 100));
-            player.SetComponent(new CGraphics(playerImage));
+            player.AddComponent(new CKeyboardNavigation());
+            player.AddComponent(new CMovement((5, 5), (0, 0)));
+            player.AddComponent(new CPosition(mainPanel.Width / 2, mainPanel.Height / 2));
+            player.AddComponent(new CGraphics(playerImage));
+            player.AddComponent(new GameObject());
 
-            MakeTree(630, 200);
-            MakeTree(240, 310);
-            MakeTree(315, 115);
+            var camera = _world.CreateEntity();
+            camera.AddComponent(new CCamera(20, player.Entity, (30*64, 30*64), (mapPanel.Width, mapPanel.Height)));
+            camera.AddComponent(new CPosition(mainPanel.Width / 2 + 1, mainPanel.Height / 2 + 1));
+
+            MakeMap(30, 30, 64);
 
             gameTimer.Enabled = true;
         }
 
+        readonly Random rnd = new Random();
+        void MakeMap(int w, int h, int tileSize)
+        {
+            foreach (var i in Enumerable.Range(0, h))
+            {
+                foreach (var j in Enumerable.Range(0, w))
+                {
+                    var tile = _world.CreateEntity();
+                    tile.AddComponent(new CTile());
+                    tile.AddComponent(new CPosition(i * tileSize, j * tileSize));
+
+                    Image rawImage;
+                    switch (rnd.Next(3))
+                    {
+                        case 0:
+                            rawImage = Properties.Resources.ground;
+                            switch (rnd.Next(2))
+                            {
+                                case 0:
+                                    MakeTree(i * tileSize, j * tileSize);
+                                    break;
+                                default:
+                                    break;
+                            }
+                            break;
+                        default:
+                            rawImage = Properties.Resources.Grass;
+                            switch (rnd.Next(5))
+                            {
+                                case 4:
+                                    MakeTree(i * tileSize, j * tileSize);
+                                    break;
+                                default:
+                                    break;
+                            }
+                            break;
+                    }
+
+                    Image image = ResizeImage(rawImage, tileSize, tileSize);
+                    tile.AddComponent(new CGraphics(image));
+                }
+            }
+        }
+
         void MakeTree(int X, int Y)
         {
-            Image treeImage = ResizeImage(Properties.Resources.Tree, 64, 64);
+            Image treeImage;
+            switch (rnd.Next(3))
+            {
+                case 0:
+                    treeImage = ResizeImage(Properties.Resources.baobab, 64, 64);
+                    break;
+                default:
+                    treeImage = ResizeImage(Properties.Resources.smrk, 64, 64);
+                    break;
+
+            }
             var tree = _world.CreateEntity();
-            tree.SetComponent(new CPosition(X, Y));
-            tree.SetComponent(new CGraphics(treeImage));
+            tree.AddComponent(new CPosition(X, Y));
+            tree.AddComponent(new CGraphics(treeImage));
+            tree.AddComponent(new GameObject());
         }
 
         readonly Dictionary<Keys, KeyEventArgs> ke = new Dictionary<Keys, KeyEventArgs>();

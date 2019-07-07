@@ -11,34 +11,76 @@ namespace Crimson
 {
     class RenderSystem: GameSystem
     {
-        readonly Control _control;
-        EntityFilter<CPosition, CGraphics> _filter = new EntityFilter<CPosition, CGraphics>(); 
+        readonly Control _mainControl;
+        readonly Control _mapControl;
+        readonly EntityFilter<CPosition, CGraphics, GameObject> _renderable;
+        readonly EntityFilter<CPosition, CCamera> _cameras;
+        readonly EntityFilter<CPosition, CTile, CGraphics> _tiles;
 
-        public RenderSystem(World world, Control control)
+        public RenderSystem(World world, Control mainControl, Control mapControl)
         {
             _world = world;
-            _control = control;
-            _filter = _world.GetFilter<EntityFilter<CPosition, CGraphics>>();
-            _control.Paint += Control_Paint;
+            _mainControl = mainControl;
+            _mapControl = mapControl;
+            _mainControl.Paint += MainControl_Paint;
+            _mapControl.Paint += MapControl_Paint;
+
+            _renderable = _world.GetFilter<EntityFilter<CPosition, CGraphics, GameObject>>();
+            _cameras = _world.GetFilter<EntityFilter<CPosition, CCamera>>();
+            _tiles = _world.GetFilter<EntityFilter<CPosition, CTile, CGraphics>>();
         }
 
         public override void Update()
         {
-            _control.Refresh();
+            _mainControl.Refresh();
+            _mapControl.Refresh();
         }
 
-        void Control_Paint(object sender, PaintEventArgs e)
+        // TODO: Zredukovat duplikovaný kod v následujících dvou funkcích
+        void MainControl_Paint(object sender, PaintEventArgs e)
         {
-            foreach (var i in Enumerable.Range(0, _filter.Entities.Count))
-            {
-                var entity = _filter.Entities[i];
-                var position = _filter.Components1[i];
-                var image = _filter.Components2[i].Image;
+            var (cameraX, cameraY) = _cameras.Components1[0].Coords;
+            var width = _mapControl.Width;
+            var height = _mapControl.Height;
+            var left = cameraX - width / 2;
+            var right = cameraX + width / 2;
+            var top = cameraY - height / 2;
+            var bottom = cameraY + height / 2;
 
-                var (X, Y) = position.Coords;
-                position.Changed = false;
-                _world.AddComponentToEntity(entity, position);
-                e.Graphics.DrawImage(image, (float)X, (float)Y);
+            foreach (var i in Enumerable.Range(0, _renderable.Entities.Count))
+            {
+                var entity = _renderable.Entities[i];
+                var (X, Y) = _renderable.Components1[i].Coords;
+                var image = _renderable.Components2[i].Image;
+
+                if (X + image.Width > left && X < right && Y + image.Height > top && Y < bottom)
+                {
+                    e.Graphics.DrawImage(image, (float)(X - left), (float)(Y - top));
+                }
+            }
+        }
+
+        void MapControl_Paint(object sender, PaintEventArgs e)
+        {
+
+            var (cameraX, cameraY) = _cameras.Components1[0].Coords;
+            var width = _mapControl.Width;
+            var height = _mapControl.Height;
+            var left = cameraX - width / 2;
+            var right = cameraX + width / 2;
+            var top = cameraY - height / 2;
+            var bottom = cameraY + height / 2;
+
+            foreach (var i in Enumerable.Range(0, _tiles.Entities.Count))
+            {
+                var (X, Y) = _tiles.Components1[i].Coords;
+                var tile = _tiles.Components2[i];
+                var image = _tiles.Components3[i].Image;
+
+                if (X + image.Width > left && X < right && Y + image.Height > top && Y < bottom)
+                {
+                    e.Graphics.DrawImage(image, (float)(X - left), (float)(Y - top));
+                }
             }
         }
     }

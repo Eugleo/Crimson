@@ -49,6 +49,7 @@
     <Compile Include="Entity\EntityFilter.cs" />
     <Compile Include="Entity\Entity.cs" />
     <Compile Include="Component\ComponentMask.cs" />
+    <Compile Include="System\CameraSystem.cs" />
     <Compile Include="System\InputSystem.cs" />
     <Compile Include="System\RenderSystem.cs" />
     <Compile Include="Component\ComponentManager.cs" />
@@ -92,10 +93,31 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\PlayerCharacter.png" />
+    <None Include="Resources\tree-variations.png" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\tree-variations.png" />
+    <None Include="Resources\rogue.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\tileable_grass_00.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\grass.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\stone.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\baobab.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\smrk.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\grass2.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\ground.jpg" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
