@@ -65,10 +65,12 @@ namespace Crimson
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.mainPanel.BackColor = System.Drawing.Color.Transparent;
+            this.mainPanel.Cursor = System.Windows.Forms.Cursors.Cross;
             this.mainPanel.Location = new System.Drawing.Point(0, 0);
             this.mainPanel.Name = "mainPanel";
             this.mainPanel.Size = new System.Drawing.Size(1658, 899);
             this.mainPanel.TabIndex = 0;
+            this.mainPanel.MouseDown += new System.Windows.Forms.MouseEventHandler(this.MainPanel_MouseClick);
             // 
             // MainForm
             // 

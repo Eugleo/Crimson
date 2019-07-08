@@ -11,16 +11,13 @@ namespace Crimson
 {
     struct CHealth
     {
-        public int MaxHealth;
-        public int CurrentHealth;
-        public bool Invincible;
+        public int MaxHealth { get; }
+        public int CurrentHealth { get; }
 
-
-        public CHealth(int maxHealth)
+        public CHealth(int maxHealth, int currentHealth)
         {
             MaxHealth = maxHealth;
-            CurrentHealth = maxHealth;
-            Invincible = false;
+            CurrentHealth = currentHealth;
         }
     }
 
@@ -34,8 +31,6 @@ namespace Crimson
             Speed = speed;
             Acceleration = acceleration;
         }
-
-        public int Id => 2;
     }
 
     struct CPosition
@@ -68,11 +63,11 @@ namespace Crimson
 
     struct CKeyboardNavigation { }
 
-    struct CInput
+    struct CInputEvent
     {
         public List<KeyEventArgs> KeyEventArgs { get; }
 
-        public CInput(List<KeyEventArgs> keyEventArgs)
+        public CInputEvent(List<KeyEventArgs> keyEventArgs)
         {
             KeyEventArgs = keyEventArgs;
         }
@@ -81,6 +76,8 @@ namespace Crimson
     struct CCamera
     {
         public int FollowDistance { get; }
+
+        // Target entita musí mít CMovement a CPosition
         public Entity Target { get; }
 
         public (double, double) WorldBounds { get; }
@@ -95,18 +92,54 @@ namespace Crimson
         }
     }
 
-    struct CCollision
+    struct CBullet
     {
+        public int Damage { get; }
 
+        public CBullet(int damage)
+        {
+            Damage = damage;
+        }
     }
 
-    struct CTile
+    struct CCollides
     {
+        public Rectangle Bounds { get; }
 
+        public CCollides(Rectangle bounds)
+        {
+            Bounds = bounds;
+        }
     }
 
-    struct GameObject
-    {
+    struct CCollisionEvent { }
 
+    struct CShootEvent
+    {
+        public (double, double) Target { get; }
+
+        public CShootEvent((double, double) target)
+        {
+            Target = target;
+        }
     }
+
+    struct CHasGun
+    {
+        public enum GunType
+        {
+            Pistol, Shotgun, SMG
+        }
+
+        public GunType Type { get; }
+
+        public CHasGun(GunType type)
+        {
+            Type = type;
+        }
+    }
+
+    struct CTile { }
+
+    struct CGameObject { }
 }

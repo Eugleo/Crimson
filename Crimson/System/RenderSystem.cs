@@ -13,7 +13,7 @@ namespace Crimson
     {
         readonly Control _mainControl;
         readonly Control _mapControl;
-        readonly EntityFilter<CPosition, CGraphics, GameObject> _renderable;
+        readonly EntityFilter<CPosition, CGraphics, CGameObject> _renderable;
         readonly EntityFilter<CPosition, CCamera> _cameras;
         readonly EntityFilter<CPosition, CTile, CGraphics> _tiles;
 
@@ -25,7 +25,7 @@ namespace Crimson
             _mainControl.Paint += MainControl_Paint;
             _mapControl.Paint += MapControl_Paint;
 
-            _renderable = _world.GetFilter<EntityFilter<CPosition, CGraphics, GameObject>>();
+            _renderable = _world.GetFilter<EntityFilter<CPosition, CGraphics, CGameObject>>();
             _cameras = _world.GetFilter<EntityFilter<CPosition, CCamera>>();
             _tiles = _world.GetFilter<EntityFilter<CPosition, CTile, CGraphics>>();
         }

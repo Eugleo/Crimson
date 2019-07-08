@@ -10,12 +10,12 @@ namespace Crimson
 {
     class InputSystem: GameSystem
     {
-        readonly EntityFilter<CInput, CMovement, CKeyboardNavigation> _filter = new EntityFilter<CInput, CMovement, CKeyboardNavigation>();
+        readonly EntityFilter<CInputEvent, CMovement, CKeyboardNavigation> _filter;
 
         public InputSystem(World world)
         {
             _world = world;
-            _filter = _world.GetFilter<EntityFilter<CInput, CMovement, CKeyboardNavigation>>();
+            _filter = _world.GetFilter<EntityFilter<CInputEvent, CMovement, CKeyboardNavigation>>();
         }
 
         public override void Update()
@@ -26,6 +26,8 @@ namespace Crimson
                 var keyEventArgs = _filter.Components1[i].KeyEventArgs;
                 var acc = keyEventArgs.Count > 1 ? Math.Sqrt(2) / 2 : 1;
 
+                double accX = 0;
+                double accY = 0;
                 foreach (var ke in keyEventArgs)
                 {
                     var move = _filter.Components2[i];
@@ -33,28 +35,24 @@ namespace Crimson
                     {
                         case Keys.Down:
                         case Keys.S:
-                            Debug.WriteLine("Down!");
-                            _world.AddComponentToEntity(entity, new CMovement(move.Speed, (move.Acceleration.X, acc)));
+                            accY = acc;
                             break;
                         case Keys.Up:
                         case Keys.W:
-                            Debug.WriteLine("Up!");
-                            _world.AddComponentToEntity(entity, new CMovement(move.Speed, (move.Acceleration.X, -acc)));
+                            accY = -acc;
                             break;
                         case Keys.Left:
                         case Keys.A:
-                            Debug.WriteLine("Left!");
-                            _world.AddComponentToEntity(entity, new CMovement(move.Speed, (-acc, move.Acceleration.Y)));
+                            accX = -acc;
                             break;
                         case Keys.Right:
                         case Keys.D:
-                            Debug.WriteLine("Right!");
-                            _world.AddComponentToEntity(entity, new CMovement(move.Speed, (acc, move.Acceleration.Y)));
+                            accX = acc;
                             break;
                     }
+                    _world.AddComponentToEntity(entity, new CMovement(move.Speed, (accX, accY)));
                 }
             }
-            _world.ForEachEntityWithComponents<CInput>(e => _world.RemoveComponentFromEntity<CInput>(e));
         }
     }
 }

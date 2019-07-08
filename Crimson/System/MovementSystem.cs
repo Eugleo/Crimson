@@ -31,7 +31,7 @@ namespace Crimson
                 {
                     // TODO: Movement by se neměl sám zastavovat (nebo měl?) promyslet 
                     _world.AddComponentToEntity(entity, new CPosition(newPosition));
-                    _world.AddComponentToEntity(entity, new CMovement(move.Speed, (0, 0)));
+                    //_world.AddComponentToEntity(entity, new CMovement(move.Speed, (0, 0)));
                 }
             }
         }

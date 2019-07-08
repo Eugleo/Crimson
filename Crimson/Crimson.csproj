@@ -50,6 +50,7 @@
     <Compile Include="Entity\Entity.cs" />
     <Compile Include="Component\ComponentMask.cs" />
     <Compile Include="System\CameraSystem.cs" />
+    <Compile Include="System\GunSystem.cs" />
     <Compile Include="System\InputSystem.cs" />
     <Compile Include="System\RenderSystem.cs" />
     <Compile Include="Component\ComponentManager.cs" />
@@ -118,6 +119,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\ground.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\bullet.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
