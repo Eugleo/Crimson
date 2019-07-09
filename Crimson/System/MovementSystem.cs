@@ -9,28 +9,24 @@ namespace Crimson
 {
     class MovementSystem: GameSystem
     {
-        EntityFilter<CPosition, CMovement> _filter = new EntityFilter<CPosition, CMovement>();
+        EntityFilter<CTransform, CMovement> _filter = new EntityFilter<CTransform, CMovement>();
 
         public MovementSystem(World world)
         {
             _world = world;
-            _filter = _world.GetFilter<EntityFilter<CPosition, CMovement>>();
+            _filter = _world.GetFilter<EntityFilter<CTransform, CMovement>>();
         }
 
         public override void Update()
         {
-            foreach (var i in Enumerable.Range(0, _filter.Entities.Count))
+            foreach (var (entity, transform, movement) in _filter)
             {
-                var entity = _filter.Entities[i];
-                var position = _filter.Components1[i];
-                var move = _filter.Components2[i];
-                (var X, var Y) = position.Coords;
-                var newPosition = (X + move.Speed.X * move.Acceleration.X, Y + move.Speed.Y * move.Acceleration.Y);
+                var newPosition = transform.Location + movement.Acceleration.ScaledBy(movement.Speed);
 
-                if (newPosition != (X, Y))
+                if (newPosition != transform.Location)
                 {
                     // TODO: Movement by se neměl sám zastavovat (nebo měl?) promyslet 
-                    _world.AddComponentToEntity(entity, new CPosition(newPosition));
+                    _world.AddComponentToEntity(entity, new CTransform(newPosition));
                     //_world.AddComponentToEntity(entity, new CMovement(move.Speed, (0, 0)));
                 }
             }

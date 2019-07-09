@@ -20,17 +20,15 @@ namespace Crimson
 
         public override void Update()
         {
-            foreach (var i in Enumerable.Range(0, _filter.Entities.Count))
+            foreach (var (entity, input, move, _) in _filter)
             {
-                var entity = _filter.Entities[i];
-                var keyEventArgs = _filter.Components1[i].KeyEventArgs;
+                var keyEventArgs = input.KeyEventArgs;
                 var acc = keyEventArgs.Count > 1 ? Math.Sqrt(2) / 2 : 1;
 
                 double accX = 0;
                 double accY = 0;
                 foreach (var ke in keyEventArgs)
                 {
-                    var move = _filter.Components2[i];
                     switch (ke.KeyCode)
                     {
                         case Keys.Down:
@@ -50,7 +48,7 @@ namespace Crimson
                             accX = acc;
                             break;
                     }
-                    _world.AddComponentToEntity(entity, new CMovement(move.Speed, (accX, accY)));
+                    _world.AddComponentToEntity(entity, new CMovement(move.Speed, new Vector(accX, accY)));
                 }
             }
         }

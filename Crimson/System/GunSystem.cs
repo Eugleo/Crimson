@@ -9,67 +9,101 @@ namespace Crimson
 {
     class GunSystem : GameSystem
     {
-        EntityFilter<CHasGun, CShootEvent, CPosition> _filter;
+        EntityFilter<CHasGun, CTransform, CShootEvent> _filter;
 
         public GunSystem(World world)
         {
             _world = world;
-            _filter = _world.GetFilter<EntityFilter<CHasGun, CShootEvent, CPosition>>();
+            _filter = _world.GetFilter<EntityFilter<CHasGun, CTransform, CShootEvent>>();
         }
 
         public override void Update()
         {
-            foreach (var i in Enumerable.Range(0, _filter.Entities.Count))
+            foreach (var (entity, gun, transform, shot) in _filter)
             {
-                var gun = _filter.Components1[i];
-                var targetPosition = _filter.Components2[i].Target;
-                var position = _filter.Components3[i].Coords;
+                var targetPosition = shot.TargetLocation;
+                var position = transform.Location;
 
                 switch (gun.Type)
                 {
                     case CHasGun.GunType.Pistol:
-                        ShootPistol(position, targetPosition);
+                        ShootPistol(position, targetPosition, gun, entity);
                         break;
                     case CHasGun.GunType.SMG:
-                        ShootSMG(position, targetPosition);
+                        ShootSMG(position, targetPosition, gun, entity);
                         break;
                     case CHasGun.GunType.Shotgun:
-                        ShootShotgun(position, targetPosition);
+                        ShootShotgun(position, targetPosition, gun, entity);
                         break;
                     default:
                         break;
                 }
             }
-            _world.ForEachEntityWithComponents<CShootEvent>(e => _world.RemoveComponentFromEntity<CShootEvent>(e));
         }
 
-        void ShootPistol((double X, double Y) position, (double X, double Y) targetPosition)
+        readonly Random rnd = new Random();
+        async void ShootPistol(Vector position, Vector targetPosition, CHasGun gun, Entity e)
         {
-            Debug.WriteLine("Shoot!");
+            if (gun.CanShoot)
+            {
+                MakeBullet(position, targetPosition, 20, 30, new Vector(Inaccuracy(5), Inaccuracy(5)));
+                gun.CanShoot = false;
+                _world.AddComponentToEntity(e, gun);
+                // TODO tohle info mít v nějakém dictionary s daty různých druhů zbraní
+                await Task.Delay(300);
+                gun.CanShoot = true;
+                _world.AddComponentToEntity(e, gun);
+            }
+        }
 
-            var (X, Y) = position;
-            var (targetX, targetY) = targetPosition;
-            // TODO: Refaktorovat na vektor
-            var size = Math.Sqrt(Math.Pow(targetPosition.X - position.X, 2) + Math.Pow(targetPosition.Y - position.Y, 2));
+        async void ShootSMG(Vector position, Vector targetPosition, CHasGun gun, Entity e)
+        {
+            if (gun.CanShoot)
+            {
+                MakeBullet(position, targetPosition, 10, 30, new Vector(Inaccuracy(12), Inaccuracy(12)));
+                gun.CanShoot = false;
+                _world.AddComponentToEntity(e, gun);
+                // TODO tohle info mít v nějakém dictionary s daty různých druhů zbraní
+                await Task.Delay(45);
+                gun.CanShoot = true;
+                _world.AddComponentToEntity(e, gun);
+            }
+        }
 
+        async void ShootShotgun(Vector position, Vector targetPosition, CHasGun gun, Entity e)
+        {
+            if (gun.CanShoot)
+            {
+                var acc = (targetPosition - position).Orthogonalized().Normalized(8);
+
+                foreach (var i in Enumerable.Range(-2, 5))
+                {
+                    MakeBullet(position, targetPosition, 20, 15, acc.ScaledBy(i));
+                }
+
+                gun.CanShoot = false;
+                _world.AddComponentToEntity(e, gun);
+                // TODO tohle info mít v nějakém dictionary s daty různých druhů zbraní
+                await Task.Delay(650);
+                gun.CanShoot = true;
+                _world.AddComponentToEntity(e, gun);
+            }
+        }
+
+        void MakeBullet(Vector position, Vector targetPosition, int damage, int speed, Vector offset)
+        {
+            var acc = (targetPosition - position).Normalized(100);
             var bullet = _world.CreateEntity();
-            bullet.AddComponent(new CBullet(20));
-            bullet.AddComponent(new CMovement((30, 30), ((targetPosition.X - position.X) / size, (targetPosition.Y - position.Y) / size)));
-            bullet.AddComponent(new CPosition(position));
+            bullet.AddComponent(new CBullet(damage));
+            bullet.AddComponent(new CMovement(speed, (acc + offset).Normalized()));
+            bullet.AddComponent(new CTransform(position));
             bullet.AddComponent(new CGraphics(MainForm.ResizeImage(Properties.Resources.bullet, 20, 20)));
             bullet.AddComponent(new CGameObject());
         }
 
-        void ShootSMG((double, double) position, (double, double) targetPosition)
+        int Inaccuracy(int upperBound)
         {
-            var (X, Y) = position;
-            var (targetX, targetY) = targetPosition;
-        }
-
-        void ShootShotgun((double, double) position, (double, double) targetPosition)
-        {
-            var (X, Y) = position;
-            var (targetX, targetY) = targetPosition;
+            return rnd.Next(2) == 0 ? -rnd.Next(upperBound + 1) : rnd.Next(upperBound + 1);
         }
     }
 }

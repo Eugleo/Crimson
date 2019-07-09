@@ -13,9 +13,9 @@ namespace Crimson
     {
         readonly Control _mainControl;
         readonly Control _mapControl;
-        readonly EntityFilter<CPosition, CGraphics, CGameObject> _renderable;
-        readonly EntityFilter<CPosition, CCamera> _cameras;
-        readonly EntityFilter<CPosition, CTile, CGraphics> _tiles;
+        readonly EntityFilter<CTransform, CGraphics, CGameObject> _renderable;
+        readonly EntityFilter<CTransform, CCamera> _cameras;
+        readonly EntityFilter<CTransform, CGraphics, CTile> _tiles;
 
         public RenderSystem(World world, Control mainControl, Control mapControl)
         {
@@ -25,9 +25,9 @@ namespace Crimson
             _mainControl.Paint += MainControl_Paint;
             _mapControl.Paint += MapControl_Paint;
 
-            _renderable = _world.GetFilter<EntityFilter<CPosition, CGraphics, CGameObject>>();
-            _cameras = _world.GetFilter<EntityFilter<CPosition, CCamera>>();
-            _tiles = _world.GetFilter<EntityFilter<CPosition, CTile, CGraphics>>();
+            _renderable = _world.GetFilter<EntityFilter<CTransform, CGraphics, CGameObject>>();
+            _cameras = _world.GetFilter<EntityFilter<CTransform, CCamera>>();
+            _tiles = _world.GetFilter<EntityFilter<CTransform, CGraphics, CTile>>();
         }
 
         public override void Update()
@@ -39,23 +39,23 @@ namespace Crimson
         // TODO: Zredukovat duplikovaný kod v následujících dvou funkcích
         void MainControl_Paint(object sender, PaintEventArgs e)
         {
-            var (cameraX, cameraY) = _cameras.Components1[0].Coords;
+            var location = _cameras.Components1[0].Location;
             var width = _mapControl.Width;
             var height = _mapControl.Height;
-            var left = cameraX - width / 2;
-            var right = cameraX + width / 2;
-            var top = cameraY - height / 2;
-            var bottom = cameraY + height / 2;
+            var left = location.X - width / 2;
+            var right = location.X + width / 2;
+            var top = location.Y - height / 2;
+            var bottom = location.Y + height / 2;
 
-            foreach (var i in Enumerable.Range(0, _renderable.Entities.Count))
+            foreach (var (entity, transform, graphics, _) in _renderable)
             {
-                var entity = _renderable.Entities[i];
-                var (X, Y) = _renderable.Components1[i].Coords;
-                var image = _renderable.Components2[i].Image;
+                var entityLocation = transform.Location;
+                var image = graphics.Image;
 
-                if (X + image.Width > left && X < right && Y + image.Height > top && Y < bottom)
+                if (entityLocation.X + image.Width > left && entityLocation.X < right  &&
+                    entityLocation.Y + image.Height > top && entityLocation.Y < bottom)
                 {
-                    e.Graphics.DrawImage(image, (float)(X - left), (float)(Y - top));
+                    e.Graphics.DrawImage(image, (float)(entityLocation.X - left), (float)(entityLocation.Y - top));
                 }
             }
         }
@@ -63,23 +63,23 @@ namespace Crimson
         void MapControl_Paint(object sender, PaintEventArgs e)
         {
 
-            var (cameraX, cameraY) = _cameras.Components1[0].Coords;
+            var location = _cameras.Components1[0].Location;
             var width = _mapControl.Width;
             var height = _mapControl.Height;
-            var left = cameraX - width / 2;
-            var right = cameraX + width / 2;
-            var top = cameraY - height / 2;
-            var bottom = cameraY + height / 2;
+            var left = location.X - width / 2;
+            var right = location.X + width / 2;
+            var top = location.Y - height / 2;
+            var bottom = location.Y + height / 2;
 
-            foreach (var i in Enumerable.Range(0, _tiles.Entities.Count))
+            foreach (var (entity, transform, graphics, _) in _tiles)
             {
-                var (X, Y) = _tiles.Components1[i].Coords;
-                var tile = _tiles.Components2[i];
-                var image = _tiles.Components3[i].Image;
+                var tileLocation = transform.Location;
+                var image = graphics.Image;
 
-                if (X + image.Width > left && X < right && Y + image.Height > top && Y < bottom)
+                if (tileLocation.X + image.Width > left && tileLocation.X < right &&
+                    tileLocation.Y + image.Height > top && tileLocation.Y < bottom)
                 {
-                    e.Graphics.DrawImage(image, (float)(X - left), (float)(Y - top));
+                    e.Graphics.DrawImage(image, (float)(tileLocation.X - left), (float)(tileLocation.Y - top));
                 }
             }
         }

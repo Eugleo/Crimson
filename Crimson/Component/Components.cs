@@ -23,31 +23,28 @@ namespace Crimson
 
     struct CMovement
     {
-        public (int X, int Y) Speed;
-        public (double X, double Y) Acceleration;
+        public double Speed;
+        public Vector Acceleration;
 
-        public CMovement((int, int) speed, (double, double) acceleration)
+        public CMovement(double speed, Vector acceleration)
         {
             Speed = speed;
             Acceleration = acceleration;
         }
     }
 
-    struct CPosition
+    struct CTransform
     {
-        public (double X, double Y) Coords;
-        public bool Changed;
+        public Vector Location;
 
-        public CPosition(double x, double y)
+        public CTransform(double x, double y)
         {
-            Coords = (x, y);
-            Changed = true;
+            Location = new Vector(x, y);
         }
 
-        public CPosition((double, double) coords)
+        public CTransform(Vector location)
         {
-            Coords = coords;
-            Changed = true;
+            Location = location;
         }
     }
 
@@ -116,16 +113,17 @@ namespace Crimson
 
     struct CShootEvent
     {
-        public (double, double) Target { get; }
+        public Vector TargetLocation { get; }
 
-        public CShootEvent((double, double) target)
+        public CShootEvent(Vector targetLocation)
         {
-            Target = target;
+            TargetLocation = targetLocation;
         }
     }
 
     struct CHasGun
     {
+        public bool CanShoot;
         public enum GunType
         {
             Pistol, Shotgun, SMG
@@ -136,6 +134,7 @@ namespace Crimson
         public CHasGun(GunType type)
         {
             Type = type;
+            CanShoot = true;
         }
     }
 

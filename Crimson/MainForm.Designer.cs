@@ -32,7 +32,6 @@ namespace Crimson
         {
             this.components = new System.ComponentModel.Container();
             this.gameTimer = new System.Windows.Forms.Timer(this.components);
-            this.moveTimer = new System.Windows.Forms.Timer(this.components);
             this.mapPanel = new Crimson.DoubleBufferedPanel();
             this.mainPanel = new Crimson.DoubleBufferedPanel();
             this.mapPanel.SuspendLayout();
@@ -42,11 +41,6 @@ namespace Crimson
             // 
             this.gameTimer.Interval = 20;
             this.gameTimer.Tick += new System.EventHandler(this.GameTimer_Tick);
-            // 
-            // moveTimer
-            // 
-            this.moveTimer.Interval = 10;
-            this.moveTimer.Tick += new System.EventHandler(this.MoveTimer_Tick);
             // 
             // mapPanel
             // 
@@ -70,7 +64,9 @@ namespace Crimson
             this.mainPanel.Name = "mainPanel";
             this.mainPanel.Size = new System.Drawing.Size(1658, 899);
             this.mainPanel.TabIndex = 0;
-            this.mainPanel.MouseDown += new System.Windows.Forms.MouseEventHandler(this.MainPanel_MouseClick);
+            this.mainPanel.MouseDown += new System.Windows.Forms.MouseEventHandler(this.MainPanel_MouseDown);
+            this.mainPanel.MouseMove += new System.Windows.Forms.MouseEventHandler(this.MainPanel_MouseMove);
+            this.mainPanel.MouseUp += new System.Windows.Forms.MouseEventHandler(this.MainPanel_MouseUp);
             // 
             // MainForm
             // 
@@ -91,7 +87,6 @@ namespace Crimson
 
         #endregion
         private System.Windows.Forms.Timer gameTimer;
-        private System.Windows.Forms.Timer moveTimer;
         private DoubleBufferedPanel mainPanel;
         private DoubleBufferedPanel mapPanel;
     }

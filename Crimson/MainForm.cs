@@ -30,20 +30,19 @@ namespace Crimson
             Image playerImage = ResizeImage(Properties.Resources.Player, 64, 64);
             _player = _world.CreateEntity();
             _player.AddComponent(new CKeyboardNavigation());
-            _player.AddComponent(new CMovement((5, 5), (0, 0)));
-            _player.AddComponent(new CPosition(mainPanel.Width / 2, mainPanel.Height / 2));
+            _player.AddComponent(new CMovement(5, new Vector(0, 0)));
+            _player.AddComponent(new CTransform(mainPanel.Width / 2, mainPanel.Height / 2));
             _player.AddComponent(new CGraphics(playerImage));
             _player.AddComponent(new CGameObject());
             _player.AddComponent(new CHasGun(CHasGun.GunType.Pistol));
 
             var camera = _world.CreateEntity();
             camera.AddComponent(new CCamera(20, _player.Entity, (30*64, 30*64), (mapPanel.Width, mapPanel.Height)));
-            camera.AddComponent(new CPosition(mainPanel.Width / 2 + 1, mainPanel.Height / 2 + 1));
+            camera.AddComponent(new CTransform(mainPanel.Width / 2 + 1, mainPanel.Height / 2 + 1));
 
             MakeMap(30, 30, 64);
 
             gameTimer.Enabled = true;
-            _entitiesWithInput = _world.GetFilter<EntityFilter<CKeyboardNavigation, CInputEvent>>();
         }
 
         readonly Random rnd = new Random();
@@ -55,7 +54,7 @@ namespace Crimson
                 {
                     var tile = _world.CreateEntity();
                     tile.AddComponent(new CTile());
-                    tile.AddComponent(new CPosition(i * tileSize, j * tileSize));
+                    tile.AddComponent(new CTransform(i * tileSize, j * tileSize));
 
                     Image rawImage;
                     switch (rnd.Next(3))
@@ -103,7 +102,7 @@ namespace Crimson
                     break;
             }
             var tree = _world.CreateEntity();
-            tree.AddComponent(new CPosition(X, Y));
+            tree.AddComponent(new CTransform(X, Y));
             tree.AddComponent(new CGraphics(treeImage));
             tree.AddComponent(new CGameObject());
         }
@@ -114,26 +113,46 @@ namespace Crimson
             ke[e.KeyCode] = e;
             if (ke.Count > 0)
             {
-                moveTimer.Enabled = true;
+                _world.ForEachEntityWithComponents<CKeyboardNavigation>(en => 
+                    _world.AddComponentToEntity(en, new CInputEvent(ke.Values.ToList()))
+                );
+            }
+            switch (e.KeyCode)
+            {
+                case Keys.D1:
+                    _player.AddComponent(new CHasGun(CHasGun.GunType.Pistol));
+                    break;
+                case Keys.D2:
+                    _player.AddComponent(new CHasGun(CHasGun.GunType.Shotgun));
+                    break;
+                case Keys.D3:
+                    _player.AddComponent(new CHasGun(CHasGun.GunType.SMG));
+                    break;
             }
         }
 
         private void GameTimer_Tick(object sender, EventArgs e)
         {
             _world.Tick();
+            if (_isShooting)
+            {
+                var absoluteCenterLocation = _world.GetFilter<EntityFilter<CCamera, CTransform>>().Components2[0].Location;
+                var relativeOffset = new Vector(mapPanel.Width / 2, mapPanel.Height / 2);
+                _player.AddComponent(new CShootEvent(_mouseLocation + absoluteCenterLocation - relativeOffset));
+            }
         }
 
         private void MainForm_KeyUp(object sender, KeyEventArgs e)
         {
             // TODO upravit, ted předpokládám moc věcí
             ke.Remove(e.KeyCode);
+            _world.ForEachEntityWithComponents<CKeyboardNavigation>(en => _world.AddComponentToEntity(en, new CInputEvent(ke.Values.ToList())));
             if (ke.Count == 0)
             {
-                moveTimer.Enabled = false;
                 _world.ForEachEntityWithComponents<CKeyboardNavigation>(entity => {
                     _world.RemoveComponentFromEntity<CInputEvent>(entity);
                     var move = _world.GetComponentForEntity<CMovement>(entity);
-                    _world.AddComponentToEntity(entity, new CMovement(move.Speed, (0, 0)));
+                    _world.AddComponentToEntity(entity, new CMovement(move.Speed, new Vector(0, 0)));
                 });
             }
         }
@@ -152,18 +171,26 @@ namespace Crimson
             return destImage;
         }
 
-        EntityFilter<CKeyboardNavigation, CInputEvent> _entitiesWithInput;
-        private void MoveTimer_Tick(object sender, EventArgs e)
+        bool _isShooting = false;
+        Vector _mouseLocation;
+        private void MainPanel_MouseDown(object sender, MouseEventArgs e)
         {
-            Debug.WriteLine("Count = {0}", ke.Count);
-            _world.ForEachEntityWithComponents<CKeyboardNavigation>(en => _world.AddComponentToEntity(en, new CInputEvent(ke.Values.ToList())));
+            _mouseLocation = Vector.FromPoint(e.Location);
+            _isShooting = true;
+            var absoluteCenterLocation = _world.GetFilter<EntityFilter<CCamera, CTransform>>().Components2[0].Location;
+            var relativeOffset = new Vector(mapPanel.Width / 2, mapPanel.Height / 2);
+            _player.AddComponent(new CShootEvent(Vector.FromPoint(e.Location) + absoluteCenterLocation - relativeOffset));
         }
 
-        private void MainPanel_MouseClick(object sender, MouseEventArgs e)
+        private void MainPanel_MouseUp(object sender, MouseEventArgs e)
         {
-            var (X, Y) = _world.GetFilter<EntityFilter<CCamera, CPosition>>().Components2[0].Coords;
-            var (relX, relY) = (mapPanel.Width / 2, mapPanel.Height / 2);
-            _player.AddComponent(new CShootEvent((e.X - relX + X, e.Y - relY + Y)));
+            _isShooting = false;
+            _player.RemoveComponent<CShootEvent>();
+        }
+
+        private void MainPanel_MouseMove(object sender, MouseEventArgs e)
+        {
+            _mouseLocation = Vector.FromPoint(e.Location);
         }
     }
 }

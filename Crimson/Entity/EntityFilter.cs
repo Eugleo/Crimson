@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -19,7 +20,7 @@ namespace Crimson
         public abstract void UpdateComponentsFor(Entity entity);
     }
 
-    class EntityFilter<Component1> : EntityFilter
+    class EntityFilter<Component1> : EntityFilter, IEnumerable<(Entity, Component1)>
     {
         public List<Component1> Components1 = new List<Component1>();
 
@@ -35,6 +36,14 @@ namespace Crimson
             Components1.Add(_world.GetComponentForEntity<Component1>(e));
         }
 
+        public IEnumerator<(Entity, Component1)> GetEnumerator()
+        {
+            foreach (var i in Enumerable.Range(0, Entities.Count))
+            {
+                yield return (Entities[i], Components1[i]);
+            }
+        }
+
         public override void Remove(Entity e)
         {
             var i = _entities.IndexOf(e);
@@ -47,9 +56,14 @@ namespace Crimson
             var i = _entities.IndexOf(entity);
             Components1[i] = _world.GetComponentForEntity<Component1>(entity);
         }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
     }
 
-    class EntityFilter<Component1, Component2> : EntityFilter
+    class EntityFilter<Component1, Component2> : EntityFilter, IEnumerable<(Entity, Component1, Component2)>
     {
         public List<Component1> Components1 = new List<Component1>();
         public List<Component2> Components2 = new List<Component2>();
@@ -82,9 +96,22 @@ namespace Crimson
             Components1[i] = _world.GetComponentForEntity<Component1>(entity);
             Components2[i] = _world.GetComponentForEntity<Component2>(entity);
         }
+
+        public IEnumerator<(Entity, Component1, Component2)> GetEnumerator()
+        {
+            foreach (var i in Enumerable.Range(0, Entities.Count))
+            {
+                yield return (Entities[i], Components1[i], Components2[i]);
+            }
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
     }
 
-    class EntityFilter<Component1, Component2, Component3> : EntityFilter 
+    class EntityFilter<Component1, Component2, Component3> : EntityFilter, IEnumerable<(Entity, Component1, Component2, Component3)>
     {
         public List<Component1> Components1 = new List<Component1>();
         public List<Component2> Components2 = new List<Component2>();
@@ -121,6 +148,19 @@ namespace Crimson
             Components1[i] = _world.GetComponentForEntity<Component1>(entity);
             Components2[i] = _world.GetComponentForEntity<Component2>(entity);
             Components3[i] = _world.GetComponentForEntity<Component3>(entity);
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
+
+        public IEnumerator<(Entity, Component1, Component2, Component3)> GetEnumerator()
+        {
+            foreach (var i in Enumerable.Range(0, Entities.Count))
+            {
+                yield return (Entities[i], Components1[i], Components2[i], Components3[i]);
+            }
         }
     }
 }
