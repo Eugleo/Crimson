@@ -1,11 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 using System.Diagnostics;
+using Crimson.Entities;
 
-namespace Crimson
+namespace Crimson.Components
 {
     // TODO: Existuje nějaký lepší způsob přidělování ID jednotlivým ComponentManagerům než toto?
     static class ComponentManagerDB
@@ -25,7 +22,7 @@ namespace Crimson
 
         Dictionary<Entity, Component> _components = new Dictionary<Entity, Component>();
 
-        public void SetComponentForEntity(Entity e, Component c)
+        public void SetComponentOfEntity(Entity e, Component c)
         {
             _components[e] = c;
         }

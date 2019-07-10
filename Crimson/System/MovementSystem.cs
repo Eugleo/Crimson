@@ -1,11 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Diagnostics;
+﻿using System.Diagnostics;
+using Crimson.Entities;
+using Crimson.Components;
 
-namespace Crimson
+namespace Crimson.Systems
 {
     class MovementSystem: GameSystem
     {
@@ -26,7 +23,7 @@ namespace Crimson
                 if (newPosition != transform.Location)
                 {
                     // TODO: Movement by se neměl sám zastavovat (nebo měl?) promyslet 
-                    _world.AddComponentToEntity(entity, new CTransform(newPosition));
+                    _world.SetComponentOfEntity(entity, new CTransform(newPosition));
                     //_world.AddComponentToEntity(entity, new CMovement(move.Speed, (0, 0)));
                 }
             }

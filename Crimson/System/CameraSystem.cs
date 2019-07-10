@@ -1,11 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Diagnostics;
+using Crimson.Entities;
+using Crimson.Components;
 
-namespace Crimson
+namespace Crimson.Systems
 {
     class CameraSystem : GameSystem
     {
@@ -48,7 +46,7 @@ namespace Crimson
             }
 
             var move = new CMovement(targetMovement.Speed, new Vector(xOffset, yOffset));
-            _world.AddComponentToEntity(_cameras.Entities[0], move);
+            _world.SetComponentOfEntity(_cameras.Entities[0], move);
         }
     }
 }

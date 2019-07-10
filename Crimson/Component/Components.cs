@@ -6,8 +6,9 @@ using System.Threading.Tasks;
 using System.Drawing;
 using System.Windows.Forms;
 using System.Diagnostics;
+using Crimson.Entities;
 
-namespace Crimson
+namespace Crimson.Components
 {
     struct CHealth
     {
@@ -99,13 +100,18 @@ namespace Crimson
         }
     }
 
-    struct CCollides
+    struct CCollidable
     {
-        public Rectangle Bounds { get; }
+        public Vector Size { get; }
 
-        public CCollides(Rectangle bounds)
+        public CCollidable(Vector size)
         {
-            Bounds = bounds;
+            Size = size;
+        }
+
+        public CCollidable(double width, double height)
+        {
+            Size = new Vector(width, height);
         }
     }
 
@@ -121,19 +127,30 @@ namespace Crimson
         }
     }
 
-    struct CHasGun
+    struct CGun
     {
         public bool CanShoot;
+
+        // TODO Možná by nebylo od věci změnit GunType na ShootingPattern nebo tak něco
         public enum GunType
         {
             Pistol, Shotgun, SMG
         }
-
         public GunType Type { get; }
+        public int Damage { get; }
+        public int ReloadSpeed { get; }
+        public int Inaccuracy { get; }
+        public int Cadence { get;  }
+        public double BulletSpeed { get;  }
 
-        public CHasGun(GunType type)
+        public CGun(GunType type, int damage, int reloadSpeed, int inaccuracy, int cadence, int bulletSpeed) : this()
         {
             Type = type;
+            Damage = damage;
+            ReloadSpeed = reloadSpeed;
+            Inaccuracy = inaccuracy;
+            Cadence = cadence;
+            BulletSpeed = bulletSpeed;
             CanShoot = true;
         }
     }

@@ -2,6 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Diagnostics;
+using Crimson.Components;
+using Crimson.Entities;
+using Crimson.Systems;
 
 namespace Crimson
 {
@@ -26,12 +29,17 @@ namespace Crimson
             return ComponentManager<Component>.Instance.LookupComponentForEntity(e);
         }
 
-        public void AddComponentToEntity<Component>(Entity e, Component c)
+        public void SetComponentOfEntity<Component>(Entity e, Component c)
         {
-            ComponentManager<Component>.Instance.SetComponentForEntity(e, c);
+            ComponentManager<Component>.Instance.SetComponentOfEntity(e, c);
             var mask = _entityManager.GetComponentMask(e);
             mask.IncludeComponent<Component>();
             UpdateFiltersForEntity(e);
+        }
+
+        public bool EntityHasComponent<Component>(Entity e)
+        {
+            return _entityManager.GetComponentMask(e).IncludesComponent<Component>();
         }
 
         public void RemoveComponentFromEntity<Component>(Entity e)

@@ -4,6 +4,9 @@ using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
 using System.Diagnostics;
+using Crimson.Components;
+using Crimson.Systems;
+using Crimson.Entities;
 
 namespace Crimson
 {
@@ -11,21 +14,26 @@ namespace Crimson
     {
         readonly World _world = new World();
         readonly EntityHandle _player;
+        readonly Dictionary<CGun.GunType, CGun> _guns = new Dictionary<CGun.GunType, CGun>();
 
         public MainForm()
         {
             InitializeComponent();
+
+            _guns[CGun.GunType.Pistol] = new CGun(CGun.GunType.Pistol, 15, 700, 5, 300, 30);
+            _guns[CGun.GunType.Shotgun] = new CGun(CGun.GunType.Shotgun, 20, 800, 0, 700, 20);
+            _guns[CGun.GunType.SMG] = new CGun(CGun.GunType.SMG, 10, 700, 15, 45, 30);
 
             var renderSystem = new RenderSystem(_world, mainPanel, mapPanel);
             var movementSystem = new MovementSystem(_world);
             var inputSystem = new InputSystem(_world);
             var cameraSystem = new CameraSystem(_world);
             var gunSystem = new GunSystem(_world);
-            _world.AddSystem(renderSystem);
-            _world.AddSystem(movementSystem);
             _world.AddSystem(inputSystem);
             _world.AddSystem(cameraSystem);
+            _world.AddSystem(movementSystem);
             _world.AddSystem(gunSystem);
+            _world.AddSystem(renderSystem);
 
             Image playerImage = ResizeImage(Properties.Resources.Player, 64, 64);
             _player = _world.CreateEntity();
@@ -34,7 +42,7 @@ namespace Crimson
             _player.AddComponent(new CTransform(mainPanel.Width / 2, mainPanel.Height / 2));
             _player.AddComponent(new CGraphics(playerImage));
             _player.AddComponent(new CGameObject());
-            _player.AddComponent(new CHasGun(CHasGun.GunType.Pistol));
+            _player.AddComponent(_guns[CGun.GunType.Pistol]);
 
             var camera = _world.CreateEntity();
             camera.AddComponent(new CCamera(20, _player.Entity, (30*64, 30*64), (mapPanel.Width, mapPanel.Height)));
@@ -114,19 +122,19 @@ namespace Crimson
             if (ke.Count > 0)
             {
                 _world.ForEachEntityWithComponents<CKeyboardNavigation>(en => 
-                    _world.AddComponentToEntity(en, new CInputEvent(ke.Values.ToList()))
+                    _world.SetComponentOfEntity(en, new CInputEvent(ke.Values.ToList()))
                 );
             }
             switch (e.KeyCode)
             {
                 case Keys.D1:
-                    _player.AddComponent(new CHasGun(CHasGun.GunType.Pistol));
+                    _player.AddComponent(_guns[CGun.GunType.Pistol]);
                     break;
                 case Keys.D2:
-                    _player.AddComponent(new CHasGun(CHasGun.GunType.Shotgun));
+                    _player.AddComponent(_guns[CGun.GunType.Shotgun]);
                     break;
                 case Keys.D3:
-                    _player.AddComponent(new CHasGun(CHasGun.GunType.SMG));
+                    _player.AddComponent(_guns[CGun.GunType.SMG]);
                     break;
             }
         }
@@ -146,13 +154,13 @@ namespace Crimson
         {
             // TODO upravit, ted předpokládám moc věcí
             ke.Remove(e.KeyCode);
-            _world.ForEachEntityWithComponents<CKeyboardNavigation>(en => _world.AddComponentToEntity(en, new CInputEvent(ke.Values.ToList())));
+            _world.ForEachEntityWithComponents<CKeyboardNavigation>(en => _world.SetComponentOfEntity(en, new CInputEvent(ke.Values.ToList())));
             if (ke.Count == 0)
             {
                 _world.ForEachEntityWithComponents<CKeyboardNavigation>(entity => {
                     _world.RemoveComponentFromEntity<CInputEvent>(entity);
                     var move = _world.GetComponentForEntity<CMovement>(entity);
-                    _world.AddComponentToEntity(entity, new CMovement(move.Speed, new Vector(0, 0)));
+                    _world.SetComponentOfEntity(entity, new CMovement(move.Speed, new Vector(0, 0)));
                 });
             }
         }

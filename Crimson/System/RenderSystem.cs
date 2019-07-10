@@ -1,13 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Drawing;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Windows.Forms;
+using Crimson.Entities;
+using Crimson.Components;
 
-namespace Crimson
+namespace Crimson.Systems
 {
     class RenderSystem: GameSystem
     {

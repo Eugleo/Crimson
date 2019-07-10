@@ -4,8 +4,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Crimson.Components;
 
-namespace Crimson
+namespace Crimson.Entities
 {
     abstract class EntityFilter
     {
@@ -20,7 +21,7 @@ namespace Crimson
         public abstract void UpdateComponentsFor(Entity entity);
     }
 
-    class EntityFilter<Component1> : EntityFilter, IEnumerable<(Entity, Component1)>
+    class EntityFilter<Component1> : EntityFilter, IEnumerable<(Entity, Component1)>, IReadOnlyList<(Entity, Component1)>
     {
         public List<Component1> Components1 = new List<Component1>();
 
@@ -29,6 +30,10 @@ namespace Crimson
             Mask = new ComponentMask();
             Mask.IncludeComponent<Component1>();
         }
+
+        public (Entity, Component1) this[int index] => (Entities[index], Components1[index]);
+
+        public int Count => Entities.Count;
 
         public override void Add(Entity e)
         {
@@ -63,10 +68,17 @@ namespace Crimson
         }
     }
 
-    class EntityFilter<Component1, Component2> : EntityFilter, IEnumerable<(Entity, Component1, Component2)>
+    class EntityFilter<Component1, Component2> : 
+        EntityFilter, 
+        IEnumerable<(Entity, Component1, Component2)>, 
+        IReadOnlyList<(Entity, Component1, Component2)>
     {
         public List<Component1> Components1 = new List<Component1>();
         public List<Component2> Components2 = new List<Component2>();
+
+        public int Count => Entities.Count;
+
+        public (Entity, Component1, Component2) this[int index] => (Entities[index], Components1[index], Components2[index]);
 
         public EntityFilter()
         {
@@ -111,11 +123,19 @@ namespace Crimson
         }
     }
 
-    class EntityFilter<Component1, Component2, Component3> : EntityFilter, IEnumerable<(Entity, Component1, Component2, Component3)>
+    class EntityFilter<Component1, Component2, Component3> : 
+        EntityFilter, 
+        IEnumerable<(Entity, Component1, Component2, Component3)>, 
+        IReadOnlyList<(Entity, Component1, Component2, Component3)>
     {
         public List<Component1> Components1 = new List<Component1>();
         public List<Component2> Components2 = new List<Component2>();
         public List<Component3> Components3 = new List<Component3>();
+
+        public int Count => Entities.Count;
+
+        public (Entity, Component1, Component2, Component3) this[int index] => 
+            (Entities[index], Components1[index], Components2[index], Components3[index]);
 
         public EntityFilter()
         {

@@ -50,6 +50,7 @@
     <Compile Include="Entity\Entity.cs" />
     <Compile Include="Component\ComponentMask.cs" />
     <Compile Include="System\CameraSystem.cs" />
+    <Compile Include="System\CollisionSystem.cs" />
     <Compile Include="System\GunSystem.cs" />
     <Compile Include="System\InputSystem.cs" />
     <Compile Include="System\RenderSystem.cs" />

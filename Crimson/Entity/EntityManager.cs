@@ -3,8 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Crimson.Components;
 
-namespace Crimson
+namespace Crimson.Entities
 {
     class EntityManager
     {

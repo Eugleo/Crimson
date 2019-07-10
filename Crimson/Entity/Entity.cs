@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Crimson
+namespace Crimson.Entities
 {
     struct Entity: IEquatable<Entity>
     {
@@ -36,7 +36,7 @@ namespace Crimson
 
         public void AddComponent<Component>(Component c)
         {
-            _world.AddComponentToEntity<Component>(_entity, c);
+            _world.SetComponentOfEntity<Component>(_entity, c);
         }
 
         public void RemoveComponent<Component>()

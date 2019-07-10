@@ -1,20 +1,20 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Diagnostics;
+using Crimson.Entities;
+using Crimson.Components;
 
-namespace Crimson
+namespace Crimson.Systems
 {
     class GunSystem : GameSystem
     {
-        EntityFilter<CHasGun, CTransform, CShootEvent> _filter;
+        EntityFilter<CGun, CTransform, CShootEvent> _filter;
 
         public GunSystem(World world)
         {
             _world = world;
-            _filter = _world.GetFilter<EntityFilter<CHasGun, CTransform, CShootEvent>>();
+            _filter = _world.GetFilter<EntityFilter<CGun, CTransform, CShootEvent>>();
         }
 
         public override void Update()
@@ -26,13 +26,13 @@ namespace Crimson
 
                 switch (gun.Type)
                 {
-                    case CHasGun.GunType.Pistol:
+                    case CGun.GunType.Pistol:
                         ShootPistol(position, targetPosition, gun, entity);
                         break;
-                    case CHasGun.GunType.SMG:
+                    case CGun.GunType.SMG:
                         ShootSMG(position, targetPosition, gun, entity);
                         break;
-                    case CHasGun.GunType.Shotgun:
+                    case CGun.GunType.Shotgun:
                         ShootShotgun(position, targetPosition, gun, entity);
                         break;
                     default:
@@ -42,35 +42,33 @@ namespace Crimson
         }
 
         readonly Random rnd = new Random();
-        async void ShootPistol(Vector position, Vector targetPosition, CHasGun gun, Entity e)
+        async void ShootPistol(Vector position, Vector targetPosition, CGun gun, Entity e)
         {
             if (gun.CanShoot)
             {
-                MakeBullet(position, targetPosition, 20, 30, new Vector(Inaccuracy(5), Inaccuracy(5)));
+                MakeBullet(position, targetPosition, gun.Damage, gun.BulletSpeed, new Vector(Inaccuracy(gun.Inaccuracy), Inaccuracy(gun.Inaccuracy)));
                 gun.CanShoot = false;
-                _world.AddComponentToEntity(e, gun);
-                // TODO tohle info mít v nějakém dictionary s daty různých druhů zbraní
-                await Task.Delay(300);
+                _world.SetComponentOfEntity(e, gun);
+                await Task.Delay(gun.Cadence);
                 gun.CanShoot = true;
-                _world.AddComponentToEntity(e, gun);
+                _world.SetComponentOfEntity(e, gun);
             }
         }
 
-        async void ShootSMG(Vector position, Vector targetPosition, CHasGun gun, Entity e)
+        async void ShootSMG(Vector position, Vector targetPosition, CGun gun, Entity e)
         {
             if (gun.CanShoot)
             {
-                MakeBullet(position, targetPosition, 10, 30, new Vector(Inaccuracy(12), Inaccuracy(12)));
+                MakeBullet(position, targetPosition, gun.Damage, gun.BulletSpeed, new Vector(Inaccuracy(gun.Inaccuracy), Inaccuracy(gun.Inaccuracy)));
                 gun.CanShoot = false;
-                _world.AddComponentToEntity(e, gun);
-                // TODO tohle info mít v nějakém dictionary s daty různých druhů zbraní
-                await Task.Delay(45);
+                _world.SetComponentOfEntity(e, gun);
+                await Task.Delay(gun.Cadence);
                 gun.CanShoot = true;
-                _world.AddComponentToEntity(e, gun);
+                _world.SetComponentOfEntity(e, gun);
             }
         }
 
-        async void ShootShotgun(Vector position, Vector targetPosition, CHasGun gun, Entity e)
+        async void ShootShotgun(Vector position, Vector targetPosition, CGun gun, Entity e)
         {
             if (gun.CanShoot)
             {
@@ -78,19 +76,19 @@ namespace Crimson
 
                 foreach (var i in Enumerable.Range(-2, 5))
                 {
-                    MakeBullet(position, targetPosition, 20, 15, acc.ScaledBy(i));
+                    MakeBullet(position, targetPosition, gun.Damage, gun.BulletSpeed, acc.ScaledBy(i));
                 }
 
                 gun.CanShoot = false;
-                _world.AddComponentToEntity(e, gun);
+                _world.SetComponentOfEntity(e, gun);
                 // TODO tohle info mít v nějakém dictionary s daty různých druhů zbraní
-                await Task.Delay(650);
+                await Task.Delay(gun.Cadence);
                 gun.CanShoot = true;
-                _world.AddComponentToEntity(e, gun);
+                _world.SetComponentOfEntity(e, gun);
             }
         }
 
-        void MakeBullet(Vector position, Vector targetPosition, int damage, int speed, Vector offset)
+        void MakeBullet(Vector position, Vector targetPosition, int damage, double speed, Vector offset)
         {
             var acc = (targetPosition - position).Normalized(100);
             var bullet = _world.CreateEntity();

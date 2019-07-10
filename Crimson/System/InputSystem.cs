@@ -1,12 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Diagnostics;
+using Crimson.Entities;
+using Crimson.Components;
 
-namespace Crimson
+namespace Crimson.Systems
 {
     class InputSystem: GameSystem
     {
@@ -48,7 +46,7 @@ namespace Crimson
                             accX = acc;
                             break;
                     }
-                    _world.AddComponentToEntity(entity, new CMovement(move.Speed, new Vector(accX, accY)));
+                    _world.SetComponentOfEntity(entity, new CMovement(move.Speed, new Vector(accX, accY)));
                 }
             }
         }
