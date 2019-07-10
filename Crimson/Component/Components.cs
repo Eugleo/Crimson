@@ -115,7 +115,15 @@ namespace Crimson.Components
         }
     }
 
-    struct CCollisionEvent { }
+    struct CCollisionEvent
+    {
+        public Entity Partner { get; }
+
+        public CCollisionEvent(Entity partner)
+        {
+            Partner = partner;
+        }
+    }
 
     struct CShootEvent
     {
