@@ -111,7 +111,7 @@ namespace Crimson.Entities
 
         public IEnumerator<(Entity, Component1, Component2)> GetEnumerator()
         {
-            foreach (var i in Enumerable.Range(0, Entities.Count))
+            foreach (var i in Enumerable.Range(0, Math.Min(Entities.Count, Math.Min(Components1.Count, Components2.Count))))
             {
                 yield return (Entities[i], Components1[i], Components2[i]);
             }

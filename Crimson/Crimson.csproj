@@ -22,6 +22,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -31,6 +32,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -46,27 +48,28 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Entity\EntityFilter.cs" />
-    <Compile Include="Entity\Entity.cs" />
-    <Compile Include="Component\ComponentMask.cs" />
-    <Compile Include="System\CameraSystem.cs" />
-    <Compile Include="System\CollisionSystem.cs" />
-    <Compile Include="System\GunSystem.cs" />
-    <Compile Include="System\InputSystem.cs" />
-    <Compile Include="System\RenderSystem.cs" />
-    <Compile Include="Component\ComponentManager.cs" />
-    <Compile Include="Component\Components.cs" />
-    <Compile Include="Entity\EntityManager.cs" />
+    <Compile Include="Entities\EntityFilter.cs" />
+    <Compile Include="Entities\Entity.cs" />
+    <Compile Include="Components\ComponentMask.cs" />
+    <Compile Include="Systems\CameraSystem.cs" />
+    <Compile Include="Systems\CollisionSystem.cs" />
+    <Compile Include="Systems\GunSystem.cs" />
+    <Compile Include="Systems\HealthSystem.cs" />
+    <Compile Include="Systems\InputSystem.cs" />
+    <Compile Include="Systems\RenderSystem.cs" />
+    <Compile Include="Components\ComponentManager.cs" />
+    <Compile Include="Components\Components.cs" />
+    <Compile Include="Entities\EntityManager.cs" />
     <Compile Include="MainForm.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="MainForm.Designer.cs">
       <DependentUpon>MainForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="System\MovementSystem.cs" />
+    <Compile Include="Systems\MovementSystem.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="System\GameSystem.cs" />
+    <Compile Include="Systems\GameSystem.cs" />
     <Compile Include="Vector.cs" />
     <Compile Include="World.cs" />
     <EmbeddedResource Include="MainForm.resx">

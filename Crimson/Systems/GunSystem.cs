@@ -9,7 +9,7 @@ namespace Crimson.Systems
 {
     class GunSystem : GameSystem
     {
-        EntityFilter<CGun, CTransform, CShootEvent> _filter;
+        readonly EntityFilter<CGun, CTransform, CShootEvent> _filter;
 
         public GunSystem(World world)
         {
@@ -81,7 +81,6 @@ namespace Crimson.Systems
 
                 gun.CanShoot = false;
                 _world.SetComponentOfEntity(e, gun);
-                // TODO tohle info mít v nějakém dictionary s daty různých druhů zbraní
                 await Task.Delay(gun.Cadence);
                 gun.CanShoot = true;
                 _world.SetComponentOfEntity(e, gun);
@@ -97,6 +96,7 @@ namespace Crimson.Systems
             bullet.AddComponent(new CTransform(position));
             bullet.AddComponent(new CGraphics(MainForm.ResizeImage(Properties.Resources.bullet, 20, 20)));
             bullet.AddComponent(new CGameObject());
+            bullet.AddComponent(new CCollidable(20, 20));
         }
 
         int Inaccuracy(int upperBound)

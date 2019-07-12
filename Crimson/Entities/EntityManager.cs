@@ -25,9 +25,9 @@ namespace Crimson.Entities
             return new EntityHandle(e, _world);
         }
 
-        public void RemoveEntity(EntityHandle e)
+        public void RemoveEntity(Entity e)
         {
-            Entities.Remove(e.Entity);
+            Entities.Remove(e);
         }
 
         public void SetComponentMask(Entity e, ComponentMask mask)

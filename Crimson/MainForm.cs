@@ -33,6 +33,9 @@ namespace Crimson
             _world.AddSystem(cameraSystem);
             _world.AddSystem(movementSystem);
             _world.AddSystem(gunSystem);
+            _world.AddSystem(new CollisionCheckSystem(_world));
+            _world.AddSystem(new CollisionResolverSystem(_world));
+            _world.AddSystem(new HealthSystem(_world));
             _world.AddSystem(renderSystem);
 
             Image playerImage = ResizeImage(Properties.Resources.Player, 64, 64);
@@ -43,6 +46,7 @@ namespace Crimson
             _player.AddComponent(new CGraphics(playerImage));
             _player.AddComponent(new CGameObject());
             _player.AddComponent(_guns[CGun.GunType.Pistol]);
+            _player.AddComponent(new CCollidable(64, 64));
 
             var camera = _world.CreateEntity();
             camera.AddComponent(new CCamera(20, _player.Entity, (30*64, 30*64), (mapPanel.Width, mapPanel.Height)));
@@ -69,7 +73,7 @@ namespace Crimson
                     {
                         case 0:
                             rawImage = Properties.Resources.ground;
-                            switch (rnd.Next(3))
+                            switch (rnd.Next(40))
                             {
                                 case 0:
                                     MakeTree(i * tileSize, j * tileSize);
@@ -80,7 +84,7 @@ namespace Crimson
                             break;
                         default:
                             rawImage = Properties.Resources.Grass;
-                            switch (rnd.Next(5))
+                            switch (rnd.Next(40))
                             {
                                 case 0:
                                     MakeTree(i * tileSize, j * tileSize);
@@ -113,6 +117,8 @@ namespace Crimson
             tree.AddComponent(new CTransform(X, Y));
             tree.AddComponent(new CGraphics(treeImage));
             tree.AddComponent(new CGameObject());
+            tree.AddComponent(new CCollidable(64, 64));
+            tree.AddComponent(new CHealth(100, 100));
         }
 
         readonly Dictionary<Keys, KeyEventArgs> ke = new Dictionary<Keys, KeyEventArgs>();

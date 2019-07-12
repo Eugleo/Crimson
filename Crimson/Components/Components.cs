@@ -52,10 +52,12 @@ namespace Crimson.Components
     struct CGraphics
     {
         public Image Image { get; }
+        public Image OriginalImage { get; set; }
 
         public CGraphics(Image image)
         {
             Image = image;
+            OriginalImage = image;
         }
     }
 

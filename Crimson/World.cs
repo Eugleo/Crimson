@@ -5,6 +5,7 @@ using System.Diagnostics;
 using Crimson.Components;
 using Crimson.Entities;
 using Crimson.Systems;
+using System.Reflection;
 
 namespace Crimson
 {
@@ -22,6 +23,22 @@ namespace Crimson
         public EntityHandle CreateEntity()
         {
             return _entityManager.CreateEntity();
+        }
+
+        public void RemoveEntity(Entity e)
+        {
+            _entityManager.RemoveEntity(e);
+            foreach (var cm in ComponentManagerDB.ComponentManagers.Values)
+            {
+                MethodInfo method = typeof(ComponentMask).GetMethod("IncludesComponent");
+                method = method.MakeGenericMethod(cm);
+                if (Convert.ToBoolean(method.Invoke(_entityManager.GetComponentMask(e), new object[0])))
+                {
+                    MethodInfo method2 = typeof(World).GetMethod("RemoveComponentFromEntity");
+                    method2 = method2.MakeGenericMethod(cm);
+                    method2.Invoke(this, new object[1] { e });
+                }
+            }
         }
 
         public Component GetComponentForEntity<Component>(Entity e)
