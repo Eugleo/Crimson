@@ -133,16 +133,6 @@ namespace Crimson.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap Stone {
-            get {
-                object obj = ResourceManager.GetObject("Stone", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
         internal static System.Drawing.Bitmap Tree {
             get {
                 object obj = ResourceManager.GetObject("Tree", resourceCulture);

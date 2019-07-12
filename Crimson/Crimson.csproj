@@ -102,9 +102,6 @@
     <None Include="Resources\tree-variations.png" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\rogue.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\tileable_grass_00.png" />
   </ItemGroup>
   <ItemGroup>
@@ -124,6 +121,15 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\ground.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\shooter.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Top-Down-Shooter-SurvivalPLAYERART.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\rogue.png" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\bullet.png" />

@@ -21,6 +21,16 @@ namespace Crimson.Entities
         {
             return this.ID == other.ID;
         }
+
+        static public bool operator ==(Entity a, Entity b)
+        {
+            return a.Equals(b);
+        }
+
+        static public bool operator !=(Entity a, Entity b)
+        {
+            return !(a == b);
+        }
     }
 
     struct EntityHandle
