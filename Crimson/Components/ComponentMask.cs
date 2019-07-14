@@ -8,28 +8,49 @@ namespace Crimson.Components
 {
     class ComponentMask
     {
-        public HashSet<int> Mask { get; } = new HashSet<int>();
+        // TODO vyměnit za bitmask (kdy každý komponent má hodnotu mocniny dvojky a maska je součet komponentů)
+        public HashSet<string> IncludedComponents { get; } = new HashSet<string>();
+        public HashSet<string> ExcludedComponents { get; } = new HashSet<string>();
 
         public ComponentMask() { }
 
-        public void IncludeComponent<Component>()
+        public void IncludeComponent(Type componentType)
         {
-            Mask.Add(ComponentManager<Component>.Instance.ID);
+            IncludedComponents.Add(componentType.Name);
         }
 
-        public void ExcludeComponent<Component>()
+        public void IncludeComponent<T>() where T : Component
         {
-            Mask.Remove(ComponentManager<Component>.Instance.ID);
+            IncludedComponents.Add(typeof(T).Name);
+            ExcludedComponents.Remove(typeof(T).Name);
+        }
+
+        public void ExcludeComponent<T>() where T : Component
+        {
+            IncludedComponents.Remove(typeof(T).Name);
+            ExcludedComponents.Add(typeof(T).Name);
+        }
+
+        public void RemoveComponent<T>() where T : Component
+        {
+            IncludedComponents.Remove(typeof(T).Name);
+            ExcludedComponents.Remove(typeof(T).Name);
         }
 
         public bool CompatibleWith(ComponentMask componentMask)
         {
-            return Mask.Intersect(componentMask.Mask).Count() == Mask.Count;
+            return IncludedComponents.All(c => componentMask.IncludedComponents.Contains(c)) &&
+                   ExcludedComponents.All(c => !componentMask.IncludedComponents.Contains(c));
         }
 
-        public bool IncludesComponent<Component>()
+        public bool DoesIncludeComponent<T>() where T : Component
         {
-            return Mask.Contains(ComponentManager<Component>.Instance.ID);
+            return IncludedComponents.Contains(typeof(T).Name);
+        }
+
+        public bool DoesExcludeComponent<T>() where T : Component
+        {
+            return ExcludedComponents.Contains(typeof(T).Name);
         }
     }
 }

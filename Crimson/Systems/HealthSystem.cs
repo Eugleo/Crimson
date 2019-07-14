@@ -13,16 +13,16 @@ namespace Crimson.Systems
 {
     class HealthSystem : GameSystem
     {
-        readonly EntityFilter<CHealth> _filter;
+        readonly EntityGroup<CHealth> _filter;
 
         public HealthSystem(World world)
         {
             _world = world;
-            _filter = _world.GetFilter<EntityFilter<CHealth>>();
+            _filter = _world.GetGroup<EntityGroup<CHealth>>();
         }
         public override void Update()
         {
-            List<Entity> toRemove = new List<Entity>();
+            List<EntityHandle> toRemove = new List<EntityHandle>();
             foreach (var (entity, health) in _filter)
             {
                 if (health.CurrentHealth <= 0)
@@ -30,18 +30,18 @@ namespace Crimson.Systems
                     toRemove.Add(entity);
                 }
 
-                if (_world.EntityHasComponent<CGraphics>(entity))
+                if (entity.HasComponent<CGraphics>())
                 {
-                    var graphics = _world.GetComponentForEntity<CGraphics>(entity);
+                    var graphics = entity.GetComponent<CGraphics>();
                     var newImage = AdjustContrast(new Bitmap(graphics.OriginalImage), 100 * ((float)health.CurrentHealth / (float)health.MaxHealth));
                     var newGraphics = new CGraphics(newImage)
                     {
                         OriginalImage = graphics.OriginalImage
                     };
-                    _world.SetComponentOfEntity(entity, newGraphics);
+                    entity.AddComponent(newGraphics);
                 }
             }
-            toRemove.ForEach(e => _world.RemoveEntity(e));
+            toRemove.ForEach(e => e.Delete());
         }
 
         public static Bitmap AdjustContrast(Bitmap Image, float Value)
@@ -70,6 +70,7 @@ namespace Crimson.Systems
 
                         float Red = R / 255.0f;
                         float Green = G / 255.0f;
+
                         float Blue = B / 255.0f;
                         Red = (((Red - 0.5f) * Value) + 0.5f) * 255.0f;
                         Green = (((Green - 0.5f) * Value) + 0.5f) * 255.0f;

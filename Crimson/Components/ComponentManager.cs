@@ -13,24 +13,24 @@ namespace Crimson.Components
 
     interface IComponentManager { }
 
-    class ComponentManager<Component> : IComponentManager
+    class ComponentManager<T> : IComponentManager where T : Component
     {
-        public static ComponentManager<Component> Instance = new ComponentManager<Component>();
+        public static ComponentManager<T> Instance = new ComponentManager<T>();
         public int ID;
+
+        readonly Dictionary<Entity, T> _components = new Dictionary<Entity, T>();
 
         ComponentManager() {
             ID = ComponentManagerDB.ComponentManagers.Count;
-            ComponentManagerDB.ComponentManagers[ID] = typeof(Component);
+            ComponentManagerDB.ComponentManagers[ID] = typeof(T);
         }
 
-        Dictionary<Entity, Component> _components = new Dictionary<Entity, Component>();
-
-        public void SetComponentOfEntity(Entity e, Component c)
+        public void SetComponentOfEntity(Entity e, T c)
         {
             _components[e] = c;
         }
 
-        public Component LookupComponentForEntity(Entity e)
+        public T LookupComponentForEntity(Entity e)
         {
             return _components[e];
         }

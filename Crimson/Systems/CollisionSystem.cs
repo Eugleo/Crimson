@@ -11,29 +11,29 @@ namespace Crimson.Systems
 {
     class CollisionResolverSystem : GameSystem
     {
-        readonly EntityFilter<CTransform, CCollisionEvent> _filter;
+        readonly EntityGroup<CTransform, CCollisionEvent> _filter;
 
         public CollisionResolverSystem(World world)
         {
             _world = world;
-            _filter = _world.GetFilter<EntityFilter<CTransform, CCollisionEvent>>();
+            _filter = _world.GetGroup<EntityGroup<CTransform, CCollisionEvent>>();
         }
 
         public override void Update()
         {
-            List<Entity> toRemove = new List<Entity>();
+            var toRemove = new List<EntityHandle>();
             foreach (var (entity, transform, collision) in _filter)
             {
-                if (_world.EntityHasComponent<CBullet>(collision.Partner) && _world.EntityHasComponent<CHealth>(entity))
+                if (collision.Partner.HasComponent<CBullet>() && entity.HasComponent<CHealth>())
                 {
-                    var bullet = _world.GetComponentForEntity<CBullet>(collision.Partner);
-                    var health = _world.GetComponentForEntity<CHealth>(entity);
+                    var bullet = collision.Partner.GetComponent<CBullet>();
+                    var health = entity.GetComponent<CHealth>();
                     var newHealth = new CHealth(health.MaxHealth, health.CurrentHealth - bullet.Damage);
-                    _world.SetComponentOfEntity(entity, newHealth);
+                    entity.AddComponent(newHealth);
                     toRemove.Add(collision.Partner);
                 }
             }
-            toRemove.ForEach(e => _world.RemoveEntity(e));
+            toRemove.ForEach(e => e.Delete());
             _world.ForEachEntityWithComponents<CCollisionEvent>(e => _world.RemoveComponentFromEntity<CCollisionEvent>(e));
         }
     }

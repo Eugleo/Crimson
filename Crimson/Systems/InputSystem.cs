@@ -8,17 +8,17 @@ namespace Crimson.Systems
 {
     class InputSystem: GameSystem
     {
-        readonly EntityFilter<CInputEvent, CMovement, CKeyboardNavigation> _filter;
+        readonly EntityGroup<CInputEvent, CMovement, CKeyboardNavigation> _inputable;
 
         public InputSystem(World world)
         {
             _world = world;
-            _filter = _world.GetFilter<EntityFilter<CInputEvent, CMovement, CKeyboardNavigation>>();
+            _inputable = _world.GetGroup<EntityGroup<CInputEvent, CMovement, CKeyboardNavigation>>();
         }
 
         public override void Update()
         {
-            foreach (var (entity, input, move, _) in _filter)
+            foreach (var (entity, input, move, _) in _inputable)
             {
                 var keyEventArgs = input.KeyEventArgs;
                 var acc = keyEventArgs.Count > 1 ? Math.Sqrt(2) / 2 : 1;
@@ -46,7 +46,7 @@ namespace Crimson.Systems
                             accX = acc;
                             break;
                     }
-                    _world.SetComponentOfEntity(entity, new CMovement(move.Speed, new Vector(accX, accY)));
+                    entity.AddComponent(new CMovement(move.Speed, new Vector(accX, accY)));
                 }
             }
         }

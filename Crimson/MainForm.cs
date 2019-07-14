@@ -8,6 +8,7 @@ using Crimson.Components;
 using Crimson.Systems;
 using Crimson.Entities;
 using System.Drawing.Imaging;
+using System.Drawing.Drawing2D;
 
 namespace Crimson
 {
@@ -15,28 +16,24 @@ namespace Crimson
     {
         readonly World _world = new World();
         readonly EntityHandle _player;
-        readonly Dictionary<CGun.GunType, CGun> _guns = new Dictionary<CGun.GunType, CGun>();
+        readonly Dictionary<CGun.ShootingPattern, CGun> _guns = new Dictionary<CGun.ShootingPattern, CGun>();
 
         public MainForm()
         {
             InitializeComponent();
 
-            _guns[CGun.GunType.Pistol] = new CGun(CGun.GunType.Pistol, 15, 700, 5, 300, 30);
-            _guns[CGun.GunType.Shotgun] = new CGun(CGun.GunType.Shotgun, 20, 800, 0, 700, 20);
-            _guns[CGun.GunType.SMG] = new CGun(CGun.GunType.SMG, 10, 700, 15, 45, 30);
+            _guns[CGun.ShootingPattern.Pistol] = new CGun(CGun.ShootingPattern.Pistol, 15, 700, 5, 300, 30, 350);
+            _guns[CGun.ShootingPattern.Shotgun] = new CGun(CGun.ShootingPattern.Shotgun, 20, 800, 0, 700, 20, 200);
+            _guns[CGun.ShootingPattern.SMG] = new CGun(CGun.ShootingPattern.SMG, 10, 700, 2, 45, 30, 600);
 
-            var renderSystem = new RenderSystem(_world, mainPanel, mapPanel);
-            var movementSystem = new MovementSystem(_world);
-            var inputSystem = new InputSystem(_world);
-            var cameraSystem = new CameraSystem(_world);
-            var gunSystem = new GunSystem(_world);
-            _world.AddSystem(inputSystem);
-            _world.AddSystem(cameraSystem);
-            _world.AddSystem(movementSystem);
-            _world.AddSystem(gunSystem);
+            _world.AddSystem(new InputSystem(_world));
+            _world.AddSystem(new CameraSystem(_world));
+            _world.AddSystem(new MovementSystem(_world));
+            _world.AddSystem(new GunSystem(_world));
             _world.AddSystem(new CollisionResolverSystem(_world));
             _world.AddSystem(new HealthSystem(_world));
-            _world.AddSystem(renderSystem);
+            _world.AddSystem(new BulletSystem(_world));
+            _world.AddSystem(new RenderSystem(_world, mainPanel, mapPanel));
 
             Image playerImage = ResizeImage(Properties.Resources.Player, 64, 64);
             _player = _world.CreateEntity();
@@ -45,11 +42,11 @@ namespace Crimson
             _player.AddComponent(new CTransform(mainPanel.Width / 2, mainPanel.Height / 2));
             _player.AddComponent(new CGraphics(playerImage));
             _player.AddComponent(new CGameObject());
-            _player.AddComponent(_guns[CGun.GunType.Pistol]);
+            _player.AddComponent(_guns[CGun.ShootingPattern.Pistol]);
             _player.AddComponent(new CCollidable(64, 64));
 
             var camera = _world.CreateEntity();
-            camera.AddComponent(new CCamera(20, _player.Entity, (30*64, 30*64), (mapPanel.Width, mapPanel.Height)));
+            camera.AddComponent(new CCamera(20, _player, (30*64, 30*64), (mapPanel.Width, mapPanel.Height)));
             camera.AddComponent(new CTransform(mainPanel.Width / 2 + 1, mainPanel.Height / 2 + 1));
 
             MakeMap(30, 30, 64);
@@ -60,6 +57,9 @@ namespace Crimson
         readonly Random rnd = new Random();
         void MakeMap(int w, int h, int tileSize)
         {
+            var map = _world.CreateEntity();
+            map.AddComponent(new CMap(w, h, tileSize));
+
             foreach (var i in Enumerable.Range(0, h))
             {
                 foreach (var j in Enumerable.Range(0, w))
@@ -134,28 +134,36 @@ namespace Crimson
             switch (e.KeyCode)
             {
                 case Keys.D1:
-                    _player.AddComponent(_guns[CGun.GunType.Pistol]);
+                    _player.AddComponent(_guns[CGun.ShootingPattern.Pistol]);
                     break;
                 case Keys.D2:
-                    _player.AddComponent(_guns[CGun.GunType.Shotgun]);
+                    _player.AddComponent(_guns[CGun.ShootingPattern.Shotgun]);
                     break;
                 case Keys.D3:
-                    _player.AddComponent(_guns[CGun.GunType.SMG]);
+                    _player.AddComponent(_guns[CGun.ShootingPattern.SMG]);
                     break;
             }
         }
 
         private void GameTimer_Tick(object sender, EventArgs e)
         {
+            // TODO refaktorovat
             _world.Tick();
-            var absoluteCenterLocation = _world.GetFilter<EntityFilter<CCamera, CTransform>>().Components2[0].Location;
-            var relativeOffset = new Vector(mapPanel.Width / 2, mapPanel.Height / 2);
-            var targetLocation = _mouseLocation + absoluteCenterLocation - relativeOffset;
 
+            /*
+            var g = _world.GetComponentForEntity<CGraphics>(_player.Entity);
+            var up = new Vector(1, 0);
+            var dir = (targetLocation - (_world.GetComponentForEntity<CTransform>(_player.Entity).Location + new Vector(g.Image.Width / 2, g.Image.Height / 2))).Normalized();
 
+            var angle = -Math.Atan2(dir.X * up.Y - dir.Y * up.X, dir.X * up.X + dir.Y * up.Y) * (180 / Math.PI);
+            //_player.AddComponent(new CGraphics(RotateImage(g.OriginalImage, (float)angle, true, false, Color.Transparent)) { OriginalImage = g.OriginalImage });
 
+    */
             if (_isShooting)
             {
+                var absoluteCenterLocation = _world.GetGroup<EntityGroup<CCamera, CTransform>>().Components2[0].Location;
+                var relativeOffset = new Vector(mapPanel.Width / 2, mapPanel.Height / 2);
+                var targetLocation = _mouseLocation + absoluteCenterLocation - relativeOffset;
                 _player.AddComponent(new CShootEvent(targetLocation));
             }
         }
@@ -261,7 +269,7 @@ namespace Crimson
         {
             _mouseLocation = Vector.FromPoint(e.Location);
             _isShooting = true;
-            var absoluteCenterLocation = _world.GetFilter<EntityFilter<CCamera, CTransform>>().Components2[0].Location;
+            var absoluteCenterLocation = _world.GetGroup<EntityGroup<CCamera, CTransform>>().Components2[0].Location;
             var relativeOffset = new Vector(mapPanel.Width / 2, mapPanel.Height / 2);
             _player.AddComponent(new CShootEvent(Vector.FromPoint(e.Location) + absoluteCenterLocation - relativeOffset));
         }

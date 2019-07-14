@@ -48,9 +48,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Entities\EntityFilter.cs" />
+    <Compile Include="Entities\EntityGroup.cs" />
     <Compile Include="Entities\Entity.cs" />
     <Compile Include="Components\ComponentMask.cs" />
+    <Compile Include="Systems\BulletSystem.cs" />
     <Compile Include="Systems\CameraSystem.cs" />
     <Compile Include="Systems\CollisionSystem.cs" />
     <Compile Include="Systems\GunSystem.cs" />

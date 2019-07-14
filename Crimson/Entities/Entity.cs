@@ -3,10 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Crimson.Components;
 
 namespace Crimson.Entities
 {
-    struct Entity: IEquatable<Entity>
+    struct Entity : IEquatable<Entity>
     {
         int _id;
 
@@ -35,25 +36,38 @@ namespace Crimson.Entities
 
     struct EntityHandle
     {
-        readonly Entity _entity;
+        public Entity Entity { get; }
         readonly World _world;
 
         public EntityHandle(Entity entity, World world)
         {
-            _entity = entity;
+            Entity = entity;
             _world = world;
         }
 
-        public void AddComponent<Component>(Component c)
+        public void AddComponent<T>(T c) where T : Component
         {
-            _world.SetComponentOfEntity<Component>(_entity, c);
+            _world.SetComponentOfEntity(Entity, c);
         }
 
-        public void RemoveComponent<Component>()
+        public void RemoveComponent<T>() where T : Component
         {
-            _world.RemoveComponentFromEntity<Component>(_entity);
+            _world.RemoveComponentFromEntity<T>(Entity);
         }
 
-        public Entity Entity => _entity;
+        public T GetComponent<T>() where T : Component
+        {
+            return ComponentManager<T>.Instance.LookupComponentForEntity(Entity);
+        }
+
+        public bool HasComponent<T>() where T : Component
+        {
+            return _world.EntityHasComponent<T>(Entity);
+        }
+
+        public void Delete()
+        {
+            _world.RemoveEntity(Entity);
+        }
     }
 }

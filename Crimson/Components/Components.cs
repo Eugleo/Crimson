@@ -10,7 +10,9 @@ using Crimson.Entities;
 
 namespace Crimson.Components
 {
-    struct CHealth
+    interface Component { }
+
+    struct CHealth : Component
     {
         public int MaxHealth { get; }
         public int CurrentHealth { get; }
@@ -22,7 +24,7 @@ namespace Crimson.Components
         }
     }
 
-    struct CMovement
+    struct CMovement : Component
     {
         public double Speed;
         public Vector Acceleration;
@@ -34,7 +36,7 @@ namespace Crimson.Components
         }
     }
 
-    struct CTransform
+    struct CTransform : Component
     {
         public Vector Location;
 
@@ -49,7 +51,7 @@ namespace Crimson.Components
         }
     }
 
-    struct CGraphics
+    struct CGraphics : Component
     {
         public Image Image { get; }
         public Image OriginalImage { get; set; }
@@ -61,9 +63,9 @@ namespace Crimson.Components
         }
     }
 
-    struct CKeyboardNavigation { }
+    struct CKeyboardNavigation : Component { }
 
-    struct CInputEvent
+    struct CInputEvent : Component
     {
         public List<KeyEventArgs> KeyEventArgs { get; }
 
@@ -73,17 +75,17 @@ namespace Crimson.Components
         }
     }
 
-    struct CCamera
+    struct CCamera : Component
     {
         public int FollowDistance { get; }
 
         // Target entita musí mít CMovement a CPosition
-        public Entity Target { get; }
+        public EntityHandle Target { get; }
 
         public (double, double) WorldBounds { get; }
         public (double, double) ScreenBounds { get; }
 
-        public CCamera(int followDistance, Entity target, (double, double) worldBounds, (double, double) cameraBounds)
+        public CCamera(int followDistance, EntityHandle target, (double, double) worldBounds, (double, double) cameraBounds)
         {
             FollowDistance = followDistance;
             Target = target;
@@ -92,17 +94,19 @@ namespace Crimson.Components
         }
     }
 
-    struct CBullet
+    struct CBullet : Component
     {
         public int Damage { get; }
+        public double RangeLeft { get; }
 
-        public CBullet(int damage)
+        public CBullet(int damage, double rangeLeft)
         {
             Damage = damage;
+            RangeLeft = rangeLeft;
         }
     }
 
-    struct CCollidable
+    struct CCollidable : Component
     {
         public Vector Size { get; }
 
@@ -117,17 +121,17 @@ namespace Crimson.Components
         }
     }
 
-    struct CCollisionEvent
+    struct CCollisionEvent : Component
     {
-        public Entity Partner { get; }
+        public EntityHandle Partner { get; }
 
-        public CCollisionEvent(Entity partner)
+        public CCollisionEvent(EntityHandle partner)
         {
             Partner = partner;
         }
     }
 
-    struct CShootEvent
+    struct CShootEvent : Component
     {
         public Vector TargetLocation { get; }
 
@@ -137,23 +141,24 @@ namespace Crimson.Components
         }
     }
 
-    struct CGun
+    struct CGun : Component
     {
         public bool CanShoot;
 
         // TODO Možná by nebylo od věci změnit GunType na ShootingPattern nebo tak něco
-        public enum GunType
+        public enum ShootingPattern
         {
             Pistol, Shotgun, SMG
         }
-        public GunType Type { get; }
+        public ShootingPattern Type { get; }
         public int Damage { get; }
         public int ReloadSpeed { get; }
         public int Inaccuracy { get; }
         public int Cadence { get;  }
         public double BulletSpeed { get;  }
+        public Double Range { get; }
 
-        public CGun(GunType type, int damage, int reloadSpeed, int inaccuracy, int cadence, int bulletSpeed) : this()
+        public CGun(ShootingPattern type, int damage, int reloadSpeed, int inaccuracy, int cadence, int bulletSpeed, double range) : this()
         {
             Type = type;
             Damage = damage;
@@ -162,10 +167,25 @@ namespace Crimson.Components
             Cadence = cadence;
             BulletSpeed = bulletSpeed;
             CanShoot = true;
+            Range = range;
         }
     }
 
-    struct CTile { }
+    struct CTile : Component { }
 
-    struct CGameObject { }
+    struct CGameObject : Component { }
+
+    struct CMap : Component
+    {
+        public int Width { get; }
+        public int Height { get; }
+        public int TileSize { get; }
+
+        public CMap(int width, int height, int tileSize)
+        {
+            Width = width;
+            Height = height;
+            TileSize = tileSize;
+        }
+    }
 }

@@ -9,12 +9,12 @@ namespace Crimson.Systems
 {
     class GunSystem : GameSystem
     {
-        readonly EntityFilter<CGun, CTransform, CShootEvent> _filter;
+        readonly EntityGroup<CGun, CTransform, CShootEvent> _filter;
 
         public GunSystem(World world)
         {
             _world = world;
-            _filter = _world.GetFilter<EntityFilter<CGun, CTransform, CShootEvent>>();
+            _filter = _world.GetGroup<EntityGroup<CGun, CTransform, CShootEvent>>();
         }
 
         // TODO Refaktorovat MakeBullet
@@ -27,9 +27,9 @@ namespace Crimson.Systems
                 var startPosition = position;
                 int offset = 0;
 
-                if (_world.EntityHasComponent<CGraphics>(entity))
+                if (entity.HasComponent<CGraphics>())
                 {
-                    var image = _world.GetComponentForEntity<CGraphics>(entity).Image;
+                    var image = entity.GetComponent<CGraphics>().Image;
                     position += new Vector(image.Width / 2, image.Height / 2);
                     offset = (int)Math.Ceiling(new Vector(image.Width / 2, image.Height / 2).Size);
                     startPosition = position + (targetPosition - position).Normalized(offset);
@@ -37,13 +37,13 @@ namespace Crimson.Systems
 
                 switch (gun.Type)
                 {
-                    case CGun.GunType.Pistol:
+                    case CGun.ShootingPattern.Pistol:
                         ShootPistol(position, targetPosition, gun, entity, startPosition);
                         break;
-                    case CGun.GunType.SMG:
+                    case CGun.ShootingPattern.SMG:
                         ShootSMG(position, targetPosition, gun, entity, startPosition);
                         break;
-                    case CGun.GunType.Shotgun:
+                    case CGun.ShootingPattern.Shotgun:
                         ShootShotgun(position, targetPosition, gun, entity, startPosition);
                         break;
                     default:
@@ -53,33 +53,33 @@ namespace Crimson.Systems
         }
 
         readonly Random rnd = new Random();
-        async void ShootPistol(Vector position, Vector targetPosition, CGun gun, Entity e, Vector startPosition)
+        async void ShootPistol(Vector position, Vector targetPosition, CGun gun, EntityHandle e, Vector startPosition)
         {
             if (gun.CanShoot)
             {
-                MakeBullet(position, targetPosition, gun.Damage, gun.BulletSpeed, new Vector(Inaccuracy(gun.Inaccuracy), Inaccuracy(gun.Inaccuracy)), startPosition);
+                MakeBullet(position, targetPosition, gun.Damage, gun.BulletSpeed, new Vector(Inaccuracy(gun.Inaccuracy), Inaccuracy(gun.Inaccuracy)), startPosition, gun.Range);
                 gun.CanShoot = false;
-                _world.SetComponentOfEntity(e, gun);
+                e.AddComponent(gun);
                 await Task.Delay(gun.Cadence);
                 gun.CanShoot = true;
-                _world.SetComponentOfEntity(e, gun);
+                e.AddComponent(gun);
             }
         }
 
-        async void ShootSMG(Vector position, Vector targetPosition, CGun gun, Entity e, Vector startPosition)
+        async void ShootSMG(Vector position, Vector targetPosition, CGun gun, EntityHandle e, Vector startPosition)
         {
             if (gun.CanShoot)
             {
-                MakeBullet(position, targetPosition, gun.Damage, gun.BulletSpeed, new Vector(Inaccuracy(gun.Inaccuracy), Inaccuracy(gun.Inaccuracy)), startPosition);
+                MakeBullet(position, targetPosition, gun.Damage, gun.BulletSpeed, new Vector(Inaccuracy(gun.Inaccuracy), Inaccuracy(gun.Inaccuracy)), startPosition, gun.Range);
                 gun.CanShoot = false;
-                _world.SetComponentOfEntity(e, gun);
+                e.AddComponent(gun);
                 await Task.Delay(gun.Cadence);
                 gun.CanShoot = true;
-                _world.SetComponentOfEntity(e, gun);
+                e.AddComponent(gun);
             }
         }
 
-        async void ShootShotgun(Vector position, Vector targetPosition, CGun gun, Entity e, Vector startPosition)
+        async void ShootShotgun(Vector position, Vector targetPosition, CGun gun, EntityHandle e, Vector startPosition)
         {
             if (gun.CanShoot)
             {
@@ -87,22 +87,22 @@ namespace Crimson.Systems
 
                 foreach (var i in Enumerable.Range(-2, 5))
                 {
-                    MakeBullet(position, targetPosition, gun.Damage, gun.BulletSpeed, acc.ScaledBy(i), startPosition);
+                    MakeBullet(position, targetPosition, gun.Damage, gun.BulletSpeed, acc.ScaledBy(i), startPosition, gun.Range);
                 }
 
                 gun.CanShoot = false;
-                _world.SetComponentOfEntity(e, gun);
+                e.AddComponent(gun);
                 await Task.Delay(gun.Cadence);
                 gun.CanShoot = true;
-                _world.SetComponentOfEntity(e, gun);
+                e.AddComponent(gun);
             }
         }
 
-        void MakeBullet(Vector position, Vector targetPosition, int damage, double speed, Vector offset, Vector startPosition)
+        void MakeBullet(Vector position, Vector targetPosition, int damage, double speed, Vector offset, Vector startPosition, double range)
         {
             var acc = (targetPosition - position).Normalized(100);
             var bullet = _world.CreateEntity();
-            bullet.AddComponent(new CBullet(damage));
+            bullet.AddComponent(new CBullet(damage, range));
             bullet.AddComponent(new CMovement(speed, (acc + offset).Normalized()));
             bullet.AddComponent(new CTransform(startPosition));
             bullet.AddComponent(new CGraphics(MainForm.ResizeImage(Properties.Resources.bullet, 10, 10)));

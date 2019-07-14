@@ -12,7 +12,7 @@ namespace Crimson
     class World
     {
         readonly EntityManager _entityManager;
-        readonly List<EntityFilter> _filters = new List<EntityFilter>();
+        readonly List<EntityGroup> _entityGroups = new List<EntityGroup>();
         readonly List<GameSystem> _systems = new List<GameSystem>();
 
         public World()
@@ -30,7 +30,7 @@ namespace Crimson
             _entityManager.RemoveEntity(e);
             foreach (var cm in ComponentManagerDB.ComponentManagers.Values)
             {
-                MethodInfo method = typeof(ComponentMask).GetMethod("IncludesComponent");
+                MethodInfo method = typeof(ComponentMask).GetMethod("DoesIncludeComponent");
                 method = method.MakeGenericMethod(cm);
                 if (Convert.ToBoolean(method.Invoke(_entityManager.GetComponentMask(e), new object[0])))
                 {
@@ -41,80 +41,81 @@ namespace Crimson
             }
         }
 
-        public Component GetComponentForEntity<Component>(Entity e)
+        public T GetComponentForEntity<T>(Entity e) where T : Component
         {
-            return ComponentManager<Component>.Instance.LookupComponentForEntity(e);
+            return ComponentManager<T>.Instance.LookupComponentForEntity(e);
         }
 
-        public void SetComponentOfEntity<Component>(Entity e, Component c)
+        public void SetComponentOfEntity<T>(Entity e, T c) where T : Component
         {
-            ComponentManager<Component>.Instance.SetComponentOfEntity(e, c);
+            ComponentManager<T>.Instance.SetComponentOfEntity(e, c);
             var mask = _entityManager.GetComponentMask(e);
-            mask.IncludeComponent<Component>();
+            mask.IncludeComponent<T>();
             UpdateFiltersForEntity(e);
         }
 
-        public bool EntityHasComponent<Component>(Entity e)
+        public bool EntityHasComponent<T>(Entity e) where T : Component
         {
-            return _entityManager.GetComponentMask(e).IncludesComponent<Component>();
+            return _entityManager.GetComponentMask(e).DoesIncludeComponent<T>();
         }
 
-        public void RemoveComponentFromEntity<Component>(Entity e)
+        public void RemoveComponentFromEntity<T>(Entity e) where T : Component
         {
             ComponentManager<Component>.Instance.RemoveComponentFromEntity(e);
             var mask = _entityManager.GetComponentMask(e);
-            mask.ExcludeComponent<Component>();
+            mask.RemoveComponent<T>();
             UpdateFiltersForEntity(e);
         }
 
         public void UpdateFiltersForEntity(Entity entity)
         {
             var mask = _entityManager.GetComponentMask(entity);
-            foreach (var filter in _filters)
+
+            foreach (var group in _entityGroups)
             {
-                if (filter.Entities.Contains(entity))
+                if (group.Entities.Select(e => e.Entity).Contains(entity))
                 {
-                    if (!filter.Mask.CompatibleWith(mask))
+                    if (!group.Mask.CompatibleWith(mask))
                     {
-                        filter.Remove(entity);
+                        group.Remove(entity);
                     }
                     else
                     {
-                        filter.UpdateComponentsFor(entity);
+                        group.UpdateComponentsFor(entity);
                     }
                 }
-                else if (filter.Mask.CompatibleWith(mask))
+                else if (group.Mask.CompatibleWith(mask))
                 {
-                    filter.Add(entity);
+                    group.Add(entity);
                 }
             }
         }
 
-        public void ForEachEntityWithComponents<Component>(Action<Entity> f)
-        {
+        public void ForEachEntityWithComponents<T>(Action<Entity> f) where T : Component
+        { 
             foreach (var entity in _entityManager.Entities)
             {
-                if (_entityManager.GetComponentMask(entity).IncludesComponent<Component>())
+                if (_entityManager.GetComponentMask(entity).DoesIncludeComponent<T>())
                 {
                     f(entity);
                 }
             }
         }
 
-        public FilterT GetFilter<FilterT>() where FilterT : EntityFilter
+        public Group GetGroup<Group>() where Group : EntityGroup
         {
-            var filterType = typeof(FilterT);
-            foreach (var i in Enumerable.Range(0, _filters.Count))
+            var groupType = typeof(Group);
+            foreach (var i in Enumerable.Range(0, _entityGroups.Count))
             {
-                if (_filters[i].GetType() == filterType)
+                if (_entityGroups[i].GetType() == groupType)
                 {
-                    return _filters[i] as FilterT;
+                    return _entityGroups[i] as Group;
                 }
             }
-            var filter = Activator.CreateInstance(filterType, true) as EntityFilter;
-            filter._world = this;
-            _filters.Add(filter);
-            return filter as FilterT;
+            var group = Activator.CreateInstance(groupType, true) as EntityGroup;
+            group._world = this;
+            _entityGroups.Add(group);
+            return group as Group;
         } 
 
         public void AddSystem(GameSystem system) {
