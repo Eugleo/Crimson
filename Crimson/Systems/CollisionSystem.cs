@@ -24,11 +24,9 @@ namespace Crimson.Systems
             var toRemove = new List<EntityHandle>();
             foreach (var (entity, transform, collision) in _filter)
             {
-                if (collision.Partner.TryGetComponent(out CBullet bullet) && entity.HasComponent<CHealth>())
+                if (collision.Partner.TryGetComponent(out CBullet bullet) && entity.TryGetComponent(out CHealth health))
                 {
-                    var health = entity.GetComponent<CHealth>();
-                    var newHealth = new CHealth(health.MaxHealth, health.CurrentHealth - bullet.Damage);
-                    entity.AddComponent(newHealth);
+                    entity.AddComponent(new CHealth(health.MaxHealth, health.CurrentHealth - bullet.Damage));
                     toRemove.Add(collision.Partner);
                 }
             }

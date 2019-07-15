@@ -25,9 +25,9 @@ namespace Crimson.Systems
 
                 Vector startingLocation;
                 Vector direction;
-                if (entity.HasComponent<CGraphics>())
+                if (entity.TryGetComponent(out CGraphics graphics))
                 {
-                    var image = entity.GetComponent<CGraphics>().Image;
+                    var image = graphics.Image;
                     var location = transform.Location + new Vector(image.Width / 2, image.Height / 2);
                     direction = (shot.TargetLocation - location).Normalized(100);
                     var offset = (int)Math.Ceiling(new Vector(image.Width / 2, image.Height / 2).Size);

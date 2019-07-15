@@ -30,9 +30,8 @@ namespace Crimson.Systems
                     toRemove.Add(entity);
                 }
 
-                if (entity.HasComponent<CGraphics>())
+                if (entity.TryGetComponent(out CGraphics graphics))
                 {
-                    var graphics = entity.GetComponent<CGraphics>();
                     var newImage = AdjustContrast(new Bitmap(graphics.OriginalImage), 100 * ((float)health.CurrentHealth / (float)health.MaxHealth));
                     var newGraphics = new CGraphics(newImage)
                     {
