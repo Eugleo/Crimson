@@ -8,13 +8,11 @@ namespace Crimson.Systems
     class CameraSystem : GameSystem
     {
         readonly EntityGroup<CCamera, CTransform> _cameras;
-        readonly EntityGroup<CMap> _maps;
 
         public CameraSystem(World world)
         {
             _world = world;
             _cameras = _world.GetGroup<EntityGroup<CCamera, CTransform>>();
-            _maps = _world.GetGroup<EntityGroup<CMap>>();
         }
 
         public override void Update()
@@ -22,9 +20,8 @@ namespace Crimson.Systems
             if (_cameras.Count > 0)
             {
                 var camera = _cameras.Components1[0];
-
-                var (worldWidth, worldHeight) = (camera.WorldBounds.Item1, camera.WorldBounds.Item2);
-                var (screenWidth, screenHeight) = (camera.ScreenBounds.Item1, camera.ScreenBounds.Item2);
+                var (right, bottom) = (camera.WorldBounds.Item1, camera.WorldBounds.Item2);
+                var (width, height) = (camera.ScreenBounds.Item1, camera.ScreenBounds.Item2);
                 var targetLocation = camera.Target.GetComponent<CTransform>().Location;
                 var targetMovement = camera.Target.GetComponent<CMovement>();
                 var (X, Y) = (_cameras.Components2[0].Location.X, (_cameras.Components2[0].Location.Y));
@@ -32,24 +29,21 @@ namespace Crimson.Systems
                 double xOffset = 0;
                 double yOffset = 0;
 
-                var distanceX = X - targetLocation.X;
-                if (Math.Abs(distanceX) > camera.FollowDistance)
+                if (Math.Abs(X - targetLocation.X) > camera.FollowDistance)
                 {
-                    var newAcc = (distanceX > 0 ? -1 : 1) * Math.Abs(targetMovement.Acceleration.X);
-                    var newX = X + targetMovement.Speed * newAcc;
-                    if (newX > screenWidth / 2 && newX < worldWidth - screenWidth / 2)
+                    var newX = X + targetMovement.Speed * (X - targetLocation.X > 0 ? -1 : 1) * Math.Abs(targetMovement.Acceleration.X);
+                    if (newX > width / 2 && newX < right - width / 2)
                     {
-                        xOffset = newAcc;
+                        xOffset = (X - targetLocation.X > 0 ? -1 : 1) * Math.Abs(targetMovement.Acceleration.X);
                     }
                 }
-                var distanceY = Y - targetLocation.Y;
-                if (Math.Abs(distanceY) > camera.FollowDistance)
+
+                if (Math.Abs(Y - targetLocation.Y) > camera.FollowDistance)
                 {
-                    var newAcc = (distanceY > 0 ? -1 : 1) * Math.Abs(targetMovement.Acceleration.Y);
-                    var newY = Y + targetMovement.Speed * newAcc;
-                    if (newY > screenHeight / 2 && newY < worldHeight - screenHeight / 2)
+                    var newY = Y + targetMovement.Speed * (Y - targetLocation.Y > 0 ? -1 : 1) * Math.Abs(targetMovement.Acceleration.Y);
+                    if (newY > height / 2 && newY < bottom - height / 2)
                     {
-                        yOffset = newAcc;
+                        yOffset = (Y - targetLocation.Y > 0 ? -1 : 1) * Math.Abs(targetMovement.Acceleration.Y);
                     }
                 }
 
