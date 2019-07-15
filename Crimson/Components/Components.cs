@@ -81,15 +81,12 @@ namespace Crimson.Components
 
         // Target entita musí mít CMovement a CPosition
         public EntityHandle Target { get; }
-
-        public (double, double) WorldBounds { get; }
         public (double, double) ScreenBounds { get; }
 
-        public CCamera(int followDistance, EntityHandle target, (double, double) worldBounds, (double, double) cameraBounds)
+        public CCamera(int followDistance, EntityHandle target, (double, double) cameraBounds)
         {
             FollowDistance = followDistance;
             Target = target;
-            WorldBounds = worldBounds;
             ScreenBounds = cameraBounds;
         }
     }

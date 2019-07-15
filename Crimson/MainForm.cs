@@ -24,7 +24,7 @@ namespace Crimson
 
             _guns[CGun.ShootingPattern.Pistol] = new CGun(CGun.ShootingPattern.Pistol, 15, 700, 5, 300, 30, 350);
             _guns[CGun.ShootingPattern.Shotgun] = new CGun(CGun.ShootingPattern.Shotgun, 20, 800, 0, 700, 20, 200);
-            _guns[CGun.ShootingPattern.SMG] = new CGun(CGun.ShootingPattern.SMG, 10, 700, 2, 80, 30, 600);
+            _guns[CGun.ShootingPattern.SMG] = new CGun(CGun.ShootingPattern.SMG, 10, 700, 2, 50, 30, 600);
 
             _world.AddSystem(new InputSystem(_world));
             _world.AddSystem(new MovementSystem(_world));
@@ -47,7 +47,7 @@ namespace Crimson
             _player.AddComponent(new CFaction(Faction.PC));
 
             var camera = _world.CreateEntity();
-            camera.AddComponent(new CCamera(20, _player, (30*64, 30*64), (mapPanel.Width, mapPanel.Height)));
+            camera.AddComponent(new CCamera(20, _player, (mapPanel.Width, mapPanel.Height)));
             camera.AddComponent(new CTransform(mainPanel.Width / 2 + 1, mainPanel.Height / 2 + 1));
 
             MakeMap(30, 30, 64);

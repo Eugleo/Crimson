@@ -19,42 +19,45 @@ namespace Crimson.Systems
 
         public override void Update()
         {
-            if (_cameras.Count > 0)
+            foreach (var (entity, camera, transform) in _cameras)
             {
-                var camera = _cameras.Components1[0];
+                var map = _maps.Components1[0];
 
-                var (worldWidth, worldHeight) = (camera.WorldBounds.Item1, camera.WorldBounds.Item2);
-                var (screenWidth, screenHeight) = (camera.ScreenBounds.Item1, camera.ScreenBounds.Item2);
-                var targetLocation = camera.Target.GetComponent<CTransform>().Location;
-                var targetMovement = camera.Target.GetComponent<CMovement>();
-                var (X, Y) = (_cameras.Components2[0].Location.X, (_cameras.Components2[0].Location.Y));
-
-                double xOffset = 0;
-                double yOffset = 0;
-
-                var distanceX = X - targetLocation.X;
-                if (Math.Abs(distanceX) > camera.FollowDistance)
+                if (camera.Target.TryGetComponent(out CMovement targetMovement) &&
+                    camera.Target.TryGetComponent(out CTransform targetTransform))
                 {
-                    var newAcc = (distanceX > 0 ? -1 : 1) * Math.Abs(targetMovement.Acceleration.X);
-                    var newX = X + targetMovement.Speed * newAcc;
-                    if (newX > screenWidth / 2 && newX < worldWidth - screenWidth / 2)
-                    {
-                        xOffset = newAcc;
-                    }
-                }
-                var distanceY = Y - targetLocation.Y;
-                if (Math.Abs(distanceY) > camera.FollowDistance)
-                {
-                    var newAcc = (distanceY > 0 ? -1 : 1) * Math.Abs(targetMovement.Acceleration.Y);
-                    var newY = Y + targetMovement.Speed * newAcc;
-                    if (newY > screenHeight / 2 && newY < worldHeight - screenHeight / 2)
-                    {
-                        yOffset = newAcc;
-                    }
-                }
+                    var (worldWidth, worldHeight) = (map.Width * map.TileSize, map.Height * map.TileSize);
+                    var (screenWidth, screenHeight) = (camera.ScreenBounds.Item1, camera.ScreenBounds.Item2);
+                    var targetLocation = targetTransform.Location;
+                    var (X, Y) = (_cameras.Components2[0].Location.X, (_cameras.Components2[0].Location.Y));
 
-                var move = new CMovement(targetMovement.Speed, new Vector(xOffset, yOffset));
-                _cameras.Entities[0].AddComponent(move);
+                    double xOffset = 0;
+                    double yOffset = 0;
+
+                    var distanceX = X - targetLocation.X;
+                    if (Math.Abs(distanceX) > camera.FollowDistance)
+                    {
+                        var newAcc = (distanceX > 0 ? -1 : 1) * Math.Abs(targetMovement.Acceleration.X);
+                        var newX = X + targetMovement.Speed * newAcc;
+                        if (screenWidth / 2 < newX && newX < worldWidth - screenWidth / 2)
+                        {
+                            xOffset = newAcc;
+                        }
+                    }
+                    var distanceY = Y - targetLocation.Y;
+                    if (Math.Abs(distanceY) > camera.FollowDistance)
+                    {
+                        var newAcc = (distanceY > 0 ? -1 : 1) * Math.Abs(targetMovement.Acceleration.Y);
+                        var newY = Y + targetMovement.Speed * newAcc;
+                        if (screenHeight / 2 < newY && newY < worldHeight - screenHeight / 2)
+                        {
+                            yOffset = newAcc;
+                        }
+                    }
+
+                    var move = new CMovement(targetMovement.Speed, new Vector(xOffset, yOffset));
+                    _cameras.Entities[0].AddComponent(move);
+                }
             }
         }
     }
