@@ -27,8 +27,8 @@ namespace Crimson
             _guns[CGun.ShootingPattern.SMG] = new CGun(CGun.ShootingPattern.SMG, 10, 700, 2, 80, 30, 600);
 
             _world.AddSystem(new InputSystem(_world));
-            _world.AddSystem(new CameraSystem(_world));
             _world.AddSystem(new MovementSystem(_world));
+            _world.AddSystem(new CameraSystem(_world));
             _world.AddSystem(new GunSystem(_world));
             _world.AddSystem(new CollisionResolverSystem(_world));
             _world.AddSystem(new HealthSystem(_world));
