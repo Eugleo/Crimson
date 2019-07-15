@@ -35,13 +35,32 @@ namespace Crimson.Systems
                     var bounds = entity.GetComponent<CCollidable>();
                     foreach (var (entity2, transform2, bounds2) in _collidable)
                     {
-                        if (entity2.Entity != entity.Entity && 
-                            CollideArea(newPosition, bounds.Size, transform2.Location, bounds2.Size) > 20 &&
+                        if (entity2.Entity != entity.Entity && !entity.HasComponent<CBullet>() && !entity2.HasComponent<CBullet>())
+                        {
+                            if (CollideArea(new Vector(newPosition.X, transform.Location.Y), bounds.Size, transform2.Location, bounds2.Size) > 0)
+                            {
+                                newPosition = new Vector(transform.Location.X, newPosition.Y);
+                            }
+                            if (CollideArea(new Vector(transform.Location.X, newPosition.Y), bounds.Size, transform2.Location, bounds2.Size) > 0)
+                            {
+                                newPosition = new Vector(newPosition.X, transform.Location.Y);
+                            }
+                        }
+                        else if (entity2.Entity != entity.Entity && 
+                            CollideArea(newPosition, bounds.Size, transform2.Location, bounds2.Size) > 0 &&
                             !(entity.HasComponent<CBullet>() && entity2.HasComponent<CBullet>()))
                         {
-                            newPosition = transform.Location;
                             entity.AddComponent(new CCollisionEvent(entity2));
                             entity2.AddComponent(new CCollisionEvent(entity));
+
+                            if (!entity.HasComponent<CBullet>())
+                            {
+
+                            }
+                            else
+                            {
+                                
+                            }
                         }
                     }
                 }
@@ -49,7 +68,6 @@ namespace Crimson.Systems
                 if (entity.HasComponent<CBullet>())
                 {
                     var bullet = entity.GetComponent<CBullet>();
-                    Debug.WriteLine(bullet.RangeLeft);
                     var newBullet = new CBullet(bullet.Damage, bullet.RangeLeft - (newPosition - transform.Location).Size);
                     entity.AddComponent(newBullet);
                 }
