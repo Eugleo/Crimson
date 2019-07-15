@@ -194,4 +194,76 @@ namespace Crimson.Entities
             }
         }
     }
+
+    class EntityGroup<Component1, Component2, Component3, Component4> :
+        EntityGroup,
+        IEnumerable<(EntityHandle, Component1, Component2, Component3, Component4)>,
+        IReadOnlyList<(EntityHandle, Component1, Component2, Component3, Component4)>
+        where Component1 : Component
+        where Component2 : Component
+        where Component3 : Component
+        where Component4 : Component
+    {
+        public List<Component1> Components1 = new List<Component1>();
+        public List<Component2> Components2 = new List<Component2>();
+        public List<Component3> Components3 = new List<Component3>();
+        public List<Component4> Components4 = new List<Component4>();
+
+        public int Count => Entities.Count;
+
+        public (EntityHandle, Component1, Component2, Component3, Component4) this[int index] =>
+            (Entities[index], Components1[index], Components2[index], Components3[index], Components4[index]);
+
+        public EntityGroup()
+        {
+            Mask = new ComponentMask();
+            Mask.IncludeComponent<Component1>();
+            Mask.IncludeComponent<Component2>();
+            Mask.IncludeComponent<Component3>();
+            Mask.IncludeComponent<Component4>();
+        }
+
+        public override void Add(Entity e)
+        {
+            var eh = new EntityHandle(e, _world);
+            _entities.Add(eh);
+            Components1.Add(eh.GetComponent<Component1>());
+            Components2.Add(eh.GetComponent<Component2>());
+            Components3.Add(eh.GetComponent<Component3>());
+            Components4.Add(eh.GetComponent<Component4>());
+        }
+
+        public override void Remove(Entity entity)
+        {
+            var i = _entities.FindIndex(e => e.Entity == entity);
+            _entities.RemoveAt(i);
+            Components1.RemoveAt(i);
+            Components2.RemoveAt(i);
+            Components3.RemoveAt(i);
+            Components4.RemoveAt(i);
+        }
+
+        public override void UpdateComponentsFor(Entity entity)
+        {
+            var eh = _entities.Find(e => e.Entity == entity);
+            var i = _entities.FindIndex(e => e.Entity == entity);
+            Components1[i] = eh.GetComponent<Component1>();
+            Components2[i] = eh.GetComponent<Component2>();
+            Components3[i] = eh.GetComponent<Component3>();
+            Components4[i] = eh.GetComponent<Component4>();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
+
+        public IEnumerator<(EntityHandle, Component1, Component2, Component3, Component4)> GetEnumerator()
+        {
+            foreach (var i in Enumerable.Range(0, Entities.Count))
+            {
+                yield return (Entities[i], Components1[i], Components2[i], Components3[i], Components4[i]);
+            }
+        }
+    }
 }

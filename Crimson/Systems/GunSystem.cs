@@ -9,17 +9,17 @@ namespace Crimson.Systems
 {
     class GunSystem : GameSystem
     {
-        readonly EntityGroup<CGun, CTransform, CShootEvent> _shootingEntities;
+        readonly EntityGroup<CGun, CTransform, CShootEvent, CFaction> _shootingEntities;
 
         public GunSystem(World world)
         {
             _world = world;
-            _shootingEntities = _world.GetGroup<EntityGroup<CGun, CTransform, CShootEvent>>();
+            _shootingEntities = _world.GetGroup<EntityGroup<CGun, CTransform, CShootEvent, CFaction>>();
         }
 
         public override void Update()
         {
-            foreach (var (entity, gun, transform, shot) in _shootingEntities)
+            foreach (var (entity, gun, transform, shot, faction) in _shootingEntities)
             {
                 if (!gun.CanShoot) { return; }
 
@@ -43,13 +43,13 @@ namespace Crimson.Systems
                 {
                     case CGun.ShootingPattern.Pistol:
                     case CGun.ShootingPattern.SMG:
-                        ShootBullet(startingLocation, direction, gun);
+                        ShootBullet(startingLocation, direction, gun, faction);
                         break;
                     case CGun.ShootingPattern.Shotgun:
                         var spread = direction.Orthogonalized().Normalized(8);
                         foreach (var i in Enumerable.Range(-2, 5))
                         {
-                            ShootBullet(startingLocation, direction + spread.ScaledBy(i), gun);
+                            ShootBullet(startingLocation, direction + spread.ScaledBy(i), gun, faction);
                         }
                         break;
                     default:
@@ -59,7 +59,7 @@ namespace Crimson.Systems
             }
         }
 
-        void ShootBullet(Vector startPosition, Vector direction, CGun gun)
+        void ShootBullet(Vector startPosition, Vector direction, CGun gun, CFaction faction)
         {
             var bullet = _world.CreateEntity();
             var inaccuracy = new Vector(Inaccuracy(gun.Inaccuracy), Inaccuracy(gun.Inaccuracy));
@@ -69,6 +69,7 @@ namespace Crimson.Systems
             bullet.AddComponent(new CGraphics(MainForm.ResizeImage(Properties.Resources.bullet, 10, 10)));
             bullet.AddComponent(new CGameObject());
             bullet.AddComponent(new CCollidable(10, 10));
+            bullet.AddComponent(faction);
         }
 
         readonly Random rnd = new Random();

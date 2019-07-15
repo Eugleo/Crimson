@@ -23,58 +23,47 @@ namespace Crimson.Systems
         {
             foreach (var (entity, transform, movement) in _moveable)
             {
-                var newPosition = transform.Location + movement.Acceleration.ScaledBy(movement.Speed);
-
-                if (IsOutOfMap(newPosition) && !entity.HasComponent<CBullet>())
+                var current = transform.Location;
+                var next = transform.Location + movement.Acceleration.ScaledBy(movement.Speed);
+                if (entity.TryGetComponent(out CCollidable bounds))
                 {
-                    continue;
-                }
-
-                if (entity.HasComponent<CCollidable>())
-                {
-                    var bounds = entity.GetComponent<CCollidable>();
                     foreach (var (entity2, transform2, bounds2) in _collidable)
                     {
-                        if (entity2.Entity != entity.Entity && !entity.HasComponent<CBullet>() && !entity2.HasComponent<CBullet>())
+                        if (entity2.Entity == entity.Entity) { continue; }
+                        if (!entity.HasComponent<CBullet>() && !entity2.HasComponent<CBullet>())
                         {
-                            if (CollideArea(new Vector(newPosition.X, transform.Location.Y), bounds.Size, transform2.Location, bounds2.Size) > 0)
+                            var moveByX = new Vector(next.X, current.Y);
+                            if (CollideArea(moveByX, bounds.Size, transform2.Location, bounds2.Size) > 0 || IsOutOfMap(moveByX))
                             {
-                                newPosition = new Vector(transform.Location.X, newPosition.Y);
+                                next = new Vector(current.X, next.Y);
                             }
-                            if (CollideArea(new Vector(transform.Location.X, newPosition.Y), bounds.Size, transform2.Location, bounds2.Size) > 0)
+                            var moveByY = new Vector(current.X, next.Y);
+                            if (CollideArea(moveByY, bounds.Size, transform2.Location, bounds2.Size) > 0 || IsOutOfMap(moveByY))
                             {
-                                newPosition = new Vector(newPosition.X, transform.Location.Y);
+                                next = new Vector(next.X, current.Y);
                             }
                         }
-                        else if (entity2.Entity != entity.Entity && 
-                            CollideArea(newPosition, bounds.Size, transform2.Location, bounds2.Size) > 0 &&
-                            !(entity.HasComponent<CBullet>() && entity2.HasComponent<CBullet>()))
+                        else if (entity.HasComponent<CBullet>() && entity.TryGetComponent(out CFaction faction) && 
+                                 CollideArea(current, bounds.Size, transform2.Location, bounds2.Size) > 0)
                         {
-                            entity.AddComponent(new CCollisionEvent(entity2));
-                            entity2.AddComponent(new CCollisionEvent(entity));
-
-                            if (!entity.HasComponent<CBullet>())
+                            if ((entity2.TryGetComponent(out CFaction faction2) && faction.Faction != faction2.Faction) ||
+                                !entity2.HasComponent<CFaction>())
                             {
-
-                            }
-                            else
-                            {
-                                
+                                entity.AddComponent(new CCollisionEvent(entity2));
+                                entity2.AddComponent(new CCollisionEvent(entity));
                             }
                         }
                     }
                 }
 
-                if (entity.HasComponent<CBullet>())
+                if (entity.TryGetComponent(out CBullet bullet))
                 {
-                    var bullet = entity.GetComponent<CBullet>();
-                    var newBullet = new CBullet(bullet.Damage, bullet.RangeLeft - (newPosition - transform.Location).Size);
-                    entity.AddComponent(newBullet);
+                    entity.AddComponent(new CBullet(bullet.Damage, bullet.RangeLeft - (next - current).Size));
                 }
 
-                if (newPosition != transform.Location)
+                if (next != current)
                 {
-                     entity.AddComponent(new CTransform(newPosition));
+                     entity.AddComponent(new CTransform(next));
                 }
             }
         }

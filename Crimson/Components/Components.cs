@@ -188,4 +188,15 @@ namespace Crimson.Components
             TileSize = tileSize;
         }
     }
+
+    enum Faction { PC, NPC }
+    struct CFaction : Component
+    {
+        public Faction Faction { get; }
+
+        public CFaction(Faction faction)
+        {
+            Faction = faction;
+        }
+    }
 }

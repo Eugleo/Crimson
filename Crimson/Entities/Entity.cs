@@ -69,5 +69,20 @@ namespace Crimson.Entities
         {
             _world.RemoveEntity(Entity);
         }
+
+        public bool TryGetComponent<T>(out T component) where T : Component
+        {
+
+            if (HasComponent<T>())
+            {
+                component = GetComponent<T>();
+                return true;
+            }
+            else
+            {
+                component = default;
+                return false;
+            }
+        }
     }
 }
