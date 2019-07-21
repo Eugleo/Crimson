@@ -18,7 +18,7 @@ namespace Crimson.Systems
 
         public override void Update()
         {
-            foreach (var (entity, input, move, _) in _inputable)
+            foreach (var (entity, input, movement, _) in _inputable)
             {
                 var keyEventArgs = input.KeyEventArgs;
                 var acc = keyEventArgs.Count > 1 ? Math.Sqrt(2) / 2 : 1;
@@ -46,7 +46,7 @@ namespace Crimson.Systems
                             accX = acc;
                             break;
                     }
-                    entity.AddComponent(new CMovement(move.Speed, new Vector(accX, accY)));
+                    entity.AddComponent(new CMovement(movement.MaxSpeed, new Vector(accX, accY).ScaledBy(movement.MaxSpeed)));
                 }
             }
         }

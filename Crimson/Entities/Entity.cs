@@ -57,7 +57,7 @@ namespace Crimson.Entities
 
         public T GetComponent<T>() where T : Component
         {
-            return ComponentManager<T>.Instance.LookupComponentForEntity(Entity);
+            return _world.GetComponentForEntity<T>(Entity);
         }
 
         public bool HasComponent<T>() where T : Component

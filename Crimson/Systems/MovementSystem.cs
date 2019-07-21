@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Collections.Generic;
+using System.Linq;
 using Crimson.Entities;
 using Crimson.Components;
 
@@ -8,8 +10,10 @@ namespace Crimson.Systems
     class MovementSystem: GameSystem
     {
         readonly EntityGroup<CTransform, CMovement> _moveable;
-        readonly EntityGroup<CTransform, CCollidable> _collidable; 
+        readonly EntityGroup<CTransform, CCollidable> _collidable;
         readonly EntityGroup<CMap> _map;
+
+        readonly double STEP_SIZE = 0.1;
 
         public MovementSystem(World world)
         {
@@ -43,7 +47,7 @@ namespace Crimson.Systems
                                 next = new Vector(next.X, current.Y);
                             }
                         }
-                        else if (entity.HasComponent<CBullet>() && entity.TryGetComponent(out CFaction faction) && 
+                        else if (entity.HasComponent<CBullet>() && entity.TryGetComponent(out CFaction faction) &&
                                  CollideArea(current, bounds.Size, transform2.Location, bounds2.Size) > 0)
                         {
                             if ((entity2.TryGetComponent(out CFaction faction2) && faction.Faction != faction2.Faction) ||
@@ -56,15 +60,30 @@ namespace Crimson.Systems
                     }
                 }
 
+                if (entity.HasComponent<CFeeler>())
+                {
+                    foreach (var (entity2, transform2, bounds2) in _collidable)
+                    {
+                        if (entity2.Entity == entity.Entity) { continue; }
+                        if (!entity2.HasComponent<CBullet>())
+                        {
+                            var moveByX = new Vector(next.X, current.Y);
+                            var moveByY = new Vector(current.X, next.Y);
+                            if (IsColliding(moveByX, 20, transform2.Location, bounds2.Size) || IsOutOfMap(moveByX) ||
+                                IsColliding(moveByY, 20, transform2.Location, bounds2.Size) || IsOutOfMap(moveByY))
+                            {
+                                entity.AddComponent(new CCollisionEvent(entity2));
+                            }
+                        }
+                    }
+                }
+
                 if (entity.TryGetComponent(out CBullet bullet))
                 {
                     entity.AddComponent(new CBullet(bullet.Damage, bullet.RangeLeft - (next - current).Size));
                 }
 
-                if (next != current)
-                {
-                     entity.AddComponent(new CTransform(next));
-                }
+                entity.AddComponent(new CTransform(next));
             }
         }
 
@@ -76,11 +95,11 @@ namespace Crimson.Systems
             return (X < 0 || X > map.Width - 1 || Y < 0 || Y > map.Height - 1);
         }
 
-        double CollideArea(Vector aLocation, Vector aSize, Vector bLocation, Vector bSize)
+        bool IsColliding(Vector aLocation, int aSize, Vector bLocation, int bSize)
         {
-            var X = Math.Min(aLocation.X + aSize.X, bLocation.X + bSize.X) - Math.Max(aLocation.X, bLocation.X);
-            var Y = Math.Min(aLocation.Y + aSize.Y, bLocation.Y + bSize.Y) - Math.Max(aLocation.Y, bLocation.Y);
-            return X > 0 && Y > 0 ? X * Y : 0;
+            var centerA = new Vector(aLocation.X + aSize, aLocation.Y + aSize);
+            var centerB = new Vector(bLocation.X + bSize, bLocation.Y + bSize);
+            return (centerA - centerB).Size < aSize + bSize;
         }
     }
 }

@@ -38,7 +38,7 @@ namespace Crimson
 
         public Vector Normalized()
         {
-            return new Vector(X / Size, Y / Size);
+            return Size != 0 ? new Vector(X / Size, Y / Size) : this;
         }
 
         public Vector Orthogonalized()

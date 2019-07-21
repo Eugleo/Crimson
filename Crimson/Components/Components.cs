@@ -26,13 +26,13 @@ namespace Crimson.Components
 
     struct CMovement : Component
     {
-        public double Speed;
-        public Vector Acceleration;
+        public Vector Velocity;
+        public double MaxSpeed;
 
-        public CMovement(double speed, Vector acceleration)
+        public CMovement(double maxSpeed, Vector acceleration)
         {
-            Speed = speed;
-            Acceleration = acceleration;
+            Velocity = acceleration;
+            MaxSpeed = maxSpeed;
         }
     }
 
@@ -105,16 +105,11 @@ namespace Crimson.Components
 
     struct CCollidable : Component
     {
-        public Vector Size { get; }
+        public int Size { get; }
 
-        public CCollidable(Vector size)
+        public CCollidable(int size)
         {
             Size = size;
-        }
-
-        public CCollidable(double width, double height)
-        {
-            Size = new Vector(width, height);
         }
     }
 
@@ -135,6 +130,31 @@ namespace Crimson.Components
         public CShootEvent(Vector targetLocation)
         {
             TargetLocation = targetLocation;
+        }
+    }
+
+    struct CPursuitBehavior : Component
+    {
+        // TODO Target musí mít movement a position
+        public EntityHandle Target;
+        public int Prediction;
+        public int ReactionSpeed;
+        public int Distance;
+
+        public CPursuitBehavior(EntityHandle target, int prediction, int reactionSpeed)
+        {
+            Target = target;
+            Prediction = prediction;
+            ReactionSpeed = reactionSpeed;
+            Distance = 0;
+        }
+
+        public CPursuitBehavior(EntityHandle target, int prediction, int reactionSpeed, int distance)
+        {
+            Target = target;
+            Prediction = prediction;
+            ReactionSpeed = reactionSpeed;
+            Distance = distance;
         }
     }
 
@@ -194,6 +214,30 @@ namespace Crimson.Components
         public CFaction(Faction faction)
         {
             Faction = faction;
+        }
+    }
+
+    struct CFeeler : Component
+    {
+        public Vector Offset { get; }
+
+        public CFeeler(Vector offset)
+        {
+            Offset = offset;
+        }
+    }
+
+    struct CAvoidObstaclesBehavior : Component
+    {
+        public int Prediction;
+        public int ReactionSpeed;
+        public List<(EntityHandle, int)> Feelers;
+
+        public CAvoidObstaclesBehavior(int prediction, int reactionSpeed, List<(EntityHandle, int)> feelers)
+        {
+            Prediction = prediction;
+            ReactionSpeed = reactionSpeed;
+            Feelers = feelers;
         }
     }
 }

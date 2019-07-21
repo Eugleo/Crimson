@@ -64,11 +64,11 @@ namespace Crimson.Systems
             var bullet = _world.CreateEntity();
             var inaccuracy = new Vector(Inaccuracy(gun.Inaccuracy), Inaccuracy(gun.Inaccuracy));
             bullet.AddComponent(new CBullet(gun.Damage, gun.Range));
-            bullet.AddComponent(new CMovement(gun.BulletSpeed, (direction + inaccuracy).Normalized()));
+            bullet.AddComponent(new CMovement(gun.BulletSpeed, (direction + inaccuracy).Normalized(gun.BulletSpeed)));
             bullet.AddComponent(new CTransform(startPosition));
             bullet.AddComponent(new CGraphics(MainForm.ResizeImage(Properties.Resources.bullet, 10, 10)));
             bullet.AddComponent(new CGameObject());
-            bullet.AddComponent(new CCollidable(10, 10));
+            bullet.AddComponent(new CCollidable(5));
             bullet.AddComponent(faction);
         }
 

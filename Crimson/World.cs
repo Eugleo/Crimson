@@ -27,6 +27,7 @@ namespace Crimson
 
         public void RemoveEntity(Entity e)
         {
+            Debug.WriteLine("Remove {0}", e.ID);
             _entityManager.RemoveEntity(e);
             foreach (var cm in ComponentManagerDB.ComponentManagers.Values)
             {

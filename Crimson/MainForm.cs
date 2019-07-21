@@ -29,6 +29,8 @@ namespace Crimson
             _world.AddSystem(new InputSystem(_world));
             _world.AddSystem(new MovementSystem(_world));
             _world.AddSystem(new CameraSystem(_world));
+            _world.AddSystem(new PursuitSystem(_world));
+            _world.AddSystem(new AvoidObstaclesSystem(_world));
             _world.AddSystem(new GunSystem(_world));
             _world.AddSystem(new CollisionResolverSystem(_world));
             _world.AddSystem(new HealthSystem(_world));
@@ -38,17 +40,18 @@ namespace Crimson
             Image playerImage = ResizeImage(Properties.Resources.Player, 64, 64);
             _player = _world.CreateEntity();
             _player.AddComponent(new CKeyboardNavigation());
-            _player.AddComponent(new CMovement(5, new Vector(0, 0)));
+            _player.AddComponent(new CMovement(0.5, new Vector(0, 0)));
             _player.AddComponent(new CTransform(mainPanel.Width / 2, mainPanel.Height / 2));
             _player.AddComponent(new CGraphics(playerImage));
             _player.AddComponent(new CGameObject());
             _player.AddComponent(_guns[CGun.ShootingPattern.Pistol]);
-            _player.AddComponent(new CCollidable(64, 64));
+            _player.AddComponent(new CCollidable(32));
             _player.AddComponent(new CFaction(Faction.PC));
 
             var camera = _world.CreateEntity();
             camera.AddComponent(new CCamera(20, _player, (mapPanel.Width, mapPanel.Height)));
             camera.AddComponent(new CTransform(mainPanel.Width / 2 + 1, mainPanel.Height / 2 + 1));
+            camera.AddComponent(new CMovement(5, new Vector(0, 0)));
 
             MakeMap(30, 30, 64);
 
@@ -118,7 +121,7 @@ namespace Crimson
             tree.AddComponent(new CTransform(X, Y));
             tree.AddComponent(new CGraphics(treeImage));
             tree.AddComponent(new CGameObject());
-            tree.AddComponent(new CCollidable(64, 64));
+            tree.AddComponent(new CCollidable(32));
             tree.AddComponent(new CHealth(100, 100));
         }
 
@@ -143,7 +146,45 @@ namespace Crimson
                 case Keys.D3:
                     _player.AddComponent(_guns[CGun.ShootingPattern.SMG]);
                     break;
+                case Keys.U:
+                    var enemy = _world.CreateEntity();
+                    Image image = ResizeImage(Properties.Resources.Player, 64, 64);
+                    enemy.AddComponent(new CTransform(rnd.Next(5, 64 * 30 - 5 - 64), rnd.Next(5, 64 * 30 - 5 - 64)));
+                    enemy.AddComponent(new CGraphics(image));
+                    enemy.AddComponent(new CGameObject());
+                    enemy.AddComponent(new CMovement(0.5, new Vector(0, 0)));
+                    enemy.AddComponent(new CPursuitBehavior(_player, 5, 1, 150));
+                    enemy.AddComponent(new CCollidable(32));
+                    enemy.AddComponent(new CFaction(Faction.NPC));
+                    enemy.AddComponent(new CHealth(50, 50));
+                    enemy.AddComponent(new CAvoidObstaclesBehavior(5, 2, MakeFeelers(new int[] { 0, 20, 40, 60, 80 })));
+                    break;
             }
+        }
+
+        List<(EntityHandle, int)> MakeFeelers(int[] distances)
+        {
+            var acc = new List<(EntityHandle, int)>();
+            foreach (var d in distances)
+            {
+                acc.Add((MakeFeeler(new Vector(32, 0)), d));
+                acc.Add((MakeFeeler(new Vector(32, 64)), d));
+                acc.Add((MakeFeeler(new Vector(64, 32)), d));
+                acc.Add((MakeFeeler(new Vector(0, 32)), d));
+            }
+            return acc;
+        }
+
+        EntityHandle MakeFeeler(Vector offset)
+        {
+            Image image = ResizeImage(Properties.Resources.Player, 40, 40);
+            var feeler = _world.CreateEntity();
+            feeler.AddComponent(new CMovement(0, new Vector(0, 0)));
+            feeler.AddComponent(new CTransform(0, 0));
+            //feeler.AddComponent(new CGraphics(image));
+            //feeler.AddComponent(new CGameObject());
+            feeler.AddComponent(new CFeeler(offset));
+            return feeler;
         }
 
         private void GameTimer_Tick(object sender, EventArgs e)
@@ -162,7 +203,7 @@ namespace Crimson
     */
             if (_isShooting)
             {
-                var absoluteCenterLocation = _world.GetGroup<EntityGroup<CCamera, CTransform>>().Components2[0].Location;
+                var absoluteCenterLocation = _world.GetGroup<EntityGroup<CCamera, CMovement, CTransform>>().Components3[0].Location;
                 var relativeOffset = new Vector(mapPanel.Width / 2, mapPanel.Height / 2);
                 var targetLocation = _mouseLocation + absoluteCenterLocation - relativeOffset;
                 _player.AddComponent(new CShootEvent(targetLocation));
@@ -178,8 +219,11 @@ namespace Crimson
             {
                 _world.ForEachEntityWithComponents<CKeyboardNavigation>(entity => {
                     _world.RemoveComponentFromEntity<CInputEvent>(entity);
-                    var move = _world.GetComponentForEntity<CMovement>(entity);
-                    _world.SetComponentOfEntity(entity, new CMovement(move.Speed, new Vector(0, 0)));
+                    if (_world.EntityHasComponent<CMovement>(entity))
+                    {
+                        var movement = _world.GetComponentForEntity<CMovement>(entity);
+                        _world.SetComponentOfEntity(entity, new CMovement(movement.MaxSpeed, new Vector(0, 0)));
+                    }
                 });
             }
         }
@@ -270,9 +314,9 @@ namespace Crimson
         {
             _mouseLocation = Vector.FromPoint(e.Location);
             _isShooting = true;
-            var absoluteCenterLocation = _world.GetGroup<EntityGroup<CCamera, CTransform>>().Components2[0].Location;
+            var absoluteCenterLocation = _world.GetGroup<EntityGroup<CCamera, CMovement, CTransform>>().Components3[0].Location;
             var relativeOffset = new Vector(mapPanel.Width / 2, mapPanel.Height / 2);
-            _player.AddComponent(new CShootEvent(Vector.FromPoint(e.Location) + absoluteCenterLocation - relativeOffset));
+            //_player.AddComponent(new CShootEvent(Vector.FromPoint(e.Location) + absoluteCenterLocation - relativeOffset));
         }
 
         private void MainPanel_MouseUp(object sender, MouseEventArgs e)
