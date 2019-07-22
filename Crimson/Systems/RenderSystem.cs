@@ -30,8 +30,13 @@ namespace Crimson.Systems
         {
             if (_cameras.Count > 0)
             {
-                _mainControl.Refresh();
                 _mapControl.Refresh();
+                _mainControl.Refresh();
+                if (_cameras.Components2[0].NeedsRefresh)
+                {
+                    Debug.WriteLine("Needs");
+                    
+                }
             }
         }
 
@@ -64,6 +69,7 @@ namespace Crimson.Systems
 
         void MapControl_Paint(object sender, PaintEventArgs e)
         {
+            Debug.WriteLine("Map");
             if (_cameras.Count > 0)
             {
                 var location = _cameras.Components1[0].Location;

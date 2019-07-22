@@ -8,24 +8,22 @@ namespace Crimson.Systems
     class CameraSystem : GameSystem
     {
         readonly EntityGroup<CCamera, CMovement, CTransform> _cameras;
-        readonly EntityGroup<CMap> _maps;
+        readonly Map _map;
 
-        public CameraSystem(World world)
+        public CameraSystem(World world, Map map)
         {
             _world = world;
             _cameras = _world.GetGroup<EntityGroup<CCamera, CMovement, CTransform>>();
-            _maps = _world.GetGroup<EntityGroup<CMap>>();
+            _map = map;
         }
 
         public override void Update()
         {
             foreach (var (entity, camera, movement, transform) in _cameras)
             {
-                var map = _maps.Components1[0];
-
                 if (camera.Target.TryGetComponent(out CTransform targetTransform))
                 {
-                    var (worldWidth, worldHeight) = (map.Width * map.TileSize, map.Height * map.TileSize);
+                    var (worldWidth, worldHeight) = (_map.Width * _map.TileSize, _map.Height * _map.TileSize);
                     var (screenWidth, screenHeight) = (camera.ScreenBounds.Item1, camera.ScreenBounds.Item2);
                     var targetLocation = targetTransform.Location;
                     var (X, Y) = (transform.Location.X, transform.Location.Y);
@@ -55,7 +53,12 @@ namespace Crimson.Systems
                             yOffset = newAcc;
                         }
                     }
-                    _cameras.Entities[0].AddComponent(new CMovement(targetMovement.MaxSpeed, new Vector(xOffset, yOffset)));
+
+                    if (xOffset == 0 && yOffset == 0)
+                    {
+                        entity.AddComponent(new CCamera(camera.FollowDistance, camera.Target, camera.ScreenBounds) { NeedsRefresh = false });
+                    }
+                    entity.AddComponent(new CMovement(targetMovement.MaxSpeed, new Vector(xOffset, yOffset)));
                 }
             }
         }

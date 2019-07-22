@@ -121,6 +121,7 @@ namespace Crimson
 
         public void AddSystem(GameSystem system) {
             _systems.Add(system);
+            _entityManager.Entities.ForEach(e => UpdateFiltersForEntity(e));
         }
 
         public void Tick()

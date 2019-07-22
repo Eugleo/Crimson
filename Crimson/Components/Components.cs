@@ -15,9 +15,9 @@ namespace Crimson.Components
     struct CHealth : Component
     {
         public int MaxHealth { get; }
-        public int CurrentHealth { get; }
+        public double CurrentHealth { get; }
 
-        public CHealth(int maxHealth, int currentHealth)
+        public CHealth(int maxHealth, double currentHealth)
         {
             MaxHealth = maxHealth;
             CurrentHealth = currentHealth;
@@ -82,12 +82,14 @@ namespace Crimson.Components
         // Target entita musí mít CMovement a CPosition
         public EntityHandle Target { get; }
         public (double, double) ScreenBounds { get; }
+        public bool NeedsRefresh;
 
         public CCamera(int followDistance, EntityHandle target, (double, double) cameraBounds)
         {
             FollowDistance = followDistance;
             Target = target;
             ScreenBounds = cameraBounds;
+            NeedsRefresh = true;
         }
     }
 
@@ -192,20 +194,6 @@ namespace Crimson.Components
 
     struct CGameObject : Component { }
 
-    struct CMap : Component
-    {
-        public int Width { get; }
-        public int Height { get; }
-        public int TileSize { get; }
-
-        public CMap(int width, int height, int tileSize)
-        {
-            Width = width;
-            Height = height;
-            TileSize = tileSize;
-        }
-    }
-
     enum Faction { PC, NPC }
     struct CFaction : Component
     {
@@ -224,6 +212,58 @@ namespace Crimson.Components
         public CFeeler(Vector offset)
         {
             Offset = offset;
+        }
+    }
+
+    struct CAttacker : Component
+    {
+        public EntityHandle Target;
+
+        public CAttacker(EntityHandle target)
+        {
+            Target = target;
+        }
+    }
+
+    struct COnFire : Component
+    {
+        public int Spread;
+        public double Longevity;
+
+        public COnFire(int spread, double longevity)
+        {
+            Spread = spread;
+            Longevity = longevity;
+        }
+    }
+    struct CFlammable: Component
+    {
+        public Image Image;
+    }
+
+    struct CMeleeWeapon : Component
+    {
+        public int Range;
+        public int RateOfAttack;
+        public int Damage;
+        public bool CanAttack;
+
+        public CMeleeWeapon(int range, int rateOfAttack, int damage, bool canAttack)
+        {
+            Range = range;
+            RateOfAttack = rateOfAttack;
+            Damage = damage;
+            CanAttack = canAttack;
+        }
+    }
+
+    struct CMeleeAttackEvent : Component
+    {
+        public EntityHandle Target { get; }
+
+        public CMeleeAttackEvent(EntityHandle target)
+        {
+            Target = target;
         }
     }
 

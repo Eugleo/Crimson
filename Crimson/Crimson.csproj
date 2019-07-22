@@ -51,13 +51,17 @@
     <Compile Include="Entities\EntityGroup.cs" />
     <Compile Include="Entities\Entity.cs" />
     <Compile Include="Components\ComponentMask.cs" />
+    <Compile Include="Systems\AttackSystem.cs" />
     <Compile Include="Systems\AvoidObstaclesSystem.cs" />
     <Compile Include="Systems\BulletSystem.cs" />
     <Compile Include="Systems\CameraSystem.cs" />
     <Compile Include="Systems\CollisionSystem.cs" />
+    <Compile Include="Systems\FireSystem.cs" />
     <Compile Include="Systems\GunSystem.cs" />
     <Compile Include="Systems\HealthSystem.cs" />
     <Compile Include="Systems\InputSystem.cs" />
+    <Compile Include="Systems\Map.cs" />
+    <Compile Include="Systems\MeleeSystem.cs" />
     <Compile Include="Systems\PursuitSystem.cs" />
     <Compile Include="Systems\RenderSystem.cs" />
     <Compile Include="Components\ComponentManager.cs" />

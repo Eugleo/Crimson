@@ -22,16 +22,20 @@ namespace Crimson
         {
             InitializeComponent();
 
-            _guns[CGun.ShootingPattern.Pistol] = new CGun(CGun.ShootingPattern.Pistol, 15, 700, 5, 300, 30, 350);
+            var map = MakeMap(30, 30, 64);
+
+            _guns[CGun.ShootingPattern.Pistol] = new CGun(CGun.ShootingPattern.Pistol, 15, 700, 5, 300, 25, 350);
             _guns[CGun.ShootingPattern.Shotgun] = new CGun(CGun.ShootingPattern.Shotgun, 20, 800, 0, 700, 20, 200);
             _guns[CGun.ShootingPattern.SMG] = new CGun(CGun.ShootingPattern.SMG, 10, 700, 2, 50, 30, 600);
 
             _world.AddSystem(new InputSystem(_world));
-            _world.AddSystem(new MovementSystem(_world));
-            _world.AddSystem(new CameraSystem(_world));
+            _world.AddSystem(new MovementSystem(_world, map));
+            _world.AddSystem(new CameraSystem(_world, map));
             _world.AddSystem(new PursuitSystem(_world));
             _world.AddSystem(new AvoidObstaclesSystem(_world));
+            _world.AddSystem(new AttackSystem(_world));
             _world.AddSystem(new GunSystem(_world));
+            _world.AddSystem(new MeleeSystem(_world));
             _world.AddSystem(new CollisionResolverSystem(_world));
             _world.AddSystem(new HealthSystem(_world));
             _world.AddSystem(new BulletSystem(_world));
@@ -40,35 +44,33 @@ namespace Crimson
             Image playerImage = ResizeImage(Properties.Resources.Player, 64, 64);
             _player = _world.CreateEntity();
             _player.AddComponent(new CKeyboardNavigation());
-            _player.AddComponent(new CMovement(0.5, new Vector(0, 0)));
+            _player.AddComponent(new CMovement(6, new Vector(0, 0)));
             _player.AddComponent(new CTransform(mainPanel.Width / 2, mainPanel.Height / 2));
             _player.AddComponent(new CGraphics(playerImage));
             _player.AddComponent(new CGameObject());
             _player.AddComponent(_guns[CGun.ShootingPattern.Pistol]);
             _player.AddComponent(new CCollidable(32));
             _player.AddComponent(new CFaction(Faction.PC));
+            _player.AddComponent(new CHealth(150, 150));
 
             var camera = _world.CreateEntity();
             camera.AddComponent(new CCamera(20, _player, (mapPanel.Width, mapPanel.Height)));
             camera.AddComponent(new CTransform(mainPanel.Width / 2 + 1, mainPanel.Height / 2 + 1));
             camera.AddComponent(new CMovement(5, new Vector(0, 0)));
 
-            MakeMap(30, 30, 64);
-
             gameTimer.Enabled = true;
         }
 
         readonly Random rnd = new Random();
-        void MakeMap(int w, int h, int tileSize)
+        Map MakeMap(int w, int h, int tileSize)
         {
-            var map = _world.CreateEntity();
-            map.AddComponent(new CMap(w, h, tileSize));
-
+            var map = new Map(w, h, tileSize);
             foreach (var i in Enumerable.Range(0, h))
             {
                 foreach (var j in Enumerable.Range(0, w))
                 {
                     var tile = _world.CreateEntity();
+                    map.Plan[i, j] = tile;
                     tile.AddComponent(new CTile());
                     tile.AddComponent(new CTransform(i * tileSize, j * tileSize));
 
@@ -103,6 +105,7 @@ namespace Crimson
                     tile.AddComponent(new CGraphics(image));
                 }
             }
+            return map;
         }
 
         void MakeTree(int X, int Y)
@@ -152,12 +155,14 @@ namespace Crimson
                     enemy.AddComponent(new CTransform(rnd.Next(5, 64 * 30 - 5 - 64), rnd.Next(5, 64 * 30 - 5 - 64)));
                     enemy.AddComponent(new CGraphics(image));
                     enemy.AddComponent(new CGameObject());
-                    enemy.AddComponent(new CMovement(0.5, new Vector(0, 0)));
-                    enemy.AddComponent(new CPursuitBehavior(_player, 5, 1, 150));
+                    enemy.AddComponent(new CMovement(5, new Vector(0, 0)));
+                    enemy.AddComponent(new CPursuitBehavior(_player, 5, 1, 30));
                     enemy.AddComponent(new CCollidable(32));
                     enemy.AddComponent(new CFaction(Faction.NPC));
                     enemy.AddComponent(new CHealth(50, 50));
                     enemy.AddComponent(new CAvoidObstaclesBehavior(5, 2, MakeFeelers(new int[] { 0, 20, 40, 60, 80 })));
+                    enemy.AddComponent(new CAttacker(_player));
+                    enemy.AddComponent(new CMeleeWeapon(70, 300, 100, true));
                     break;
             }
         }
