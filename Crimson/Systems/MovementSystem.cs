@@ -59,7 +59,7 @@ namespace Crimson.Systems
                     {
                         foreach (var (entity2, transform2, bounds2) in _collidable)
                         {
-                            if (entity2.HasComponent<CBullet>()) { continue; }
+                            if (entity2.HasComponent<CBullet>() || (entity2.TryGetComponent(out CFaction faction2) && faction2.Faction == faction.Faction)) { continue; }
 
                             next = location;
                             if (IsColliding(location, bounds.Size, transform2.Location, bounds2.Size))

@@ -33,9 +33,8 @@ namespace Crimson.Systems
             // Damage
             foreach (var (entity, fire, health) in _filter1)
             {
-                var newHealth = new CHealth(health.MaxHealth, health.CurrentHealth - 0.1);
+                var newHealth = new CHealth(health.MaxHealth, health.CurrentHealth - 0.5);
                 entity.AddComponent(newHealth);
-                entity.AddComponent(new COnFire(fire.Spread, fire.Longevity - 0.1));
             }
 
             // Spread entity -> tile
@@ -43,25 +42,28 @@ namespace Crimson.Systems
             {
                 var x = (int)Math.Floor(transform.Location.X / _map.TileSize);
                 var y = (int)Math.Floor(transform.Location.Y / _map.TileSize);
-                if (_map.Plan[x, y].Entity == entity.Entity) { continue; }
+                if (fire.Spread <= 0) { continue; }
 
                 if (_map.Plan[x, y].HasComponent<CFlammable>())
                 {
-                    _map.Plan[x, y].AddComponent(new COnFire(fire.Spread - 1, fire.Longevity));
+                    // TODO opravit délku ohně
+                    _map.Plan[x, y].AddComponent(new COnFire(fire.Spread - 1, 100));
                 }
 
                 // Spread tile -> tile
                 if (entity.HasComponent<CTile>())
                 {
-                    // TODO Opravit indexy
-                    new List<EntityHandle>() { _map.Plan[x - 1, y], _map.Plan[x + 1, y], _map.Plan[x, y - 1], _map.Plan[x, y + 1] }
+                    new List<(int X, int Y)>() { (x - 1, y), (x + 1, y), (x, y - 1), (x, y + 1) }
+                        .Where(t => t.X >= 0 && t.Y >= 0 && t.X < _map.Height && t.Y < _map.Width)
+                        .Select(t => _map.Plan[t.X, t.Y])
+                        .ToList()
                         .ForEach(e =>
                         {
                             if (e.HasComponent<CFlammable>())
                             {
-                                e.AddComponent(new COnFire(fire.Spread - 1, fire.Longevity));
+                                e.AddComponent(new COnFire(fire.Spread - 1, 100));
                             }
-                        });
+                        }); 
                 }
             }
 
@@ -70,21 +72,24 @@ namespace Crimson.Systems
             {
                 var x = (int)Math.Floor(transform.Location.X / _map.TileSize);
                 var y = (int)Math.Floor(transform.Location.Y / _map.TileSize);
-                if (_map.Plan[x, y].TryGetComponent(out COnFire fire))
+                if (_map.Plan[x, y].TryGetComponent(out COnFire fire) && !entity.HasComponent<COnFire>())
                 {
-                    entity.AddComponent(new COnFire(fire.Spread - 1, fire.Longevity));
-                    entity.AddComponent(new CGraphics(flame.Image));
+                    entity.AddComponent(new COnFire(fire.Spread - 1, 100));
                 }
             }
 
             // Douse if time ran out
+            var toRemove = new List<EntityHandle>();
             foreach (var (entity, fire) in _filter4)
             {
+                entity.AddComponent(new COnFire(fire.Spread, fire.Longevity - 1));
+
                 if (fire.Longevity <= 0)
                 {
-                    entity.RemoveComponent<COnFire>();
+                    toRemove.Add(entity);
                 }
             }
+            toRemove.ForEach(e => e.RemoveComponent<COnFire>());
         }
     }
 }

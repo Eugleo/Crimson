@@ -239,6 +239,11 @@ namespace Crimson.Components
     struct CFlammable: Component
     {
         public Image Image;
+
+        public CFlammable(Image image)
+        {
+            Image = image;
+        }
     }
 
     struct CMeleeWeapon : Component
@@ -278,6 +283,28 @@ namespace Crimson.Components
             Prediction = prediction;
             ReactionSpeed = reactionSpeed;
             Feelers = feelers;
+        }
+    }
+
+    struct CWet : Component
+    {
+        public double Potency { get; }
+        public int Spread { get; }
+
+        public CWet(int spread, double potency)
+        {
+            Potency = potency;
+            Spread = spread;
+        }
+    }
+
+    struct CSumbergable : Component
+    {
+        public Image Image;
+
+        public CSumbergable(Image image)
+        {
+            Image = image;
         }
     }
 }

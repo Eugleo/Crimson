@@ -14,6 +14,7 @@ namespace Crimson
 {
     public partial class MainForm : Form
     {
+        Map map;
         readonly World _world = new World();
         readonly EntityHandle _player;
         readonly Dictionary<CGun.ShootingPattern, CGun> _guns = new Dictionary<CGun.ShootingPattern, CGun>();
@@ -22,7 +23,7 @@ namespace Crimson
         {
             InitializeComponent();
 
-            var map = MakeMap(30, 30, 64);
+            map = MakeMap(30, 30, 64);
 
             _guns[CGun.ShootingPattern.Pistol] = new CGun(CGun.ShootingPattern.Pistol, 15, 700, 5, 300, 25, 350);
             _guns[CGun.ShootingPattern.Shotgun] = new CGun(CGun.ShootingPattern.Shotgun, 20, 800, 0, 700, 20, 200);
@@ -40,6 +41,8 @@ namespace Crimson
             _world.AddSystem(new HealthSystem(_world));
             _world.AddSystem(new BulletSystem(_world));
             _world.AddSystem(new RenderSystem(_world, mainPanel, mapPanel));
+            _world.AddSystem(new FireSystem(_world, map));
+            _world.AddSystem(new WaterSystem(_world, map));
 
             Image playerImage = ResizeImage(Properties.Resources.Player, 64, 64);
             _player = _world.CreateEntity();
@@ -52,6 +55,8 @@ namespace Crimson
             _player.AddComponent(new CCollidable(32));
             _player.AddComponent(new CFaction(Faction.PC));
             _player.AddComponent(new CHealth(150, 150));
+            _player.AddComponent(new CFlammable(ResizeImage(Properties.Resources.ohen, 64, 64)));
+            _player.AddComponent(new CSumbergable(ResizeImage(Properties.Resources.water, 64, 64)));
 
             var camera = _world.CreateEntity();
             camera.AddComponent(new CCamera(20, _player, (mapPanel.Width, mapPanel.Height)));
@@ -73,27 +78,31 @@ namespace Crimson
                     map.Plan[i, j] = tile;
                     tile.AddComponent(new CTile());
                     tile.AddComponent(new CTransform(i * tileSize, j * tileSize));
+                    tile.AddComponent(new CSumbergable(Properties.Resources.pond));
 
                     Image rawImage;
-                    switch (rnd.Next(3))
+                    switch (rnd.Next(5))
                     {
-                        case 0:
-                            rawImage = Properties.Resources.ground;
-                            switch (rnd.Next(40))
+                        case 1:
+                            rawImage = Properties.Resources.Grass;
+                            tile.AddComponent(new CFlammable(ResizeImage(Properties.Resources.ohen, tileSize, tileSize)));
+                            switch (rnd.Next(7))
                             {
                                 case 0:
-                                    MakeTree(i * tileSize, j * tileSize);
+                                case 1:
+                                case 2:
+                                    MakeTree(i * tileSize, j * tileSize, tileSize);
                                     break;
                                 default:
                                     break;
                             }
                             break;
                         default:
-                            rawImage = Properties.Resources.Grass;
+                            rawImage = Properties.Resources.desert;
                             switch (rnd.Next(40))
                             {
-                                case 0:
-                                    MakeTree(i * tileSize, j * tileSize);
+                                case 1:
+                                    MakeBoulder(i * tileSize, j * tileSize, tileSize);
                                     break;
                                 default:
                                     break;
@@ -108,24 +117,47 @@ namespace Crimson
             return map;
         }
 
-        void MakeTree(int X, int Y)
+        void MakeTree(int X, int Y, int tileSize)
         {
             Image treeImage;
+            int size;
             switch (rnd.Next(3))
             {
                 case 0:
-                    treeImage = ResizeImage(Properties.Resources.baobab, 64, 64);
+                    size = tileSize * 1;
+                    treeImage = ResizeImage(Properties.Resources.baobab, size, size);
                     break;
                 default:
-                    treeImage = ResizeImage(Properties.Resources.smrk, 64, 64);
+                    size = tileSize * 1;
+                    treeImage = ResizeImage(Properties.Resources.smrk, size, size);
                     break;
             }
+            var x = X - size / 4;
+            var y = Y - size / 2;
+
+            // TODO změnit 30 na šířku a výšku mapy
+            if (x < 0 || y < 0 || x + size > 30 * tileSize || y + size > 30 * tileSize) { return; }
+
             var tree = _world.CreateEntity();
-            tree.AddComponent(new CTransform(X, Y));
+            tree.AddComponent(new CTransform(x, y));
             tree.AddComponent(new CGraphics(treeImage));
             tree.AddComponent(new CGameObject());
-            tree.AddComponent(new CCollidable(32));
+            tree.AddComponent(new CCollidable(size / 2));
             tree.AddComponent(new CHealth(100, 100));
+            tree.AddComponent(new CFlammable(ResizeImage(Properties.Resources.ohen, size, size)));
+            tree.AddComponent(new CSumbergable(ResizeImage(Properties.Resources.water, 64, 64)));
+        }
+
+        void MakeBoulder(int X, int Y, int tileSize)
+        {
+            Image image = ResizeImage(Properties.Resources.boulder, tileSize, tileSize);
+            var boulder = _world.CreateEntity();
+            boulder.AddComponent(new CTransform(X, Y));
+            boulder.AddComponent(new CGraphics(image));
+            boulder.AddComponent(new CGameObject());
+            boulder.AddComponent(new CCollidable(tileSize / 2));
+            boulder.AddComponent(new CHealth(1000, 1000));
+            boulder.AddComponent(new CSumbergable(ResizeImage(Properties.Resources.water, 64, 64)));
         }
 
         readonly Dictionary<Keys, KeyEventArgs> ke = new Dictionary<Keys, KeyEventArgs>();
@@ -163,6 +195,14 @@ namespace Crimson
                     enemy.AddComponent(new CAvoidObstaclesBehavior(5, 2, MakeFeelers(new int[] { 0, 20, 40, 60, 80 })));
                     enemy.AddComponent(new CAttacker(_player));
                     enemy.AddComponent(new CMeleeWeapon(70, 300, 100, true));
+                    enemy.AddComponent(new CFlammable(ResizeImage(Properties.Resources.ohen, 64, 64)));
+                    enemy.AddComponent(new CSumbergable(ResizeImage(Properties.Resources.water, 64, 64)));
+                    break;
+                case Keys.I:
+                    _player.AddComponent(new COnFire(4, 100));
+                    break;
+                case Keys.O:
+                    map.Plan[10, 10].AddComponent(new CWet(5, 1));
                     break;
             }
         }
@@ -205,7 +245,7 @@ namespace Crimson
             var angle = -Math.Atan2(dir.X * up.Y - dir.Y * up.X, dir.X * up.X + dir.Y * up.Y) * (180 / Math.PI);
             //_player.AddComponent(new CGraphics(RotateImage(g.OriginalImage, (float)angle, true, false, Color.Transparent)) { OriginalImage = g.OriginalImage });
 
-    */
+            */
             if (_isShooting)
             {
                 var absoluteCenterLocation = _world.GetGroup<EntityGroup<CCamera, CMovement, CTransform>>().Components3[0].Location;
@@ -321,7 +361,7 @@ namespace Crimson
             _isShooting = true;
             var absoluteCenterLocation = _world.GetGroup<EntityGroup<CCamera, CMovement, CTransform>>().Components3[0].Location;
             var relativeOffset = new Vector(mapPanel.Width / 2, mapPanel.Height / 2);
-            //_player.AddComponent(new CShootEvent(Vector.FromPoint(e.Location) + absoluteCenterLocation - relativeOffset));
+            _player.AddComponent(new CShootEvent(Vector.FromPoint(e.Location) + absoluteCenterLocation - relativeOffset));
         }
 
         private void MainPanel_MouseUp(object sender, MouseEventArgs e)

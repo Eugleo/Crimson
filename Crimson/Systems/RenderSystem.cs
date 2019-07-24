@@ -30,12 +30,12 @@ namespace Crimson.Systems
         {
             if (_cameras.Count > 0)
             {
+                // TODO Nějak zařídit, aby se mapa refreshovala jen když je třeba (winforms bohužel neumí průhledné controls)
                 _mapControl.Refresh();
                 _mainControl.Refresh();
                 if (_cameras.Components2[0].NeedsRefresh)
                 {
                     Debug.WriteLine("Needs");
-                    
                 }
             }
         }
@@ -62,6 +62,14 @@ namespace Crimson.Systems
                         entityLocation.Y + image.Height > top && entityLocation.Y < bottom)
                     {
                         e.Graphics.DrawImage(image, (float)(entityLocation.X - left), (float)(entityLocation.Y - top));
+                        if (entity.HasComponent<COnFire>() && entity.TryGetComponent(out CFlammable flame))
+                        {
+                            e.Graphics.DrawImage(flame.Image, (float)(entityLocation.X - left), (float)(entityLocation.Y - top));
+                        }
+                        if (entity.HasComponent<CWet>() && entity.TryGetComponent(out CSumbergable water))
+                        {
+                            e.Graphics.DrawImage(water.Image, (float)(entityLocation.X - left), (float)(entityLocation.Y - top));
+                        }
                     }
                 }
             }
@@ -69,7 +77,6 @@ namespace Crimson.Systems
 
         void MapControl_Paint(object sender, PaintEventArgs e)
         {
-            Debug.WriteLine("Map");
             if (_cameras.Count > 0)
             {
                 var location = _cameras.Components1[0].Location;
@@ -83,12 +90,20 @@ namespace Crimson.Systems
                 foreach (var (entity, transform, graphics, _) in _tiles)
                 {
                     var tileLocation = transform.Location;
-                    var image = graphics.Image;
+                    var image =  graphics.Image;
 
                     if (tileLocation.X + image.Width > left && tileLocation.X < right &&
                         tileLocation.Y + image.Height > top && tileLocation.Y < bottom)
                     {
                         e.Graphics.DrawImage(image, (float)(tileLocation.X - left), (float)(tileLocation.Y - top));
+                        if (entity.HasComponent<COnFire>() && entity.TryGetComponent(out CFlammable flame))
+                        {
+                            e.Graphics.DrawImage(flame.Image, (float)(tileLocation.X - left), (float)(tileLocation.Y - top));
+                        }
+                        if (entity.HasComponent<CWet>() && entity.TryGetComponent(out CSumbergable water))
+                        {
+                            e.Graphics.DrawImage(water.Image, (float)(tileLocation.X - left), (float)(tileLocation.Y - top));
+                        }
                     }
                 }
             }
