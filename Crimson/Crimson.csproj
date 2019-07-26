@@ -167,5 +167,20 @@
   <ItemGroup>
     <None Include="Resources\pond.png" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\cloud.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\cloud.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\cloud-removebg-preview.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\enemy.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\kisspng-terraria-boss-lunatic-game-pixel-art-terraria-cultist-archer-www-imgarcade-com-online-5b648167ea52e1.2967986215333133839598.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

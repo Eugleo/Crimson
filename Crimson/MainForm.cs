@@ -43,6 +43,7 @@ namespace Crimson
             _world.AddSystem(new RenderSystem(_world, mainPanel, mapPanel));
             _world.AddSystem(new FireSystem(_world, map));
             _world.AddSystem(new WaterSystem(_world, map));
+            _world.AddSystem(new SteamSystem(_world));
 
             Image playerImage = ResizeImage(Properties.Resources.Player, 64, 64);
             _player = _world.CreateEntity();
@@ -184,7 +185,7 @@ namespace Crimson
                     break;
                 case Keys.U:
                     var enemy = _world.CreateEntity();
-                    Image image = ResizeImage(Properties.Resources.Player, 64, 64);
+                    Image image = ResizeImage(Properties.Resources.enemy, 64, 64);
                     enemy.AddComponent(new CTransform(rnd.Next(5, 64 * 30 - 5 - 64), rnd.Next(5, 64 * 30 - 5 - 64)));
                     enemy.AddComponent(new CGraphics(image));
                     enemy.AddComponent(new CGameObject());

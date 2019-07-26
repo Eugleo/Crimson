@@ -307,4 +307,6 @@ namespace Crimson.Components
             Image = image;
         }
     }
+
+    struct CAbove : Component { }
 }

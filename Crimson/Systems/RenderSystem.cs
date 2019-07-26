@@ -10,6 +10,7 @@ namespace Crimson.Systems
         readonly Control _mainControl;
         readonly Control _mapControl;
         readonly EntityGroup<CTransform, CGraphics, CGameObject> _renderable;
+        readonly EntityGroup<CTransform, CGraphics, CAbove> _flying;
         readonly EntityGroup<CTransform, CCamera> _cameras;
         readonly EntityGroup<CTransform, CGraphics, CTile> _tiles;
 
@@ -22,6 +23,7 @@ namespace Crimson.Systems
             _mapControl.Paint += MapControl_Paint;
 
             _renderable = _world.GetGroup<EntityGroup<CTransform, CGraphics, CGameObject>>();
+            _flying = _world.GetGroup<EntityGroup<CTransform, CGraphics, CAbove>>();
             _cameras = _world.GetGroup<EntityGroup<CTransform, CCamera>>();
             _tiles = _world.GetGroup<EntityGroup<CTransform, CGraphics, CTile>>();
         }
@@ -33,77 +35,48 @@ namespace Crimson.Systems
                 // TODO Nějak zařídit, aby se mapa refreshovala jen když je třeba (winforms bohužel neumí průhledné controls)
                 _mapControl.Refresh();
                 _mainControl.Refresh();
-                if (_cameras.Components2[0].NeedsRefresh)
-                {
-                    Debug.WriteLine("Needs");
-                }
             }
         }
 
-        // TODO: Zredukovat duplikovaný kod v následujících dvou funkcích
         void MainControl_Paint(object sender, PaintEventArgs e)
         {
-            if (_cameras.Count > 0)
-            {
-                var location = _cameras.Components1[0].Location;
-                var width = _mapControl.Width;
-                var height = _mapControl.Height;
-                var left = location.X - width / 2;
-                var right = location.X + width / 2;
-                var top = location.Y - height / 2;
-                var bottom = location.Y + height / 2;
-
-                foreach (var (entity, transform, graphics, _) in _renderable)
-                {
-                    var entityLocation = transform.Location;
-                    var image = graphics.Image;
-
-                    if (entityLocation.X + image.Width > left && entityLocation.X < right &&
-                        entityLocation.Y + image.Height > top && entityLocation.Y < bottom)
-                    {
-                        e.Graphics.DrawImage(image, (float)(entityLocation.X - left), (float)(entityLocation.Y - top));
-                        if (entity.HasComponent<COnFire>() && entity.TryGetComponent(out CFlammable flame))
-                        {
-                            e.Graphics.DrawImage(flame.Image, (float)(entityLocation.X - left), (float)(entityLocation.Y - top));
-                        }
-                        if (entity.HasComponent<CWet>() && entity.TryGetComponent(out CSumbergable water))
-                        {
-                            e.Graphics.DrawImage(water.Image, (float)(entityLocation.X - left), (float)(entityLocation.Y - top));
-                        }
-                    }
-                }
-            }
+            RenderAll(_renderable, e);
+            RenderAll(_flying, e);
         }
 
         void MapControl_Paint(object sender, PaintEventArgs e)
         {
-            if (_cameras.Count > 0)
+            RenderAll(_tiles, e);
+        }
+
+        void RenderAll<T>(EntityGroup<CTransform, CGraphics, T> group, PaintEventArgs e) where T : Component
+        {
+            if (_cameras.Count == 0) { return; }
+
+            var location = _cameras.Components1[0].Location;
+            var width = _mapControl.Width;
+            var height = _mapControl.Height;
+            var left = location.X - width / 2;
+            var right = location.X + width / 2;
+            var top = location.Y - height / 2;
+            var bottom = location.Y + height / 2;
+
+            foreach (var (entity, transform, graphics, _) in group)
             {
-                var location = _cameras.Components1[0].Location;
-                var width = _mapControl.Width;
-                var height = _mapControl.Height;
-                var left = location.X - width / 2;
-                var right = location.X + width / 2;
-                var top = location.Y - height / 2;
-                var bottom = location.Y + height / 2;
+                var tileLocation = transform.Location;
+                var image = graphics.Image;
 
-                foreach (var (entity, transform, graphics, _) in _tiles)
+                if (tileLocation.X + image.Width > left && tileLocation.X < right &&
+                    tileLocation.Y + image.Height > top && tileLocation.Y < bottom)
                 {
-                    var tileLocation = transform.Location;
-                    var image =  graphics.Image;
-
-                    if (tileLocation.X + image.Width > left && tileLocation.X < right &&
-                        tileLocation.Y + image.Height > top && tileLocation.Y < bottom)
+                    e.Graphics.DrawImage(image, (float)(tileLocation.X - left), (float)(tileLocation.Y - top));
+                    if (entity.HasComponent<COnFire>() && entity.TryGetComponent(out CFlammable flame))
                     {
-                        e.Graphics.DrawImage(image, (float)(tileLocation.X - left), (float)(tileLocation.Y - top));
-                        if (entity.HasComponent<COnFire>() && entity.TryGetComponent(out CFlammable flame))
-                        {
-                            e.Graphics.DrawImage(flame.Image, (float)(tileLocation.X - left), (float)(tileLocation.Y - top));
-                        }
-                        if (entity.HasComponent<CWet>() && entity.TryGetComponent(out CSumbergable water))
-                        {
-                            e.Graphics.DrawImage(water.Image, (float)(tileLocation.X - left), (float)(tileLocation.Y - top));
-                        }
+                        e.Graphics.DrawImage(flame.Image, (float)(tileLocation.X - left), (float)(tileLocation.Y - top));
+                    }
+                    if (entity.HasComponent<CWet>() && entity.TryGetComponent(out CSumbergable water))
+                    {
+                        e.Graphics.DrawImage(water.Image, (float)(tileLocation.X - left), (float)(tileLocation.Y - top));
                     }
                 }
             }

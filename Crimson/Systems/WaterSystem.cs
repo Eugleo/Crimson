@@ -13,7 +13,6 @@ namespace Crimson.Systems
     {
         readonly EntityGroup<CWet, CTransform, CTile> _wetTiles;
         readonly EntityGroup<CTransform, CSumbergable, CGameObject> _submergeableObjects;
-        readonly EntityGroup<COnFire, CWet> _wetAndOnFire;
         readonly EntityGroup<CWet> _wet;
         readonly Map _map;
 
@@ -22,7 +21,6 @@ namespace Crimson.Systems
             _world = world;
             _wetTiles = _world.GetGroup<EntityGroup<CWet, CTransform, CTile>>();
             _submergeableObjects = _world.GetGroup<EntityGroup<CTransform, CSumbergable, CGameObject>>();
-            _wetAndOnFire = _world.GetGroup<EntityGroup<COnFire, CWet>>();
             _wet = _world.GetGroup<EntityGroup<CWet>>();
             _map = map;
         }
