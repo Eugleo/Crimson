@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Crimson.Entities;
 using Crimson.Components;
 using System.Diagnostics;
+using System.Reflection;
 
 namespace Crimson.Systems
 {
@@ -28,6 +29,13 @@ namespace Crimson.Systems
                 {
                     entity.AddComponent(new CHealth(health.MaxHealth, health.CurrentHealth - bullet.Damage));
                     toRemove.Add(collision.Partner);
+                }
+
+                if (collision.Partner.TryGetComponent(out COnCollisionAdder add))
+                {
+                    MethodInfo method = typeof(EntityHandle).GetMethod("AddComponent");
+                    method = method.MakeGenericMethod(add.Component.GetType());
+                    _ = method.Invoke(entity, new object[1] { add.Component });
                 }
             }
             toRemove.ForEach(e => e.Delete());

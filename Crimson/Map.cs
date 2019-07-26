@@ -4,7 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Crimson.Components;
+using Crimson.Systems;
 using Crimson.Entities;
+using System.Drawing.Imaging;
+using System.Drawing;
 
 namespace Crimson.Systems
 {

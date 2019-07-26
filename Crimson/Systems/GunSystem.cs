@@ -42,6 +42,9 @@ namespace Crimson.Systems
                 switch (gun.Type)
                 {
                     case CGun.ShootingPattern.Pistol:
+                        var bullet = ShootBullet(startingLocation, direction, gun, faction);
+                        bullet.AddComponent(new COnCollisionAdder(new COnFire(3, 100)));
+                        break;
                     case CGun.ShootingPattern.SMG:
                         ShootBullet(startingLocation, direction, gun, faction);
                         break;
@@ -59,7 +62,7 @@ namespace Crimson.Systems
             }
         }
 
-        void ShootBullet(Vector startPosition, Vector direction, CGun gun, CFaction faction)
+        EntityHandle ShootBullet(Vector startPosition, Vector direction, CGun gun, CFaction faction)
         {
             var bullet = _world.CreateEntity();
             var inaccuracy = new Vector(Inaccuracy(gun.Inaccuracy), Inaccuracy(gun.Inaccuracy));
@@ -70,6 +73,7 @@ namespace Crimson.Systems
             bullet.AddComponent(new CGameObject());
             bullet.AddComponent(new CCollidable(5));
             bullet.AddComponent(faction);
+            return bullet;
         }
 
         readonly Random rnd = new Random();

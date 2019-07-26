@@ -114,6 +114,7 @@ namespace Crimson.Systems
                         (loc.X, loc.Y + 2 * size),
                         (loc.X + 2 * size, loc.Y + 2 * size)
                     }.Select(t => FindTile(t))
+                     .Where(t => t.X >= 0 && t.Y >= 0 && t.X < _map.Height && t.Y < _map.Width)
                      .ToList()
                      .ForEach(t =>
                      {

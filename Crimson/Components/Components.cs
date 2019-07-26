@@ -51,6 +51,16 @@ namespace Crimson.Components
         }
     }
 
+    struct COnCollisionAdder : Component
+    {
+        public Component Component;
+
+        public COnCollisionAdder(Component component)
+        {
+            Component = component;
+        }
+    }
+
     struct CGraphics : Component
     {
         public Image Image { get; }
