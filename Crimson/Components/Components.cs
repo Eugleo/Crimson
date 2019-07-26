@@ -227,10 +227,10 @@ namespace Crimson.Components
 
     struct COnFire : Component
     {
-        public int Spread;
+        public double Spread;
         public double Longevity;
 
-        public COnFire(int spread, double longevity)
+        public COnFire(double spread, double longevity)
         {
             Spread = spread;
             Longevity = longevity;
@@ -289,9 +289,9 @@ namespace Crimson.Components
     struct CWet : Component
     {
         public double Potency { get; }
-        public int Spread { get; }
+        public double Spread { get; }
 
-        public CWet(int spread, double potency)
+        public CWet(double spread, double potency)
         {
             Potency = potency;
             Spread = spread;

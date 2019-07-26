@@ -136,7 +136,7 @@ namespace Crimson
             var y = Y - size / 2;
 
             // TODO změnit 30 na šířku a výšku mapy
-            if (x < 0 || y < 0 || x + size > 30 * tileSize || y + size > 30 * tileSize) { return; }
+            if (x < 0 || y < 0 || x + size >= 30 * tileSize || y + size >= 30 * tileSize) { return; }
 
             var tree = _world.CreateEntity();
             tree.AddComponent(new CTransform(x, y));
@@ -150,6 +150,7 @@ namespace Crimson
 
         void MakeBoulder(int X, int Y, int tileSize)
         {
+            if (X < 0 || Y < 0 || X + tileSize >= 30 * tileSize || Y + tileSize >= 30 * tileSize) { return; }
             Image image = ResizeImage(Properties.Resources.boulder, tileSize, tileSize);
             var boulder = _world.CreateEntity();
             boulder.AddComponent(new CTransform(X, Y));
@@ -202,7 +203,7 @@ namespace Crimson
                     _player.AddComponent(new COnFire(4, 100));
                     break;
                 case Keys.O:
-                    map.Plan[10, 10].AddComponent(new CWet(5, 1));
+                    map.Plan[10, 10].AddComponent(new CWet(3, 5));
                     break;
             }
         }
