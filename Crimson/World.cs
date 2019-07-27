@@ -46,12 +46,13 @@ namespace Crimson
             return ComponentManager<T>.Instance.LookupComponentForEntity(e);
         }
 
-        public void SetComponentOfEntity<T>(Entity e, T c) where T : Component
+        public void AddComponentToEntity<T>(Entity e, T c) where T : Component
         {
-            ComponentManager<T>.Instance.SetComponentOfEntity(e, c);
+            ComponentManager<T>.Instance.AddComponentToEntity(e, c);
             var mask = _entityManager.GetComponentMask(e);
+            var oldMask = mask.Clone();
             mask.IncludeComponent<T>();
-            UpdateFiltersForEntity(e);
+            UpdateGroupsForEntity(e, mask, oldMask);
         }
 
         public bool EntityHasComponent<T>(Entity e) where T : Component
@@ -63,28 +64,29 @@ namespace Crimson
         {
             ComponentManager<Component>.Instance.RemoveComponentFromEntity(e);
             var mask = _entityManager.GetComponentMask(e);
+            var oldMask = mask.Clone();
             mask.RemoveComponent<T>();
-            UpdateFiltersForEntity(e);
+            UpdateGroupsForEntity(e, mask, oldMask);
         }
 
-        public void UpdateFiltersForEntity(Entity entity)
+        void UpdateGroupsForEntity(Entity entity, ComponentMask newMask, ComponentMask oldMask)
         {
-            var mask = _entityManager.GetComponentMask(entity);
-
             foreach (var group in _entityGroups)
             {
-                if (group.Entities.Select(e => e.Entity).Contains(entity))
+                var before = group.Mask.CompatibleWith(oldMask);
+                var after = group.Mask.CompatibleWith(newMask);
+
+                if (!before && !after) { continue; }
+
+                if (before && after)
                 {
-                    if (!group.Mask.CompatibleWith(mask))
-                    {
-                        group.Remove(entity);
-                    }
-                    else
-                    {
-                        group.UpdateComponentsFor(entity);
-                    }
+                    group.UpdateComponentsFor(entity);
                 }
-                else if (group.Mask.CompatibleWith(mask))
+                else if (before)
+                {
+                    group.Remove(entity);
+                }
+                else if (after)
                 {
                     group.Add(entity);
                 }
@@ -105,27 +107,38 @@ namespace Crimson
         public Group GetGroup<Group>() where Group : EntityGroup
         {
             var groupType = typeof(Group);
-            foreach (var i in Enumerable.Range(0, _entityGroups.Count))
+            var index = _entityGroups.FindIndex(g => g.GetType() == groupType);
+            if (index != -1)
             {
-                if (_entityGroups[i].GetType() == groupType)
-                {
-                    return _entityGroups[i] as Group;
-                }
+                return _entityGroups[index] as Group;
             }
-            var group = Activator.CreateInstance(groupType, true) as EntityGroup;
-            group._world = this;
-            _entityGroups.Add(group);
-            return group as Group;
+            else
+            {
+                var group = Activator.CreateInstance(groupType, true) as EntityGroup;
+                group._world = this;
+                _entityGroups.Add(group);
+
+                foreach (var entity in _entityManager.Entities)
+                {
+                    var mask = _entityManager.GetComponentMask(entity);
+                    if (group.Mask.CompatibleWith(mask)) { group.Add(entity); }
+                }
+
+                return group as Group;
+            }
         } 
 
         public void AddSystem(GameSystem system) {
             _systems.Add(system);
-            _entityManager.Entities.ForEach(e => UpdateFiltersForEntity(e));
         }
 
-        public void Tick()
+
+        public uint Tick()
         {
             _systems.ForEach(s => s.Update());
+            return 1;
         }
+
+
     }
 }

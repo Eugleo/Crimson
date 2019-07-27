@@ -25,7 +25,7 @@ namespace Crimson.Components
             ComponentManagerDB.ComponentManagers[ID] = typeof(T);
         }
 
-        public void SetComponentOfEntity(Entity e, T c)
+        public void AddComponentToEntity(Entity e, T c)
         {
             _components[e] = c;
         }

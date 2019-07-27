@@ -9,14 +9,12 @@ namespace Crimson.Entities
 {
     struct Entity : IEquatable<Entity>
     {
-        int _id;
-
         public Entity(int id)
         {
-            _id = id;
+            ID = id;
         }
 
-        public int ID => _id;
+        public int ID { get; }
 
         public bool Equals(Entity other)
         {
@@ -47,7 +45,7 @@ namespace Crimson.Entities
 
         public void AddComponent<T>(T c) where T : Component
         {
-            _world.SetComponentOfEntity(Entity, c);
+            _world.AddComponentToEntity(Entity, c);
         }
 
         public void ScheduleForDeletion(double timeLeft)

@@ -32,6 +32,7 @@ namespace Crimson
         {
             this.components = new System.ComponentModel.Container();
             this.gameTimer = new System.Windows.Forms.Timer(this.components);
+            this.fpsTimer = new System.Windows.Forms.Timer(this.components);
             this.mapPanel = new Crimson.DoubleBufferedPanel();
             this.mainPanel = new Crimson.DoubleBufferedPanel();
             this.mapPanel.SuspendLayout();
@@ -39,8 +40,14 @@ namespace Crimson
             // 
             // gameTimer
             // 
-            this.gameTimer.Interval = 30;
+            this.gameTimer.Interval = 10;
             this.gameTimer.Tick += new System.EventHandler(this.GameTimer_Tick);
+            // 
+            // fpsTimer
+            // 
+            this.fpsTimer.Enabled = true;
+            this.fpsTimer.Interval = 1000;
+            this.fpsTimer.Tick += new System.EventHandler(this.FpsTimer_Tick);
             // 
             // mapPanel
             // 
@@ -89,6 +96,7 @@ namespace Crimson
         private System.Windows.Forms.Timer gameTimer;
         private DoubleBufferedPanel mainPanel;
         private DoubleBufferedPanel mapPanel;
+        private Timer fpsTimer;
     }
 
     class DoubleBufferedPanel : Panel

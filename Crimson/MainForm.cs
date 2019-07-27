@@ -14,7 +14,6 @@ namespace Crimson
 {
     public partial class MainForm : Form
     {
-        Form overlayForm;
         Map map;
         readonly World _world = new World();
         readonly EntityHandle _player;
@@ -23,9 +22,6 @@ namespace Crimson
         public MainForm()
         {
             InitializeComponent();
-
-            overlayForm = new Form();
-
 
             _guns[CGun.ShootingPattern.Pistol] = new CGun(CGun.ShootingPattern.Pistol, 15, 700, 5, 300, 25, 350);
             _guns[CGun.ShootingPattern.Shotgun] = new CGun(CGun.ShootingPattern.Shotgun, 20, 800, 0, 700, 20, 200);
@@ -81,7 +77,7 @@ namespace Crimson
             if (ke.Count > 0)
             {
                 _world.ForEachEntityWithComponents<CKeyboardNavigation>(en => 
-                    _world.SetComponentOfEntity(en, new CInputEvent(ke.Values.ToList()))
+                    _world.AddComponentToEntity(en, new CInputEvent(ke.Values.ToList()))
                 );
             }
             switch (e.KeyCode)
@@ -140,10 +136,11 @@ namespace Crimson
             return feeler;
         }
 
+        uint ticks;
         private void GameTimer_Tick(object sender, EventArgs e)
         {
             // TODO refaktorovat
-            _world.Tick();
+            ticks += _world.Tick();
 
             /*
             var g = _world.GetComponentForEntity<CGraphics>(_player.Entity);
@@ -167,7 +164,7 @@ namespace Crimson
         {
             // TODO upravit, ted předpokládám moc věcí
             ke.Remove(e.KeyCode);
-            _world.ForEachEntityWithComponents<CKeyboardNavigation>(en => _world.SetComponentOfEntity(en, new CInputEvent(ke.Values.ToList())));
+            _world.ForEachEntityWithComponents<CKeyboardNavigation>(en => _world.AddComponentToEntity(en, new CInputEvent(ke.Values.ToList())));
             if (ke.Count == 0)
             {
                 _world.ForEachEntityWithComponents<CKeyboardNavigation>(entity => {
@@ -175,7 +172,7 @@ namespace Crimson
                     if (_world.EntityHasComponent<CMovement>(entity))
                     {
                         var movement = _world.GetComponentForEntity<CMovement>(entity);
-                        _world.SetComponentOfEntity(entity, new CMovement(movement.MaxSpeed, new Vector(0, 0)));
+                        _world.AddComponentToEntity(entity, new CMovement(movement.MaxSpeed, new Vector(0, 0)));
                     }
                 });
             }
@@ -281,6 +278,12 @@ namespace Crimson
         private void MainPanel_MouseMove(object sender, MouseEventArgs e)
         {
             _mouseLocation = Vector.FromPoint(e.Location);
+        }
+
+        private void FpsTimer_Tick(object sender, EventArgs e)
+        {
+            this.Text = String.Format("FPS: {0}", ticks);
+            ticks = 0;
         }
     }
 }
