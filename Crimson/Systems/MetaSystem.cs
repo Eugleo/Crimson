@@ -62,6 +62,7 @@ namespace Crimson.Systems
                     }
                 }
             }
+            toRemoveRemover.ForEach(e => e.RemoveComponent<CTimedRemover>());
 
             var toDelete = new List<EntityHandle>();
             foreach (var (entity, _) in _toDelete)

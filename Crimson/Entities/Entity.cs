@@ -32,7 +32,7 @@ namespace Crimson.Entities
         }
     }
 
-    struct EntityHandle
+    struct EntityHandle : IEquatable<EntityHandle>
     {
         public Entity Entity { get; }
         readonly World _world;
@@ -63,7 +63,7 @@ namespace Crimson.Entities
             if (TryGetComponent(out CTimedRemover remover))
             {
                 var index = remover.Components.FindIndex(f => f.Component == component);
-                if (index != -1)
+                if (index != -1 && remover.Components[index].TimeLeft > timeLeft)
                 {
                     remover.Components[index] = (component, timeLeft);
                 }
@@ -116,6 +116,21 @@ namespace Crimson.Entities
                 component = default;
                 return false;
             }
+        }
+
+        public bool Equals(EntityHandle other)
+        {
+            return Entity == other.Entity;
+        }
+
+        public static bool operator ==(EntityHandle a, EntityHandle b)
+        {
+            return a.Equals(b);
+        }
+
+        public static bool operator !=(EntityHandle a, EntityHandle b)
+        {
+            return !(a == b);
         }
     }
 }
