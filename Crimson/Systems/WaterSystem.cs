@@ -12,14 +12,14 @@ namespace Crimson.Systems
     class WaterSystem : GameSystem
     {
         readonly EntityGroup<CWet, CTransform, CTile> _wetTiles;
-        readonly EntityGroup<CTransform, CSumbergable, CGameObject> _submergeableObjects;
+        readonly EntityGroup<CTransform, CCollidable, CSumbergable, CGameObject> _submergeableObjects;
         readonly Map _map;
 
         public WaterSystem(World world, Map map)
         {
             _world = world;
             _wetTiles = _world.GetGroup<EntityGroup<CWet, CTransform, CTile>>();
-            _submergeableObjects = _world.GetGroup<EntityGroup<CTransform, CSumbergable, CGameObject>>();
+            _submergeableObjects = _world.GetGroup<EntityGroup<CTransform, CCollidable, CSumbergable, CGameObject>>();
             _map = map;
         }
 
@@ -67,10 +67,8 @@ namespace Crimson.Systems
                 return ((int)Math.Floor(coords.X / _map.TileSize), (int)Math.Floor(coords.Y / _map.TileSize));
             }
 
-            foreach (var (entity, transform, _, _) in _submergeableObjects)
+            foreach (var (entity, transform, bounds, _, _) in _submergeableObjects)
             {
-                if (!entity.TryGetComponent(out CCollidable bounds)) { continue; }
-
                 var size = bounds.Size;
                 var loc = transform.Location;
 

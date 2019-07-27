@@ -262,11 +262,11 @@ namespace Crimson.Components
         }
     }
 
-    struct COnFire : Component
+    struct CBurning : Component
     {
         public double Spread { get; }
 
-        public COnFire(double spread)
+        public CBurning(double spread)
         {
             Spread = spread;
         }

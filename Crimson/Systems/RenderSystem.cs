@@ -70,7 +70,7 @@ namespace Crimson.Systems
                     tileLocation.Y + image.Height > top && tileLocation.Y < bottom)
                 {
                     e.Graphics.DrawImage(image, (float)(tileLocation.X - left), (float)(tileLocation.Y - top));
-                    if (entity.HasComponent<COnFire>() && entity.TryGetComponent(out CFlammable flame))
+                    if (entity.HasComponent<CBurning>() && entity.TryGetComponent(out CFlammable flame))
                     {
                         e.Graphics.DrawImage(flame.Image, (float)(tileLocation.X - left), (float)(tileLocation.Y - top));
                     }

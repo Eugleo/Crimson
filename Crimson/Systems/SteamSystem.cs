@@ -14,14 +14,14 @@ namespace Crimson.Systems
     class SteamSystem : GameSystem
     {
         readonly Random rnd = new Random();
-        readonly EntityGroup<COnFire, CTransform> _steamingHot;
-        readonly EntityGroup<CWet, COnFire, CTransform> _wetHot_InYourArea;
+        readonly EntityGroup<CBurning, CTransform> _steamingHot;
+        readonly EntityGroup<CWet, CBurning, CTransform> _wetHot_InYourArea;
 
         public SteamSystem(World world)
         {
             _world = world;
-            _steamingHot = _world.GetGroup<EntityGroup<COnFire, CTransform>>();
-            _wetHot_InYourArea = _world.GetGroup<EntityGroup<CWet, COnFire, CTransform>>();
+            _steamingHot = _world.GetGroup<EntityGroup<CBurning, CTransform>>();
+            _wetHot_InYourArea = _world.GetGroup<EntityGroup<CWet, CBurning, CTransform>>();
 
             var cloud = Properties.Resources.cloud;
             images03 = new List<(Image Img, int Size)>() { (cloud, 55), (cloud, 58), (cloud, 60), (cloud, 64), (cloud, 69) }
@@ -43,7 +43,7 @@ namespace Crimson.Systems
 
             foreach (var (entity, water, fire, transform) in _wetHot_InYourArea)
             {
-                entity.ScheduleComponentForRemoval(typeof(COnFire));
+                entity.ScheduleComponentForRemoval(typeof(CBurning));
                 entity.ScheduleComponentForRemoval(typeof(CWet));
                 var count = 0;
                 switch (rnd.Next(6))
