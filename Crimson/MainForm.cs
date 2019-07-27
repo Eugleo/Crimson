@@ -14,6 +14,7 @@ namespace Crimson
 {
     public partial class MainForm : Form
     {
+        Form overlayForm;
         Map map;
         readonly World _world = new World();
         readonly EntityHandle _player;
@@ -22,6 +23,9 @@ namespace Crimson
         public MainForm()
         {
             InitializeComponent();
+
+            overlayForm = new Form();
+
 
             _guns[CGun.ShootingPattern.Pistol] = new CGun(CGun.ShootingPattern.Pistol, 15, 700, 5, 300, 25, 350);
             _guns[CGun.ShootingPattern.Shotgun] = new CGun(CGun.ShootingPattern.Shotgun, 20, 800, 0, 700, 20, 200);
