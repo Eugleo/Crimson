@@ -21,10 +21,10 @@ namespace Crimson.Systems
 
         public override void Update()
         {
-            var toRemove = new List<EntityHandle>();
             foreach (var (entity, water, fire, transform) in _wetHot_InYourArea)
             {
-                toRemove.Add(entity);
+                entity.ScheduleComponentForRemoval(typeof(COnFire));
+                entity.ScheduleComponentForRemoval(typeof(CWet));
                 var count = 0;
                 switch (rnd.Next(6))
                 {
@@ -43,10 +43,6 @@ namespace Crimson.Systems
                 }
                 foreach (var _ in Enumerable.Range(0, count)) { CreateCloud(transform.Location); }
             }
-            toRemove.ForEach(e => {
-                e.RemoveComponent<COnFire>();
-                e.RemoveComponent<CWet>();
-            });
         }
 
         Random rnd = new Random();
@@ -57,6 +53,7 @@ namespace Crimson.Systems
             var size = rnd.Next(55, 75);
             cloud.AddComponent(new CGraphics(MainForm.ResizeImage(Properties.Resources.cloud, size, size)));
             cloud.AddComponent(new CTransform(location + new Vector(Sign() * rnd.Next(10), Sign() * rnd.Next(10))));
+            cloud.ScheduleForDeletion(5);
         }
 
         int Sign()

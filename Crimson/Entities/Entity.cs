@@ -50,6 +50,41 @@ namespace Crimson.Entities
             _world.SetComponentOfEntity(Entity, c);
         }
 
+        public void ScheduleForDeletion(double timeLeft)
+        {
+            AddComponent(new CTimedAdder(new CCLeanup(), timeLeft));
+        }
+
+        public void ScheduleForDeletion()
+        {
+            ScheduleForDeletion(0);
+        }
+
+        public void ScheduleComponentForRemoval(Type component, double timeLeft)
+        {
+            if (TryGetComponent(out CTimedRemover remover))
+            {
+                var index = remover.Components.FindIndex(f => f.Component == component);
+                if (index != -1)
+                {
+                    remover.Components[index] = (component, timeLeft);
+                }
+                else
+                {
+                    remover.Components.Add((component, timeLeft));
+                }
+            }
+            else
+            {
+                AddComponent(new CTimedRemover(component, timeLeft));
+            }
+        }
+
+        public void ScheduleComponentForRemoval(Type component)
+        {
+            ScheduleComponentForRemoval(component, 0);
+        }
+
         public void RemoveComponent<T>() where T : Component
         {
             _world.RemoveComponentFromEntity<T>(Entity);

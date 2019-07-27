@@ -44,6 +44,7 @@ namespace Crimson
             _world.AddSystem(new FireSystem(_world, map));
             _world.AddSystem(new WaterSystem(_world, map));
             _world.AddSystem(new SteamSystem(_world));
+            _world.AddSystem(new MetaSystem(_world));
 
             Image playerImage = ResizeImage(Properties.Resources.Player, 64, 64);
             _player = _world.CreateEntity();

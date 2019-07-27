@@ -22,24 +22,25 @@ namespace Crimson.Systems
 
         public override void Update()
         {
-            var toRemove = new List<EntityHandle>();
             foreach (var (entity, transform, collision) in _filter)
             {
                 if (collision.Partner.TryGetComponent(out CBullet bullet) && entity.TryGetComponent(out CHealth health))
                 {
                     entity.AddComponent(new CHealth(health.MaxHealth, health.CurrentHealth - bullet.Damage));
-                    toRemove.Add(collision.Partner);
+                    collision.Partner.ScheduleForDeletion();
                 }
 
                 if (collision.Partner.TryGetComponent(out COnCollisionAdder add))
                 {
-                    MethodInfo method = typeof(EntityHandle).GetMethod("AddComponent");
-                    method = method.MakeGenericMethod(add.Component.GetType());
-                    _ = method.Invoke(entity, new object[1] { add.Component });
+                    foreach (var component in add.Components)
+                    {
+                        MethodInfo method = typeof(EntityHandle).GetMethod("AddComponent");
+                        method = method.MakeGenericMethod(component.GetType());
+                        _ = method.Invoke(entity, new object[1] { component });
+                    }
                 }
+                entity.ScheduleComponentForRemoval(typeof(CCollisionEvent));
             }
-            toRemove.ForEach(e => e.Delete());
-            _world.ForEachEntityWithComponents<CCollisionEvent>(e => _world.RemoveComponentFromEntity<CCollisionEvent>(e));
         }
     }
 }

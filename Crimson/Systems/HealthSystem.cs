@@ -22,12 +22,11 @@ namespace Crimson.Systems
         }
         public override void Update()
         {
-            List<EntityHandle> toRemove = new List<EntityHandle>();
             foreach (var (entity, health) in _filter)
             {
                 if (health.CurrentHealth <= 0)
                 {
-                    toRemove.Add(entity);
+                    entity.ScheduleForDeletion();
                 }
 
                 if (entity.TryGetComponent(out CGraphics graphics))
@@ -40,7 +39,6 @@ namespace Crimson.Systems
                     entity.AddComponent(newGraphics);
                 }
             }
-            toRemove.ForEach(e => e.Delete());
         }
 
         public static Bitmap AdjustContrast(Bitmap Image, float Value)

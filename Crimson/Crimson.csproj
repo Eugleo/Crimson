@@ -56,6 +56,7 @@
     <Compile Include="Systems\AvoidObstaclesSystem.cs" />
     <Compile Include="Systems\BulletSystem.cs" />
     <Compile Include="Systems\CameraSystem.cs" />
+    <Compile Include="Systems\MetaSystem.cs" />
     <Compile Include="Systems\CollisionSystem.cs" />
     <Compile Include="Systems\FireSystem.cs" />
     <Compile Include="Systems\GunSystem.cs" />
@@ -80,6 +81,7 @@
     <Compile Include="Systems\GameSystem.cs" />
     <Compile Include="Systems\SteamSystem.cs" />
     <Compile Include="Systems\WaterSystem.cs" />
+    <Compile Include="Ultilities.cs" />
     <Compile Include="Vector.cs" />
     <Compile Include="World.cs" />
     <EmbeddedResource Include="MainForm.resx">

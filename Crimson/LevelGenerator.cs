@@ -54,6 +54,7 @@ namespace Crimson
                     tile.AddComponent(new CTransform(i * ts, j * ts));
                     tile.AddComponent(new CSumbergable(Properties.Resources.pond));
                     tile.AddComponent(new CGraphics(MainForm.ResizeImage(Properties.Resources.desert, ts, ts)));
+                    //tile.AddComponent(new CFlammable(MainForm.ResizeImage(Properties.Resources.ohen, Map.TileSize, Map.TileSize)));
                 }
             }
         }
@@ -96,13 +97,13 @@ namespace Crimson
             var i = rnd.Next(Map.Width);
             var j = rnd.Next(Map.Height);
             var size = rnd.Next(4, 7);
-            Map.Plan[i, j].AddComponent(new CWet(size, 100));
+            Map.Plan[i, j].AddComponent(new CWet(size));
 
             foreach (var _ in Enumerable.Range(0, sources - 1))
             {
                 var miniSize = rnd.Next(2, size - 1);
                 var (x, y) = RandomPointNear((i, j), rnd.Next(2, size - 2));
-                Map.Plan[x, y].AddComponent(new CWet(miniSize, 100));
+                Map.Plan[x, y].AddComponent(new CWet(miniSize));
             }
         }
 
@@ -195,8 +196,8 @@ namespace Crimson
                     treeImage = MainForm.ResizeImage(Properties.Resources.smrk, size, size);
                     break;
             }
-            var x = X * ts - size / 4;
-            var y = Y * ts - size / 2;
+            var x = X * ts; //- size / 4;
+            var y = Y * ts; //- size / 2;
 
             if (x < 0 || y < 0 || x + size >= Map.Width * ts || y + size >= Map.Height * ts) { return; }
 

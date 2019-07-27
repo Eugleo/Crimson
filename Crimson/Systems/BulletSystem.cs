@@ -21,15 +21,13 @@ namespace Crimson.Systems
 
         public override void Update()
         {
-            var toRemove = new List<EntityHandle>();
             foreach (var (entity, bullet) in _bullets)
             {
                 if (bullet.RangeLeft <= 0)
                 {
-                    toRemove.Add(entity);
+                    entity.ScheduleForDeletion();
                 }
             }
-            toRemove.ForEach(e => e.Delete());
         }
     }
 }

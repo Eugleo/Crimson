@@ -38,15 +38,13 @@ namespace Crimson.Systems
             // Damage
             foreach (var (entity, fire, health) in _filter1)
             {
-                var newHealth = new CHealth(health.MaxHealth, health.CurrentHealth - 0.5);
+                var newHealth = new CHealth(health.MaxHealth, health.CurrentHealth - 1);
                 entity.AddComponent(newHealth);
             }
 
             // Spread entity -> tile
             foreach (var (entity, fire, transform) in _filter2)
             {
-                if (fire.Spread <= 0) { continue; }
-
                 if (entity.TryGetComponent(out CCollidable bounds))
                 {
                     var size = bounds.Size;
@@ -54,17 +52,17 @@ namespace Crimson.Systems
 
                     new List<(double X, double Y)> {
                         (loc.X, loc.Y),
-                        (loc.X + 2 * size, loc.Y),
-                        (loc.X, loc.Y + 2 * size),
-                        (loc.X + 2 * size, loc.Y + 2 * size)
+                        (loc.X + 2 * size - 1, loc.Y),
+                        (loc.X, loc.Y + 2 * size - 1),
+                        (loc.X + 2 * size - 1, loc.Y + 2 * size - 1)
                     }.Select(t => FindTile(t))
                      .ToList()
                      .ForEach(t =>
                      {
                          if (_map.Plan[t.X, t.Y].HasComponent<CFlammable>() && !_map.Plan[t.X, t.Y].HasComponent<COnFire>())
                          {
-                             // TODO opravit délku ohně
-                             _map.Plan[t.X, t.Y].AddComponent(new COnFire(fire.Spread, 100));
+                             _map.Plan[t.X, t.Y].AddComponent(new COnFire(fire.Spread));
+                             _map.Plan[t.X, t.Y].ScheduleComponentForRemoval(typeof(COnFire), 40);
                          }
                      });
                 }
@@ -72,17 +70,22 @@ namespace Crimson.Systems
                 // Spread tile -> tile
                 if (entity.HasComponent<CTile>())
                 {
+                    if (fire.Spread <= 0) { continue; }
+
                     var x = (int)Math.Floor(transform.Location.X / _map.TileSize);
                     var y = (int)Math.Floor(transform.Location.Y / _map.TileSize);
+
                     new List<(int X, int Y)>() { (x - 1, y), (x + 1, y), (x, y - 1), (x, y + 1) }
                         .Where(t => t.X >= 0 && t.Y >= 0 && t.X < _map.Height && t.Y < _map.Width)
                         .Select(t => _map.Plan[t.X, t.Y])
                         .ToList()
                         .ForEach(e =>
                         {
-                            if (e.HasComponent<CFlammable>() && !e.HasComponent<COnFire>())
+                            if (e.HasComponent<CFlammable>() && entity.TryGetComponent(out CTimedRemover remover))
                             {
-                                e.AddComponent(new COnFire(fire.Spread - 1, 100));
+                                var newFire = new COnFire(fire.Spread - 1);
+                                e.AddComponent(newFire);
+                                e.ScheduleComponentForRemoval(typeof(COnFire), GetLifetime(remover));
                             }
                         });
 
@@ -92,9 +95,16 @@ namespace Crimson.Systems
                        .ToList()
                        .ForEach(e =>
                        {
-                           if (e.HasComponent<CFlammable>() && !e.HasComponent<COnFire>())
+                           if (e.HasComponent<CFlammable>() && entity.TryGetComponent(out CTimedRemover remover))
                            {
-                               e.AddComponent(new COnFire(fire.Spread - Math.Sqrt(2), 100));
+                               var spread = fire.Spread - Math.Sqrt(2);
+                               if (e.TryGetComponent(out COnFire fire2))
+                               {
+                                   spread = Math.Max(fire2.Spread, spread);
+                               }
+                               var newFire = new COnFire(spread);
+                               e.AddComponent(newFire);
+                               e.ScheduleComponentForRemoval(typeof(COnFire), GetLifetime(remover));
                            }
                        });
                 }
@@ -110,34 +120,28 @@ namespace Crimson.Systems
 
                     new List<(double X, double Y)> {
                         (loc.X, loc.Y),
-                        (loc.X + 2 * size, loc.Y),
-                        (loc.X, loc.Y + 2 * size),
-                        (loc.X + 2 * size, loc.Y + 2 * size)
+                        (loc.X + 2 * size - 1, loc.Y),
+                        (loc.X, loc.Y + 2 * size - 1),
+                        (loc.X + 2 * size - 1, loc.Y + 2 * size - 1)
                     }.Select(t => FindTile(t))
                      .Where(t => t.X >= 0 && t.Y >= 0 && t.X < _map.Height && t.Y < _map.Width)
                      .ToList()
                      .ForEach(t =>
                      {
-                         if (_map.Plan[t.X, t.Y].TryGetComponent(out COnFire fire))
+                         if (_map.Plan[t.X, t.Y].TryGetComponent(out COnFire fire) && _map.Plan[t.X, t.Y].TryGetComponent(out CTimedRemover remover))
                          {
-                             entity.AddComponent(new COnFire(2, 100));
+                             var newFire = new COnFire(fire.Spread);
+                             entity.AddComponent(newFire);
+                             entity.ScheduleComponentForRemoval(typeof(COnFire), GetLifetime(remover));
                          }
                      });
                 }
             }
 
-            // Douse if time ran out
-            var toRemove = new List<EntityHandle>();
-            foreach (var (entity, fire) in _onFire)
+            double GetLifetime(CTimedRemover remover)
             {
-                entity.AddComponent(new COnFire(fire.Spread, fire.Longevity - 1));
-
-                if (fire.Longevity <= 0)
-                {
-                    toRemove.Add(entity);
-                }
+                return remover.Components.Find(c => c.Item1 == typeof(COnFire)).Item2;
             }
-            toRemove.ForEach(e => e.RemoveComponent<COnFire>());
         }
     }
 }

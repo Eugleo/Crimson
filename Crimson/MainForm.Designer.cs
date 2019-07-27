@@ -50,7 +50,7 @@ namespace Crimson
             this.mapPanel.Controls.Add(this.mainPanel);
             this.mapPanel.Location = new System.Drawing.Point(12, 12);
             this.mapPanel.Name = "mapPanel";
-            this.mapPanel.Size = new System.Drawing.Size(611, 559);
+            this.mapPanel.Size = new System.Drawing.Size(2072, 1087);
             this.mapPanel.TabIndex = 1;
             // 
             // mainPanel
@@ -62,7 +62,7 @@ namespace Crimson
             this.mainPanel.Cursor = System.Windows.Forms.Cursors.Cross;
             this.mainPanel.Location = new System.Drawing.Point(0, 0);
             this.mainPanel.Name = "mainPanel";
-            this.mainPanel.Size = new System.Drawing.Size(611, 559);
+            this.mainPanel.Size = new System.Drawing.Size(2072, 1087);
             this.mainPanel.TabIndex = 0;
             this.mainPanel.MouseDown += new System.Windows.Forms.MouseEventHandler(this.MainPanel_MouseDown);
             this.mainPanel.MouseMove += new System.Windows.Forms.MouseEventHandler(this.MainPanel_MouseMove);
@@ -73,7 +73,7 @@ namespace Crimson
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.Control;
-            this.ClientSize = new System.Drawing.Size(635, 583);
+            this.ClientSize = new System.Drawing.Size(2096, 1111);
             this.Controls.Add(this.mapPanel);
             this.DoubleBuffered = true;
             this.Name = "MainForm";

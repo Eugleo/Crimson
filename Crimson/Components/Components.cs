@@ -53,11 +53,11 @@ namespace Crimson.Components
 
     struct COnCollisionAdder : Component
     {
-        public Component Component;
+        public List<Component> Components;
 
-        public COnCollisionAdder(Component component)
+        public COnCollisionAdder(List<Component> components)
         {
-            Component = component;
+            Components = components;
         }
     }
 
@@ -142,6 +142,33 @@ namespace Crimson.Components
         public CShootEvent(Vector targetLocation)
         {
             TargetLocation = targetLocation;
+        }
+    }
+
+    class CTimedRemover : Component
+    {
+        public List<(Type Component, double TimeLeft)> Components { get; set; }
+
+        public CTimedRemover(List<(Type, double)> components)
+        {
+            Components = components;
+        }
+
+        public CTimedRemover(Type component, double timeLeft)
+        {
+            Components = new List<(Type, double)>() { (component, timeLeft) };
+        }
+    }
+
+    struct CTimedAdder : Component
+    {
+        public double TimeLeft { get; }
+        public Component Component { get; }
+
+        public CTimedAdder(Component component, double timeLeft)
+        {
+            Component = component;
+            TimeLeft = timeLeft;
         }
     }
 
@@ -237,13 +264,11 @@ namespace Crimson.Components
 
     struct COnFire : Component
     {
-        public double Spread;
-        public double Longevity;
+        public double Spread { get; }
 
-        public COnFire(double spread, double longevity)
+        public COnFire(double spread)
         {
             Spread = spread;
-            Longevity = longevity;
         }
     }
     struct CFlammable: Component
@@ -298,15 +323,15 @@ namespace Crimson.Components
 
     struct CWet : Component
     {
-        public double Potency { get; }
         public double Spread { get; }
 
-        public CWet(double spread, double potency)
+        public CWet(double spread)
         {
-            Potency = potency;
             Spread = spread;
         }
     }
+
+    struct CCLeanup : Component { }
 
     struct CSumbergable : Component
     {
