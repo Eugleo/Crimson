@@ -11,7 +11,7 @@ using Crimson.Entities;
 namespace Crimson.Components
 {
     [Flags]
-    enum Components
+    enum Components : long
     {
         None = 0,
         Movement = 1,
@@ -43,12 +43,40 @@ namespace Crimson.Components
         Above = 134217728,
         Tile = 268435456,
         GameObject = 536870912,
-        Health = 1073741824
+        Health = 1073741824,
+        DropGun = 2147483648,
+        CAddOnStep = 4294967296
     }
 
     interface IComponent
     {
         Components Component { get; }
+    }
+
+    class CAddOnStep : IComponent
+    {
+        public Components Component => Components.CAddOnStep;
+        public IComponent Comp;
+
+        public CAddOnStep(IComponent comp)
+        {
+            Comp = comp;
+        }
+
+        public CAddOnStep() { }
+    }
+
+    class CDropGun : IComponent
+    {
+        public Components Component => Components.DropGun;
+        public CGun Gun;
+
+        public CDropGun(CGun gun)
+        {
+            Gun = gun;
+        }
+
+        public CDropGun() { }
     }
 
     class CHealth : IComponent
@@ -283,7 +311,7 @@ namespace Crimson.Components
         public CPursuitBehavior() { }
     }
 
-    class CHasGun : IComponent
+    class CGun : IComponent
     {
         public bool IsBeingReloaded { get; set; }
         public bool CanShoot { get; set; }
@@ -291,7 +319,7 @@ namespace Crimson.Components
 
         public enum ShootingPattern
         {
-            Pistol, Shotgun, SMG
+            Pistol, Shotgun, SMG, Grenade
         }
         public ShootingPattern Type { get; }
         public int Damage { get; }
@@ -303,7 +331,7 @@ namespace Crimson.Components
         public int MagazineSize { get; }
         public int Ammo { get; set; }
 
-        public CHasGun(ShootingPattern type, int damage, int reloadSpeed, int inaccuracy, int cadence, int bulletSpeed, double range, int magazineSize)
+        public CGun(ShootingPattern type, int damage, int reloadSpeed, int inaccuracy, int cadence, int bulletSpeed, double range, int magazineSize)
         {
             Type = type;
             Damage = damage;
@@ -318,7 +346,7 @@ namespace Crimson.Components
             IsBeingReloaded = false;
         }
 
-        public CHasGun() { }
+        public CGun() { }
     }
 
     class CTile : IComponent

@@ -12,13 +12,13 @@ namespace Crimson.Systems
     class AttackSystem : GameSystem
     {
         readonly EntityGroup<CTransform, CAttacker, CHasMeleeWeapon> _meleeAttackers;
-        readonly EntityGroup<CTransform, CAttacker, CHasGun> _shooters;
+        readonly EntityGroup<CTransform, CAttacker, CGun> _shooters;
 
         public AttackSystem(World world)
         {
             _world = world;
             _meleeAttackers = _world.GetGroup<EntityGroup<CTransform, CAttacker, CHasMeleeWeapon>>();
-            _shooters = _world.GetGroup<EntityGroup<CTransform, CAttacker, CHasGun>>();
+            _shooters = _world.GetGroup<EntityGroup<CTransform, CAttacker, CGun>>();
         }
 
         public override void Update()

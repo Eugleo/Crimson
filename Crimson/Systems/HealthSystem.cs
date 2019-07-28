@@ -27,6 +27,13 @@ namespace Crimson.Systems
                 if (health.CurrentHealth <= 0)
                 {
                     entity.ScheduleForDeletion();
+                    if (entity.TryGetComponent(out CDropGun dropped))
+                    {
+                        var drop = _world.CreateEntity();
+                        drop.AddComponent(new CGraphics(Properties.Resources.gun));
+                        drop.AddComponent(new CAddOnStep(dropped.Gun));
+                        drop.AddComponent(new CTransform(entity.GetComponent<CTransform>().Location));
+                    }
                 }
             }
         }

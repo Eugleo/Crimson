@@ -9,7 +9,7 @@ using System.Diagnostics;
 
 namespace Crimson
 {
-    partial class PercentageBar : ProgressBar
+    public partial class PercentageBar : ProgressBar
     {
         public Color Color
         {
@@ -24,10 +24,10 @@ namespace Crimson
         Color _color;
         Brush _brush;
 
-        public PercentageBar(Color color)
+        public PercentageBar() : base()
         {
             SetStyle(ControlStyles.AllPaintingInWmPaint | ControlStyles.UserPaint | ControlStyles.OptimizedDoubleBuffer | ControlStyles.ResizeRedraw, true);
-            Color = color;
+            Color = Color.Black;
         }
 
         public float Val

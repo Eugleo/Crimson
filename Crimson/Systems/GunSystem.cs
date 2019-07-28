@@ -9,14 +9,14 @@ namespace Crimson.Systems
 {
     class GunSystem : GameSystem
     {
-        readonly EntityGroup<CHasGun, CTransform, CShootEvent, CFaction> _shootingEntities;
-        readonly EntityGroup<CHasGun> _guns;
+        readonly EntityGroup<CGun, CTransform, CShootEvent, CFaction> _shootingEntities;
+        readonly EntityGroup<CGun> _guns;
 
         public GunSystem(World world)
         {
             _world = world;
-            _shootingEntities = _world.GetGroup<EntityGroup<CHasGun, CTransform, CShootEvent, CFaction>>();
-            _guns = _world.GetGroup<EntityGroup<CHasGun>>();
+            _shootingEntities = _world.GetGroup<EntityGroup<CGun, CTransform, CShootEvent, CFaction>>();
+            _guns = _world.GetGroup<EntityGroup<CGun>>();
         }
 
         public override void Update()
@@ -51,14 +51,15 @@ namespace Crimson.Systems
 
                 switch (gun.Type)
                 {
-                    case CHasGun.ShootingPattern.Pistol:
-                        var bullet = ShootBullet(startingLocation, direction, gun, faction);
-                        bullet.AddComponent(new COnCollisionAdder(new System.Collections.Generic.List<IComponent> { new CBurning(3), new CScheduledRemove(typeof(CBurning), 100) } ));
-                        break;
-                    case CHasGun.ShootingPattern.SMG:
+                    case CGun.ShootingPattern.Pistol:
+                    case CGun.ShootingPattern.SMG:
                         ShootBullet(startingLocation, direction, gun, faction);
                         break;
-                    case CHasGun.ShootingPattern.Shotgun:
+                    case CGun.ShootingPattern.Grenade:
+                        var bullet = ShootBullet(startingLocation, direction, gun, faction);
+                        bullet.AddComponent(new COnCollisionAdder(new System.Collections.Generic.List<IComponent> { new CBurning(2), new CScheduledRemove(typeof(CBurning), 100) }));
+                        break;
+                    case CGun.ShootingPattern.Shotgun:
                         var spread = direction.Orthogonalized().Normalized(8);
                         foreach (var i in Enumerable.Range(-2, 5))
                         {
@@ -73,7 +74,7 @@ namespace Crimson.Systems
             }
         }
 
-        EntityHandle ShootBullet(Vector startPosition, Vector direction, CHasGun gun, CFaction faction)
+        EntityHandle ShootBullet(Vector startPosition, Vector direction, CGun gun, CFaction faction)
         {
             var bullet = _world.CreateEntity();
             var inaccuracy = new Vector(Inaccuracy(gun.Inaccuracy), Inaccuracy(gun.Inaccuracy));
@@ -93,7 +94,7 @@ namespace Crimson.Systems
             return rnd.Next(2) == 0 ? -rnd.Next(upperBound + 1) : rnd.Next(upperBound + 1);
         }
 
-        async void CoolDown(CHasGun gun, EntityHandle entity)
+        async void CoolDown(CGun gun, EntityHandle entity)
         {
             gun.CanShoot = false;
             entity.AddComponent(gun);
@@ -101,7 +102,7 @@ namespace Crimson.Systems
             gun.CanShoot = true;
         }
 
-        async void Reload(CHasGun gun, EntityHandle entity)
+        async void Reload(CGun gun, EntityHandle entity)
         {
             gun.IsBeingReloaded = true;
             await Task.Delay(gun.ReloadSpeed);

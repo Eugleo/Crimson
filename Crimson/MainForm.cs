@@ -15,7 +15,8 @@ namespace Crimson
         readonly Map _map;
         readonly World _world = new World();
         readonly EntityHandle _player;
-        readonly Dictionary<CHasGun.ShootingPattern, CHasGun> _guns = new Dictionary<CHasGun.ShootingPattern, CHasGun>();
+        readonly Dictionary<CGun.ShootingPattern, CGun> _guns = new Dictionary<CGun.ShootingPattern, CGun>();
+        readonly Dictionary<CGun.ShootingPattern, Label> _gunLabels = new Dictionary<CGun.ShootingPattern, Label>();
 
         public MainForm()
         {
@@ -34,9 +35,14 @@ namespace Crimson
 
         void DefineGuns()
         {
-            _guns[CHasGun.ShootingPattern.Pistol] = new CHasGun(CHasGun.ShootingPattern.Pistol, 15, 1000, 5, 600, 25, 350, 8);
-            _guns[CHasGun.ShootingPattern.Shotgun] = new CHasGun(CHasGun.ShootingPattern.Shotgun, 20, 1600, 0, 900, 20, 200, 2);
-            _guns[CHasGun.ShootingPattern.SMG] = new CHasGun(CHasGun.ShootingPattern.SMG, 10, 500, 3, 150, 30, 400, 30);
+            _guns[CGun.ShootingPattern.Pistol] = new CGun(CGun.ShootingPattern.Pistol, 15, 1000, 5, 600, 35, 350, 8);
+            _gunLabels[CGun.ShootingPattern.Pistol] = gun1Label;
+            _guns[CGun.ShootingPattern.Shotgun] = new CGun(CGun.ShootingPattern.Shotgun, 20, 1600, 0, 900, 30, 200, 2);
+            _gunLabels[CGun.ShootingPattern.Shotgun] = gun2Label;
+            _guns[CGun.ShootingPattern.SMG] = new CGun(CGun.ShootingPattern.SMG, 10, 500, 3, 150, 40, 400, 30);
+            _gunLabels[CGun.ShootingPattern.SMG] = gun3Label;
+            _guns[CGun.ShootingPattern.Grenade] = new CGun(CGun.ShootingPattern.Grenade, 3, 3000, 0, 400, 15, 600, 1);
+            _gunLabels[CGun.ShootingPattern.Grenade] = gun4Label;
         }
 
         void AddSystemsToWorld()
@@ -68,7 +74,7 @@ namespace Crimson
             player.AddComponent(new CTransform(mapPanel.Width / 2, mapPanel.Height / 2));
             player.AddComponent(new CGraphics(playerImage));
             player.AddComponent(new CGameObject());
-            player.AddComponent(_guns[CHasGun.ShootingPattern.Pistol]);
+            player.AddComponent(_guns[CGun.ShootingPattern.Pistol]);
             player.AddComponent(new CCollidable(32));
             player.AddComponent(new CFaction(Faction.PC));
             player.AddComponent(new CHealth(150, 150));
@@ -100,13 +106,16 @@ namespace Crimson
             switch (e.KeyCode)
             {
                 case Keys.D1:
-                    _player.AddComponent(_guns[CHasGun.ShootingPattern.Pistol]);
+                    _player.AddComponent(_guns[CGun.ShootingPattern.Pistol]);
                     break;
                 case Keys.D2:
-                    _player.AddComponent(_guns[CHasGun.ShootingPattern.Shotgun]);
+                    _player.AddComponent(_guns[CGun.ShootingPattern.Shotgun]);
                     break;
                 case Keys.D3:
-                    _player.AddComponent(_guns[CHasGun.ShootingPattern.SMG]);
+                    _player.AddComponent(_guns[CGun.ShootingPattern.SMG]);
+                    break;
+                case Keys.D4:
+                    _player.AddComponent(_guns[CGun.ShootingPattern.Grenade]);
                     break;
                 case Keys.U:
                     MakeEnemy();
@@ -172,13 +181,45 @@ namespace Crimson
             return feeler;
         }
 
+        void UpdateGunLabel(Label label, CGun gun)
+        {
+            if (gun.IsBeingReloaded)
+            {
+                label.ForeColor = Color.LightGray;
+            }
+            else
+            {
+                label.ForeColor = Color.Black;
+            }
+        }
+
         uint ticks;
         private void GameTimer_Tick(object sender, EventArgs e)
         {
             _world.Tick();
             ticks += 1;
 
-            if (_player.TryGetComponent(out CHasGun gun))
+            foreach (var g in _guns.Values)
+            {
+                switch (g.Type)
+                {
+                    case CGun.ShootingPattern.Pistol:
+                        UpdateGunLabel(gun1Label, g);
+                        break;
+                    case CGun.ShootingPattern.Shotgun:
+                        UpdateGunLabel(gun2Label, g);
+                        break;
+                    case CGun.ShootingPattern.SMG:
+                        UpdateGunLabel(gun3Label, g);
+                        break;
+                    case CGun.ShootingPattern.Grenade:
+                        UpdateGunLabel(gun4Label, g);
+                        break;
+                }
+            }
+
+            _gunLabels.Values.ToList().ForEach(l => l.BackColor = Color.Transparent);
+            if (_player.TryGetComponent(out CGun gun))
             {
                 if (gun.IsBeingReloaded)
                 {
@@ -190,6 +231,7 @@ namespace Crimson
                 }
                 ammoBar.Maximum = gun.MagazineSize;
                 ammoBar.Val = gun.Ammo;
+                _gunLabels[gun.Type].BackColor = Color.DarkGreen;
             }
 
             if (_player.TryGetComponent(out CHealth health))
