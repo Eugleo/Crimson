@@ -48,6 +48,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Endgame.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Endgame.Designer.cs">
+      <DependentUpon>Endgame.cs</DependentUpon>
+    </Compile>
     <Compile Include="Entities\EntityGroup.cs" />
     <Compile Include="Entities\Entity.cs" />
     <Compile Include="Components\ComponentMask.cs" />
@@ -99,6 +105,9 @@
     <Compile Include="Utilities.cs" />
     <Compile Include="Vector.cs" />
     <Compile Include="World.cs" />
+    <EmbeddedResource Include="Endgame.resx">
+      <DependentUpon>Endgame.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="MainForm.resx">
       <DependentUpon>MainForm.cs</DependentUpon>
     </EmbeddedResource>

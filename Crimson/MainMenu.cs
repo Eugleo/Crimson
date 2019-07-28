@@ -12,7 +12,15 @@ namespace Crimson
 
         private void LaunchButton_Click(object sender, EventArgs e)
         {
-
+            launchButton.Enabled = false;
+            var frm = new MainForm
+            {
+                Location = Location,
+                StartPosition = FormStartPosition.Manual
+            };
+            frm.FormClosing += delegate { Show(); };
+            frm.Show();
+            Hide();
         }
     }
 }

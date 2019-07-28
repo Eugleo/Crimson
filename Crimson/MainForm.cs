@@ -284,7 +284,7 @@ namespace Crimson
             }
         }
 
-        readonly int KILL_COUNT = 25;
+        readonly int KILL_COUNT = 10;
         int killCounter = 0;
         void KilledEnemy()
         {
@@ -303,30 +303,28 @@ namespace Crimson
 
         void EndGame(bool won)
         {
+            fpsTimer.Enabled = false;
+            gameTimer.Enabled = false;
             _camera.RemoveComponent<CMovement>();
 
             string message;
-            string caption;
             if (won)
             {
-                message = string.Format("You WIN! You fought for: {0}min {1}sec. Would you like to retry?", ticks / 60, ticks % 60);
-                caption = "Congratulations!";
+                message = string.Format("You WIN! You fought for: {0}min {1}sec.", ticks / 60, ticks % 60);
             }
             else
             {
                 message = string.Format("You LOSE! You struggled for: {0}min {1}sec", ticks / 60, ticks % 60);
-                caption = "Oh no!";
             }
-            MessageBoxButtons buttons = MessageBoxButtons.RetryCancel;
-            var result = MessageBox.Show(message, caption, buttons);
-            if (result == DialogResult.Retry)
-            {
 
-            }
-            else
+            var frm = new Endgame(message)
             {
-                Close();
-            }
+                Location = Location,
+                StartPosition = FormStartPosition.Manual
+            };
+            frm.FormClosing += delegate { Close(); };
+            frm.Show();
+            Hide();
         }
     }
 }
