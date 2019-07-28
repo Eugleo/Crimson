@@ -34,15 +34,18 @@ namespace Crimson.Systems
                     {
                         var center = transform2.Location + new Vector(bounds.Size, bounds.Size);
                         var steering = (feelerCenter - center).Normalized(avoiding.ReactionSpeed);
-                        entity.AddComponent(new CMovement(movement.MaxSpeed, (movement.Velocity + steering).Normalized(movement.MaxSpeed)));
+                        movement.Velocity = (movement.Velocity + steering).Normalized(movement.MaxSpeed);
                         break;
                     }
                 }
 
                 foreach (var (feeler, distance) in avoiding.Feelers)
                 {
-                    var feelerLocation = transform.Location + feeler.GetComponent<CFeeler>().Offset + movement.Velocity.Normalized(distance) - new Vector(20, 20);
-                    feeler.AddComponent(new CTransform(feelerLocation));
+                    if (feeler.TryGetComponent(out CTransform feelerTansform))
+                    {
+                        var feelerLocation = transform.Location + feeler.GetComponent<CFeeler>().Offset + movement.Velocity.Normalized(distance) - new Vector(20, 20);
+                        feelerTansform.Location = feelerLocation;
+                    }
                 }
             }
         }

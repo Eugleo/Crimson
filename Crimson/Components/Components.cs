@@ -26,8 +26,8 @@ namespace Crimson.Components
 
     class CMovement : Component
     {
-        public Vector Velocity;
-        public double MaxSpeed;
+        public Vector Velocity { get; set; }
+        public double MaxSpeed { get; }
 
         public CMovement(double maxSpeed, Vector acceleration)
         {
@@ -38,7 +38,7 @@ namespace Crimson.Components
 
     class CTransform : Component
     {
-        public Vector Location;
+        public Vector Location { get; set; }
 
         public CTransform(double x, double y)
         {
@@ -53,7 +53,7 @@ namespace Crimson.Components
 
     struct COnCollisionAdder : Component
     {
-        public List<Component> Components;
+        public List<Component> Components { get; set; }
 
         public COnCollisionAdder(List<Component> components)
         {
@@ -103,10 +103,10 @@ namespace Crimson.Components
         }
     }
 
-    struct CBullet : Component
+    class CBullet : Component
     {
         public int Damage { get; }
-        public double RangeLeft { get; }
+        public double RangeLeft { get; set; }
 
         public CBullet(int damage, double rangeLeft)
         {

@@ -32,12 +32,12 @@ namespace Crimson.Systems
                     if (adjustedDirection.Size > 10)
                     {
                         var steering = (adjustedDirection - movement.Velocity).Normalized(pursuit.ReactionSpeed);
-                        entity.AddComponent(new CMovement(movement.MaxSpeed, (movement.Velocity + steering).Normalized(movement.MaxSpeed)));
+                        movement.Velocity = (movement.Velocity + steering).Normalized(movement.MaxSpeed);
                     }
                     else
                     {
                         var steering = (adjustedDirection - movement.Velocity).Normalized(pursuit.ReactionSpeed);
-                        entity.AddComponent(new CMovement(movement.MaxSpeed, (movement.Velocity + steering).Normalized(movement.Velocity.Size / 1.5)));
+                        movement.Velocity = (movement.Velocity + steering).Normalized(movement.Velocity.Size / 1.5);
                     }
                 }
             }

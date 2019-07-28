@@ -92,10 +92,10 @@ namespace Crimson.Systems
 
                 if (entity.TryGetComponent(out CBullet bullet))
                 {
-                    entity.AddComponent(new CBullet(bullet.Damage, bullet.RangeLeft - (next - current).Size));
+                    bullet.RangeLeft -= (next - current).Size;
                 }
 
-                entity.AddComponent(new CTransform(next));
+                transform.Location = next;
             }
 
             bool IsOutOfMap(Vector location)
@@ -107,9 +107,9 @@ namespace Crimson.Systems
 
             bool IsColliding(Vector aLocation, int aSize, Vector bLocation, int bSize)
             {
-                var centerA = new Vector(aLocation.X + aSize, aLocation.Y + aSize);
-                var centerB = new Vector(bLocation.X + bSize, bLocation.Y + bSize);
-                return (centerA - centerB).Size < aSize + bSize;
+                var x = aLocation.X + aSize - bLocation.X - bSize;
+                var y = aLocation.Y + aSize - bLocation.Y - bSize;
+                return Math.Sqrt(Math.Pow(x, 2) + Math.Pow(y, 2)) < aSize + bSize;
             }
         }
     }

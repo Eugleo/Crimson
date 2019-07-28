@@ -18,17 +18,17 @@ namespace Crimson.Entities
 
         public bool Equals(Entity other)
         {
-            return this.ID == other.ID;
+            return ID == other.ID;
         }
 
         static public bool operator ==(Entity a, Entity b)
         {
-            return a.Equals(b);
+            return a.ID == b.ID;
         }
 
         static public bool operator !=(Entity a, Entity b)
         {
-            return !(a == b);
+            return a.ID != b.ID;
         }
     }
 
@@ -125,12 +125,12 @@ namespace Crimson.Entities
 
         public static bool operator ==(EntityHandle a, EntityHandle b)
         {
-            return a.Equals(b);
+            return a.Entity == b.Entity;
         }
 
         public static bool operator !=(EntityHandle a, EntityHandle b)
         {
-            return !(a == b);
+            return a.Entity != b.Entity;
         }
     }
 }
