@@ -60,7 +60,7 @@ namespace Crimson.Systems
                         count = 0;
                         break;
                 }
-                foreach (var _ in Enumerable.Range(0, count)) { CreateCloud(transform.Location, images08, 25); }
+                //foreach (var _ in Enumerable.Range(0, count)) { CreateCloud(transform.Location, images08, 25); }
             }
         }
 

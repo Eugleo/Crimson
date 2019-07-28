@@ -54,7 +54,7 @@ namespace Crimson.Systems
                 .Select(t => FindTile(t))
                 .Where(t => t.X >= 0 && t.Y >= 0 && t.X < _map.Height && t.Y < _map.Width)
                 .Select(t => _map.Plan[t.X, t.Y])
-                .Where(t => t.HasComponent<CFlammable>() && !t.HasComponent<CBurning>())
+                .Where(t => t.HasComponent<CFlammable>() && !t.HasComponent<CBurning>() && !t.HasComponent<CWet>())
                 .ToList()
                 .ForEach(t =>
                 {
@@ -76,7 +76,7 @@ namespace Crimson.Systems
                     var neighbors = new List<(int X, int Y)>() { (x - 1, y), (x + 1, y), (x, y - 1), (x, y + 1) }
                         .Where(t => t.X >= 0 && t.Y >= 0 && t.X < _map.Height && t.Y < _map.Width)
                         .Select(t => _map.Plan[t.X, t.Y])
-                        .Where(t => t.HasComponent<CFlammable>())
+                        .Where(t => t.HasComponent<CFlammable>() && !t.HasComponent<CWet>())
                         .Where(t => !t.TryGetComponent(out CBurning neighborFire) || neighborFire.Spread < fire.Spread - 1);
 
                     foreach (var t in neighbors)
@@ -91,7 +91,7 @@ namespace Crimson.Systems
                     var neighbors = new List<(int X, int Y)>() { (x - 1, y - 1), (x + 1, y + 1), (x + 1, y - 1), (x - 1, y + 1) }
                         .Where(t => t.X >= 0 && t.Y >= 0 && t.X < _map.Height && t.Y < _map.Width)
                         .Select(t => _map.Plan[t.X, t.Y])
-                        .Where(t => t.HasComponent<CFlammable>())
+                        .Where(t => t.HasComponent<CFlammable>() && !t.HasComponent<CWet>())
                         .Where(t => !t.TryGetComponent(out CBurning neighborFire) || neighborFire.Spread < fire.Spread - Math.Sqrt(2));
 
                     foreach (var t in neighbors)
@@ -107,6 +107,8 @@ namespace Crimson.Systems
         {
             foreach (var (entity, transform, flame, bounds, _) in _flammableObjects)
             {
+                if (entity.HasComponent<CWet>()) { continue; }
+
                 var size = bounds.Size;
                 var loc = transform.Location;
 

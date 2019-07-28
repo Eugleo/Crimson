@@ -41,7 +41,7 @@ namespace Crimson.Systems
                     var neighbors = new List<(int X, int Y)>() { (x - 1, y), (x + 1, y), (x, y - 1), (x, y + 1) }
                        .Where(t => t.X >= 0 && t.Y >= 0 && t.X < _map.Height && t.Y < _map.Width)
                        .Select(t => _map.Plan[t.X, t.Y])
-                       .Where(t => t.HasComponent<CSumbergable>())
+                       .Where(t => t.HasComponent<CSumbergable>() && !t.HasComponent<CBurning>())
                        .Where(t => !t.TryGetComponent(out CWet neighborWater) || neighborWater.Spread < water.Spread - 1);
 
                     foreach (var t in neighbors) { t.AddComponent(new CWet(water.Spread - 1)); }
@@ -52,7 +52,7 @@ namespace Crimson.Systems
                     var neighbors = new List<(int X, int Y)>() { (x - 1, y - 1), (x + 1, y + 1), (x + 1, y - 1), (x - 1, y + 1) }
                        .Where(t => t.X >= 0 && t.Y >= 0 && t.X < _map.Height && t.Y < _map.Width)
                        .Select(t => _map.Plan[t.X, t.Y])
-                       .Where(t => t.HasComponent<CSumbergable>())
+                       .Where(t => t.HasComponent<CSumbergable>() && !t.HasComponent<CBurning>())
                        .Where(t => !t.TryGetComponent(out CWet neighborWater) || neighborWater.Spread < water.Spread - Math.Sqrt(2));
 
                     foreach (var t in neighbors) { t.AddComponent(new CWet(water.Spread - Math.Sqrt(2))); }
@@ -90,7 +90,7 @@ namespace Crimson.Systems
                 }
                 else if (entity.HasComponent<CWet>() && !wetGround)
                 {
-                    entity.ScheduleComponentForRemoval(typeof(CWet), 40);
+                    entity.ScheduleComponentForRemoval(typeof(CWet), 5);
                 }
             }
         }

@@ -12,9 +12,11 @@ namespace Crimson.Entities
         public Entity(int id)
         {
             ID = id;
+            Mask = new ComponentMask();
         }
 
         public int ID { get; }
+        public ComponentMask Mask { get; }
 
         public bool Equals(Entity other)
         {

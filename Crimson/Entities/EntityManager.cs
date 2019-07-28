@@ -10,7 +10,6 @@ namespace Crimson.Entities
     class EntityManager
     {
         public List<Entity> Entities { get; } = new List<Entity>();
-        readonly Dictionary<Entity, ComponentMask> _masks = new Dictionary<Entity, ComponentMask>();
         readonly World _world;
 
         public EntityManager(World world)
@@ -30,18 +29,9 @@ namespace Crimson.Entities
             Entities.Remove(e);
         }
 
-        public void SetComponentMask(Entity e, ComponentMask mask)
-        {
-            _masks[e] = mask;
-        }
-
         public ComponentMask GetComponentMask(Entity e)
         {
-            if (!_masks.ContainsKey(e))
-            {
-                _masks[e] = new ComponentMask();
-            }
-            return _masks[e];
+            return e.Mask;
         }
     }
 }
