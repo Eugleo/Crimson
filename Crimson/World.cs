@@ -54,7 +54,7 @@ namespace Crimson
             var mask = _entityManager.GetComponentMask(e);
             var oldMask = mask.Clone();
             mask.IncludeComponent(c.Component);
-            UpdateGroupsForEntity(e, mask, oldMask);
+            UpdateGroupsForEntity(e, mask, oldMask, c);
         }
 
         public bool EntityHasComponent<T>(Entity e) where T : IComponent, new ()
@@ -68,10 +68,10 @@ namespace Crimson
             var mask = _entityManager.GetComponentMask(e);
             var oldMask = mask.Clone();
             mask.RemoveComponent(ComponentManager<T>.Instance.ComponentID);
-            UpdateGroupsForEntity(e, mask, oldMask);
+            UpdateGroupsForEntity(e, mask, oldMask, default);
         }
 
-        void UpdateGroupsForEntity(Entity entity, ComponentMask newMask, ComponentMask oldMask)
+        void UpdateGroupsForEntity(Entity entity, ComponentMask newMask, ComponentMask oldMask, IComponent component)
         {
             foreach (var group in _entityGroups)
             {
@@ -82,7 +82,7 @@ namespace Crimson
 
                 if (before && after)
                 {
-                    group.UpdateComponentsFor(entity);
+                    group.UpdateComponent(entity, component);
                 }
                 else if (before)
                 {

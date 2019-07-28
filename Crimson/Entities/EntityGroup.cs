@@ -18,10 +18,11 @@ namespace Crimson.Entities
 
         public abstract void Add(Entity entity);
         public abstract void Remove(Entity entity);
-        public abstract void UpdateComponentsFor(Entity entity);
+        public abstract void UpdateComponent(Entity entity, IComponent component);
     }
 
-    class EntityGroup<Component1> : EntityGroup, IEnumerable<(EntityHandle, Component1)>, IReadOnlyList<(EntityHandle, Component1)> where Component1 : IComponent, new ()
+    class EntityGroup<Component1> : EntityGroup, IEnumerable<(EntityHandle, Component1)>, IReadOnlyList<(EntityHandle, Component1)> 
+        where Component1 : class, IComponent, new ()
     {
         public List<Component1> Components1 = new List<Component1>();
 
@@ -57,11 +58,16 @@ namespace Crimson.Entities
             Components1.RemoveAt(i);
         }
 
-        public override void UpdateComponentsFor(Entity entity)
+        public override void UpdateComponent(Entity entity, IComponent component)
         {
-            var eh = _entities.Find(e => e.Entity == entity);
-            var i = _entities.FindIndex(e => e.Entity == entity);
-            Components1[i] = eh.GetComponent<Component1>();
+            if (component == default) { return; }
+
+            var t = component.GetType();
+            if (t == typeof(Component1))
+            {
+                var i = _entities.FindIndex(e => e.Entity == entity);
+                Components1[i] = component as Component1;
+            }
         }
 
         IEnumerator IEnumerable.GetEnumerator()
@@ -74,8 +80,8 @@ namespace Crimson.Entities
         EntityGroup, 
         IEnumerable<(EntityHandle, Component1, Component2)>, 
         IReadOnlyList<(EntityHandle, Component1, Component2)>
-        where Component1 : IComponent, new()
-        where Component2 : IComponent, new()
+        where Component1 : class, IComponent, new()
+        where Component2 : class, IComponent, new()
     {
         public List<Component1> Components1 = new List<Component1>();
         public List<Component2> Components2 = new List<Component2>();
@@ -107,12 +113,20 @@ namespace Crimson.Entities
             Components2.RemoveAt(i);
         }
 
-        public override void UpdateComponentsFor(Entity entity)
+        public override void UpdateComponent(Entity entity, IComponent component)
         {
-            var eh = _entities.Find(e => e.Entity == entity);
-            var i = _entities.FindIndex(e => e.Entity == entity);
-            Components1[i] = eh.GetComponent<Component1>();
-            Components2[i] = eh.GetComponent<Component2>();
+            if (component == default) { return; }
+
+            var t = component.GetType();
+            if (t == typeof(Component1))
+            {
+                var i = _entities.FindIndex(e => e.Entity == entity);
+                Components1[i] = component as Component1;
+            } else if (t == typeof(Component2))
+            {
+                var i = _entities.FindIndex(e => e.Entity == entity);
+                Components2[i] = component as Component2;
+            }
         }
 
         public IEnumerator<(EntityHandle, Component1, Component2)> GetEnumerator()
@@ -133,9 +147,9 @@ namespace Crimson.Entities
         EntityGroup, 
         IEnumerable<(EntityHandle, Component1, Component2, Component3)>, 
         IReadOnlyList<(EntityHandle, Component1, Component2, Component3)>
-        where Component1 : IComponent, new()
-        where Component2 : IComponent, new()
-        where Component3 : IComponent, new()
+        where Component1 : class, IComponent, new()
+        where Component2 : class, IComponent, new()
+        where Component3 : class, IComponent, new()
     {
         public List<Component1> Components1 = new List<Component1>();
         public List<Component2> Components2 = new List<Component2>();
@@ -172,13 +186,26 @@ namespace Crimson.Entities
             Components3.RemoveAt(i);
         }
 
-        public override void UpdateComponentsFor(Entity entity)
+        public override void UpdateComponent(Entity entity, IComponent component)
         {
-            var eh = _entities.Find(e => e.Entity == entity);
-            var i = _entities.FindIndex(e => e.Entity == entity);
-            Components1[i] = eh.GetComponent<Component1>();
-            Components2[i] = eh.GetComponent<Component2>();
-            Components3[i] = eh.GetComponent<Component3>();
+            if (component == default) { return; }
+
+            var t = component.GetType();
+            if (t == typeof(Component1))
+            {
+                var i = _entities.FindIndex(e => e.Entity == entity);
+                Components1[i] = component as Component1;
+            }
+            else if (t == typeof(Component2))
+            {
+                var i = _entities.FindIndex(e => e.Entity == entity);
+                Components2[i] = component as Component2;
+            }
+            else if (t == typeof(Component3))
+            {
+                var i = _entities.FindIndex(e => e.Entity == entity);
+                Components3[i] = component as Component3;
+            }
         }
 
         IEnumerator IEnumerable.GetEnumerator()
@@ -199,10 +226,10 @@ namespace Crimson.Entities
         EntityGroup,
         IEnumerable<(EntityHandle, Component1, Component2, Component3, Component4)>,
         IReadOnlyList<(EntityHandle, Component1, Component2, Component3, Component4)>
-        where Component1 : IComponent, new()
-        where Component2 : IComponent, new()
-        where Component3 : IComponent, new()
-        where Component4 : IComponent, new()
+        where Component1 : class, IComponent, new()
+        where Component2 : class, IComponent, new()
+        where Component3 : class, IComponent, new()
+        where Component4 : class, IComponent, new()
     {
         public List<Component1> Components1 = new List<Component1>();
         public List<Component2> Components2 = new List<Component2>();
@@ -243,14 +270,31 @@ namespace Crimson.Entities
             Components4.RemoveAt(i);
         }
 
-        public override void UpdateComponentsFor(Entity entity)
+        public override void UpdateComponent(Entity entity, IComponent component)
         {
-            var eh = _entities.Find(e => e.Entity == entity);
-            var i = _entities.FindIndex(e => e.Entity == entity);
-            Components1[i] = eh.GetComponent<Component1>();
-            Components2[i] = eh.GetComponent<Component2>();
-            Components3[i] = eh.GetComponent<Component3>();
-            Components4[i] = eh.GetComponent<Component4>();
+            if (component == default) { return; }
+
+            var t = component.GetType();
+            if (t == typeof(Component1))
+            {
+                var i = _entities.FindIndex(e => e.Entity == entity);
+                Components1[i] = component as Component1;
+            }
+            else if (t == typeof(Component2))
+            {
+                var i = _entities.FindIndex(e => e.Entity == entity);
+                Components2[i] = component as Component2;
+            }
+            else if (t == typeof(Component3))
+            {
+                var i = _entities.FindIndex(e => e.Entity == entity);
+                Components3[i] = component as Component3;
+            }
+            else if (t == typeof(Component4))
+            {
+                var i = _entities.FindIndex(e => e.Entity == entity);
+                Components4[i] = component as Component4;
+            }
         }
 
         IEnumerator IEnumerable.GetEnumerator()
