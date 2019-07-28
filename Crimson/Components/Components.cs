@@ -285,7 +285,8 @@ namespace Crimson.Components
 
     class CHasGun : IComponent
     {
-        public bool CanShoot;
+        public bool IsBeingReloaded { get; set; }
+        public bool CanShoot { get; set; }
         public Components Component => Components.HasGun;
 
         public enum ShootingPattern
@@ -296,11 +297,13 @@ namespace Crimson.Components
         public int Damage { get; }
         public int ReloadSpeed { get; }
         public int Inaccuracy { get; }
-        public int Cadence { get;  }
-        public double BulletSpeed { get;  }
-        public Double Range { get; }
+        public int Cadence { get; }
+        public double BulletSpeed { get; }
+        public double Range { get; }
+        public int MagazineSize { get; }
+        public int Ammo { get; set; }
 
-        public CHasGun(ShootingPattern type, int damage, int reloadSpeed, int inaccuracy, int cadence, int bulletSpeed, double range) : this()
+        public CHasGun(ShootingPattern type, int damage, int reloadSpeed, int inaccuracy, int cadence, int bulletSpeed, double range, int magazineSize)
         {
             Type = type;
             Damage = damage;
@@ -310,6 +313,9 @@ namespace Crimson.Components
             BulletSpeed = bulletSpeed;
             CanShoot = true;
             Range = range;
+            MagazineSize = magazineSize;
+            Ammo = MagazineSize;
+            IsBeingReloaded = false;
         }
 
         public CHasGun() { }

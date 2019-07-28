@@ -7,19 +7,16 @@ namespace Crimson.Systems
 {
     class RenderSystem: GameSystem
     {
-        readonly Control _mainControl;
         readonly Control _mapControl;
         readonly EntityGroup<CTransform, CGraphics, CGameObject> _renderable;
         readonly EntityGroup<CTransform, CGraphics, CAbove> _flying;
         readonly EntityGroup<CTransform, CCamera> _cameras;
         readonly EntityGroup<CTransform, CGraphics, CTile> _tiles;
 
-        public RenderSystem(World world, Control mainControl, Control mapControl)
+        public RenderSystem(World world, Control mapControl)
         {
             _world = world;
-            _mainControl = mainControl;
             _mapControl = mapControl;
-            _mainControl.Paint += MainControl_Paint;
             _mapControl.Paint += MapControl_Paint;
 
             _renderable = _world.GetGroup<EntityGroup<CTransform, CGraphics, CGameObject>>();
@@ -34,19 +31,14 @@ namespace Crimson.Systems
             {
                 // TODO Nějak zařídit, aby se mapa refreshovala jen když je třeba (winforms bohužel neumí průhledné controls)
                 _mapControl.Refresh();
-                _mainControl.Refresh();
             }
-        }
-
-        void MainControl_Paint(object sender, PaintEventArgs e)
-        {
-            RenderAll(_renderable, e);
-            RenderAll(_flying, e);
         }
 
         void MapControl_Paint(object sender, PaintEventArgs e)
         {
             RenderAll(_tiles, e);
+            RenderAll(_renderable, e);
+            RenderAll(_flying, e);
         }
 
         void RenderAll<T>(EntityGroup<CTransform, CGraphics, T> group, PaintEventArgs e) where T : class, IComponent, new ()

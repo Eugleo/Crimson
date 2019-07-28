@@ -34,9 +34,9 @@ namespace Crimson
 
         void DefineGuns()
         {
-            _guns[CHasGun.ShootingPattern.Pistol] = new CHasGun(CHasGun.ShootingPattern.Pistol, 15, 700, 5, 300, 25, 350);
-            _guns[CHasGun.ShootingPattern.Shotgun] = new CHasGun(CHasGun.ShootingPattern.Shotgun, 20, 800, 0, 700, 20, 200);
-            _guns[CHasGun.ShootingPattern.SMG] = new CHasGun(CHasGun.ShootingPattern.SMG, 10, 700, 2, 50, 30, 600);
+            _guns[CHasGun.ShootingPattern.Pistol] = new CHasGun(CHasGun.ShootingPattern.Pistol, 15, 1000, 5, 600, 25, 350, 8);
+            _guns[CHasGun.ShootingPattern.Shotgun] = new CHasGun(CHasGun.ShootingPattern.Shotgun, 20, 1600, 0, 900, 20, 200, 2);
+            _guns[CHasGun.ShootingPattern.SMG] = new CHasGun(CHasGun.ShootingPattern.SMG, 10, 500, 3, 150, 30, 400, 30);
         }
 
         void AddSystemsToWorld()
@@ -52,7 +52,7 @@ namespace Crimson
             _world.AddSystem(new CollisionResolverSystem(_world));
             _world.AddSystem(new HealthSystem(_world));
             _world.AddSystem(new BulletSystem(_world));
-            _world.AddSystem(new RenderSystem(_world, mainPanel, mapPanel));
+            _world.AddSystem(new RenderSystem(_world, mapPanel));
             _world.AddSystem(new FireSystem(_world, _map));
             _world.AddSystem(new WaterSystem(_world, _map));
             _world.AddSystem(new SteamSystem(_world));
@@ -65,7 +65,7 @@ namespace Crimson
             var player = _world.CreateEntity();
             player.AddComponent(new CKeyboardNavigation());
             player.AddComponent(new CMovement(6, new Vector(0, 0)));
-            player.AddComponent(new CTransform(mainPanel.Width / 2, mainPanel.Height / 2));
+            player.AddComponent(new CTransform(mapPanel.Width / 2, mapPanel.Height / 2));
             player.AddComponent(new CGraphics(playerImage));
             player.AddComponent(new CGameObject());
             player.AddComponent(_guns[CHasGun.ShootingPattern.Pistol]);
@@ -81,7 +81,7 @@ namespace Crimson
         {
             var camera = _world.CreateEntity();
             camera.AddComponent(new CCamera(20, _player, (mapPanel.Width, mapPanel.Height)));
-            camera.AddComponent(new CTransform(mainPanel.Width / 2 + 1, mainPanel.Height / 2 + 1));
+            camera.AddComponent(new CTransform(mapPanel.Width / 2 + 1, mapPanel.Height / 2 + 1));
             camera.AddComponent(new CMovement(5, new Vector(0, 0)));
         }
 
@@ -160,6 +160,12 @@ namespace Crimson
         {
             _world.Tick();
             ticks += 1;
+
+            if (_player.TryGetComponent(out CHasGun gun))
+            {
+                Text = string.Format(" Ammo: {0}", gun.Ammo);
+            }
+
             if (_isShooting)
             {
                 var absoluteCenterLocation = _world.GetGroup<EntityGroup<CCamera, CMovement, CTransform>>().Components3[0].Location;
@@ -198,7 +204,7 @@ namespace Crimson
 
         bool _isShooting = false;
         Vector _mouseLocation;
-        private void MainPanel_MouseDown(object sender, MouseEventArgs e)
+        private void MapPanel_MouseDown(object sender, MouseEventArgs e)
         {
             _mouseLocation = Vector.FromPoint(e.Location);
             _isShooting = true;
@@ -207,13 +213,13 @@ namespace Crimson
             _player.AddComponent(new CShootEvent(Vector.FromPoint(e.Location) + absoluteCenterLocation - relativeOffset));
         }
 
-        private void MainPanel_MouseUp(object sender, MouseEventArgs e)
+        private void MapPanel_MouseUp(object sender, MouseEventArgs e)
         {
             _isShooting = false;
             _player.RemoveComponent<CShootEvent>();
         }
 
-        private void MainPanel_MouseMove(object sender, MouseEventArgs e)
+        private void MapPanel_MouseMove(object sender, MouseEventArgs e)
         {
             _mouseLocation = Vector.FromPoint(e.Location);
         }

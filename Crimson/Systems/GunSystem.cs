@@ -10,18 +10,28 @@ namespace Crimson.Systems
     class GunSystem : GameSystem
     {
         readonly EntityGroup<CHasGun, CTransform, CShootEvent, CFaction> _shootingEntities;
+        readonly EntityGroup<CHasGun> _guns;
 
         public GunSystem(World world)
         {
             _world = world;
             _shootingEntities = _world.GetGroup<EntityGroup<CHasGun, CTransform, CShootEvent, CFaction>>();
+            _guns = _world.GetGroup<EntityGroup<CHasGun>>();
         }
 
         public override void Update()
         {
+            foreach (var (entity, gun) in _guns)
+            {
+                if (!gun.IsBeingReloaded && gun.Ammo <= 0)
+                {
+                    Reload(gun, entity);
+                }
+            }
+
             foreach (var (entity, gun, transform, shot, faction) in _shootingEntities)
             {
-                if (!gun.CanShoot) { return; }
+                if (!gun.CanShoot || gun.Ammo <= 0) { return; }
 
                 Vector startingLocation;
                 Vector direction;
@@ -58,6 +68,7 @@ namespace Crimson.Systems
                     default:
                         break;
                 }
+                gun.Ammo -= 1;
                 CoolDown(gun, entity);
             }
         }
@@ -88,7 +99,14 @@ namespace Crimson.Systems
             entity.AddComponent(gun);
             await Task.Delay(gun.Cadence);
             gun.CanShoot = true;
-            entity.AddComponent(gun);
+        }
+
+        async void Reload(CHasGun gun, EntityHandle entity)
+        {
+            gun.IsBeingReloaded = true;
+            await Task.Delay(gun.ReloadSpeed);
+            gun.Ammo = gun.MagazineSize;
+            gun.IsBeingReloaded = false;
         }
     }
 }

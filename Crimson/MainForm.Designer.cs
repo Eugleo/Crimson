@@ -34,8 +34,6 @@ namespace Crimson
             this.gameTimer = new System.Windows.Forms.Timer(this.components);
             this.fpsTimer = new System.Windows.Forms.Timer(this.components);
             this.mapPanel = new Crimson.DoubleBufferedPanel();
-            this.mainPanel = new Crimson.DoubleBufferedPanel();
-            this.mapPanel.SuspendLayout();
             this.SuspendLayout();
             // 
             // gameTimer
@@ -54,26 +52,13 @@ namespace Crimson
             this.mapPanel.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.mapPanel.Controls.Add(this.mainPanel);
             this.mapPanel.Location = new System.Drawing.Point(12, 12);
             this.mapPanel.Name = "mapPanel";
             this.mapPanel.Size = new System.Drawing.Size(815, 814);
             this.mapPanel.TabIndex = 1;
-            // 
-            // mainPanel
-            // 
-            this.mainPanel.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.mainPanel.BackColor = System.Drawing.Color.Transparent;
-            this.mainPanel.Cursor = System.Windows.Forms.Cursors.Cross;
-            this.mainPanel.Location = new System.Drawing.Point(0, 0);
-            this.mainPanel.Name = "mainPanel";
-            this.mainPanel.Size = new System.Drawing.Size(815, 814);
-            this.mainPanel.TabIndex = 0;
-            this.mainPanel.MouseDown += new System.Windows.Forms.MouseEventHandler(this.MainPanel_MouseDown);
-            this.mainPanel.MouseMove += new System.Windows.Forms.MouseEventHandler(this.MainPanel_MouseMove);
-            this.mainPanel.MouseUp += new System.Windows.Forms.MouseEventHandler(this.MainPanel_MouseUp);
+            this.mapPanel.MouseDown += new System.Windows.Forms.MouseEventHandler(this.MapPanel_MouseDown);
+            this.mapPanel.MouseMove += new System.Windows.Forms.MouseEventHandler(this.MapPanel_MouseMove);
+            this.mapPanel.MouseUp += new System.Windows.Forms.MouseEventHandler(this.MapPanel_MouseUp);
             // 
             // MainForm
             // 
@@ -87,14 +72,12 @@ namespace Crimson
             this.Text = "Crimson";
             this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.MainForm_KeyDown);
             this.KeyUp += new System.Windows.Forms.KeyEventHandler(this.MainForm_KeyUp);
-            this.mapPanel.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
 
         #endregion
         private System.Windows.Forms.Timer gameTimer;
-        private DoubleBufferedPanel mainPanel;
         private DoubleBufferedPanel mapPanel;
         private Timer fpsTimer;
     }
