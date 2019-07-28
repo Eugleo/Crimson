@@ -21,14 +21,14 @@ namespace Crimson.Entities
         public abstract void UpdateComponentsFor(Entity entity);
     }
 
-    class EntityGroup<Component1> : EntityGroup, IEnumerable<(EntityHandle, Component1)>, IReadOnlyList<(EntityHandle, Component1)> where Component1 : Component
+    class EntityGroup<Component1> : EntityGroup, IEnumerable<(EntityHandle, Component1)>, IReadOnlyList<(EntityHandle, Component1)> where Component1 : IComponent, new ()
     {
         public List<Component1> Components1 = new List<Component1>();
 
         public EntityGroup()
         {
             Mask = new ComponentMask();
-            Mask.IncludeComponent<Component1>();
+            Mask.IncludeComponent(new Component1().Component);
         }
 
         public (EntityHandle, Component1) this[int index] => (Entities[index], Components1[index]);
@@ -74,8 +74,8 @@ namespace Crimson.Entities
         EntityGroup, 
         IEnumerable<(EntityHandle, Component1, Component2)>, 
         IReadOnlyList<(EntityHandle, Component1, Component2)>
-        where Component1 : Component
-        where Component2 : Component
+        where Component1 : IComponent, new()
+        where Component2 : IComponent, new()
     {
         public List<Component1> Components1 = new List<Component1>();
         public List<Component2> Components2 = new List<Component2>();
@@ -87,8 +87,8 @@ namespace Crimson.Entities
         public EntityGroup()
         {
             Mask = new ComponentMask();
-            Mask.IncludeComponent<Component1>();
-            Mask.IncludeComponent<Component2>();
+            Mask.IncludeComponent(new Component1().Component);
+            Mask.IncludeComponent(new Component2().Component);
         }
 
         public override void Add(Entity e)
@@ -133,9 +133,9 @@ namespace Crimson.Entities
         EntityGroup, 
         IEnumerable<(EntityHandle, Component1, Component2, Component3)>, 
         IReadOnlyList<(EntityHandle, Component1, Component2, Component3)>
-        where Component1 : Component
-        where Component2 : Component
-        where Component3 : Component
+        where Component1 : IComponent, new()
+        where Component2 : IComponent, new()
+        where Component3 : IComponent, new()
     {
         public List<Component1> Components1 = new List<Component1>();
         public List<Component2> Components2 = new List<Component2>();
@@ -149,9 +149,9 @@ namespace Crimson.Entities
         public EntityGroup()
         {
             Mask = new ComponentMask();
-            Mask.IncludeComponent<Component1>();
-            Mask.IncludeComponent<Component2>();
-            Mask.IncludeComponent<Component3>();
+            Mask.IncludeComponent(new Component1().Component);
+            Mask.IncludeComponent(new Component2().Component);
+            Mask.IncludeComponent(new Component3().Component);
         }
 
         public override void Add(Entity e)
@@ -199,10 +199,10 @@ namespace Crimson.Entities
         EntityGroup,
         IEnumerable<(EntityHandle, Component1, Component2, Component3, Component4)>,
         IReadOnlyList<(EntityHandle, Component1, Component2, Component3, Component4)>
-        where Component1 : Component
-        where Component2 : Component
-        where Component3 : Component
-        where Component4 : Component
+        where Component1 : IComponent, new()
+        where Component2 : IComponent, new()
+        where Component3 : IComponent, new()
+        where Component4 : IComponent, new()
     {
         public List<Component1> Components1 = new List<Component1>();
         public List<Component2> Components2 = new List<Component2>();
@@ -217,10 +217,10 @@ namespace Crimson.Entities
         public EntityGroup()
         {
             Mask = new ComponentMask();
-            Mask.IncludeComponent<Component1>();
-            Mask.IncludeComponent<Component2>();
-            Mask.IncludeComponent<Component3>();
-            Mask.IncludeComponent<Component4>();
+            Mask.IncludeComponent(new Component1().Component);
+            Mask.IncludeComponent(new Component2().Component);
+            Mask.IncludeComponent(new Component3().Component);
+            Mask.IncludeComponent(new Component4().Component);
         }
 
         public override void Add(Entity e)

@@ -10,35 +10,81 @@ using Crimson.Entities;
 
 namespace Crimson.Components
 {
-    interface Component { }
+    [Flags]
+    enum Components
+    {
+        None = 0,
+        Movement = 1,
+        Transform = 2,
+        OnCollisionAdder = 4,
+        Graphics = 16,
+        KeyboardNavigation = 32,
+        InputEvent = 64,
+        Camera = 128,
+        Bullet = 256,
+        Collidable = 512,
+        CollisionEvent = 1024,
+        ShootEvent = 2048,
+        ScheduledRemove = 4096,
+        ScheduledAdd = 8192,
+        PursuitBehavior = 16384,
+        HasGun = 32768,
+        Faction = 65536,
+        Feeler = 131072,
+        Attacker = 262144,
+        Burning = 524288,
+        Flammable = 1048576,
+        HasMeleeWeapon = 2097152,
+        MeleeAttackEvent = 4194304,
+        AvoidObstaclesBehavior = 8388608,
+        Wet = 16777216,
+        Cleanup = 33554432,
+        Submergeable = 67108864,
+        Above = 134217728,
+        Tile = 268435456,
+        GameObject = 536870912,
+        Health = 1073741824
+    }
 
-    struct CHealth : Component
+    interface IComponent
+    {
+        Components Component { get; }
+    }
+
+    class CHealth : IComponent
     {
         public int MaxHealth { get; }
         public double CurrentHealth { get; }
+        public Components Component => Components.Health;
 
         public CHealth(int maxHealth, double currentHealth)
         {
             MaxHealth = maxHealth;
             CurrentHealth = currentHealth;
         }
+
+        public CHealth() { }
     }
 
-    class CMovement : Component
+    class CMovement : IComponent
     {
         public Vector Velocity { get; set; }
         public double MaxSpeed { get; }
+        public Components Component => Components.Movement;
 
         public CMovement(double maxSpeed, Vector acceleration)
         {
             Velocity = acceleration;
             MaxSpeed = maxSpeed;
         }
+
+        public CMovement() { }
     }
 
-    class CTransform : Component
+    class CTransform : IComponent
     {
         public Vector Location { get; set; }
+        public Components Component => Components.Transform;
 
         public CTransform(double x, double y)
         {
@@ -49,45 +95,62 @@ namespace Crimson.Components
         {
             Location = location;
         }
+
+        public CTransform() { }
     }
 
-    struct COnCollisionAdder : Component
+    class COnCollisionAdder : IComponent
     {
-        public List<Component> Components { get; set; }
+        public List<IComponent> Components { get; set; }
+        public Components Component => Crimson.Components.Components.OnCollisionAdder;
 
-        public COnCollisionAdder(List<Component> components)
+        public COnCollisionAdder(List<IComponent> components)
         {
             Components = components;
         }
+
+        public COnCollisionAdder() { }
     }
 
-    struct CGraphics : Component
+    class CGraphics : IComponent
     {
         public Image Image { get; }
         public Image OriginalImage { get; set; }
+        public Components Component => Components.Graphics;
 
         public CGraphics(Image image)
         {
             Image = image;
             OriginalImage = image;
         }
+
+        public CGraphics() { }
     }
 
-    struct CKeyboardNavigation : Component { }
+    class CKeyboardNavigation : IComponent
+    {
+        public Components Component => Components.KeyboardNavigation;
 
-    struct CInputEvent : Component
+        public CKeyboardNavigation() { }
+    }
+
+    class CInputEvent : IComponent
     {
         public List<KeyEventArgs> KeyEventArgs { get; }
+        public Components Component => Components.InputEvent;
 
         public CInputEvent(List<KeyEventArgs> keyEventArgs)
         {
             KeyEventArgs = keyEventArgs;
         }
+
+        public CInputEvent() { }
     }
 
-    struct CCamera : Component
+    class CCamera : IComponent
     {
         public int FollowDistance { get; }
+        public Components Component => Components.Camera;
 
         // Target entita musí mít CMovement a CPosition
         public EntityHandle Target { get; }
@@ -101,53 +164,68 @@ namespace Crimson.Components
             ScreenBounds = cameraBounds;
             NeedsRefresh = true;
         }
+
+        public CCamera() { }
     }
 
-    class CBullet : Component
+    class CBullet : IComponent
     {
         public int Damage { get; }
         public double RangeLeft { get; set; }
+        public Components Component => Components.Bullet;
 
         public CBullet(int damage, double rangeLeft)
         {
             Damage = damage;
             RangeLeft = rangeLeft;
         }
+
+        public CBullet() { }
     }
 
-    struct CCollidable : Component
+    class CCollidable : IComponent
     {
         public int Size { get; }
+        public Components Component => Components.Collidable;
 
         public CCollidable(int size)
         {
             Size = size;
         }
+
+        public CCollidable() { }
     }
 
-    struct CCollisionEvent : Component
+    class CCollisionEvent : IComponent
     {
         public EntityHandle Partner { get; }
+        public Components Component => Components.CollisionEvent;
 
         public CCollisionEvent(EntityHandle partner)
         {
             Partner = partner;
         }
+
+        public CCollisionEvent() { }
     }
 
-    struct CShootEvent : Component
+    class CShootEvent : IComponent
     {
         public Vector TargetLocation { get; }
+        public Components Component => Components.ShootEvent;
 
         public CShootEvent(Vector targetLocation)
         {
             TargetLocation = targetLocation;
         }
+
+        public CShootEvent() { }
     }
 
-    class CScheduledRemove : Component
+    class CScheduledRemove : IComponent
     {
         public List<(Type Component, double TimeLeft)> Components { get; set; }
+        public Components Component => Crimson.Components.Components.ScheduledRemove;
 
         public CScheduledRemove(List<(Type, double)> components)
         {
@@ -158,27 +236,33 @@ namespace Crimson.Components
         {
             Components = new List<(Type, double)>() { (component, timeLeft) };
         }
+
+        public CScheduledRemove() { }
     }
 
-    struct CScheduledAdd : Component
+    class CScheduledAdd : IComponent
     {
         public double TimeLeft { get; }
-        public Component Component { get; }
+        public IComponent ToRemove { get; }
+        public Components Component => Components.ScheduledAdd;
 
-        public CScheduledAdd(Component component, double timeLeft)
+        public CScheduledAdd(IComponent component, double timeLeft)
         {
-            Component = component;
+            ToRemove = component;
             TimeLeft = timeLeft;
         }
+
+        public CScheduledAdd() { }
     }
 
-    struct CPursuitBehavior : Component
+    class CPursuitBehavior : IComponent
     {
         // TODO Target musí mít movement a position
         public EntityHandle Target;
         public int Prediction;
         public int ReactionSpeed;
         public int Distance;
+        public Components Component => Components.PursuitBehavior;
 
         public CPursuitBehavior(EntityHandle target, int prediction, int reactionSpeed)
         {
@@ -195,13 +279,15 @@ namespace Crimson.Components
             ReactionSpeed = reactionSpeed;
             Distance = distance;
         }
+
+        public CPursuitBehavior() { }
     }
 
-    struct CGun : Component
+    class CHasGun : IComponent
     {
         public bool CanShoot;
+        public Components Component => Components.HasGun;
 
-        // TODO Možná by nebylo od věci změnit GunType na ShootingPattern nebo tak něco
         public enum ShootingPattern
         {
             Pistol, Shotgun, SMG
@@ -214,7 +300,7 @@ namespace Crimson.Components
         public double BulletSpeed { get;  }
         public Double Range { get; }
 
-        public CGun(ShootingPattern type, int damage, int reloadSpeed, int inaccuracy, int cadence, int bulletSpeed, double range) : this()
+        public CHasGun(ShootingPattern type, int damage, int reloadSpeed, int inaccuracy, int cadence, int bulletSpeed, double range) : this()
         {
             Type = type;
             Damage = damage;
@@ -225,93 +311,127 @@ namespace Crimson.Components
             CanShoot = true;
             Range = range;
         }
+
+        public CHasGun() { }
     }
 
-    struct CTile : Component { }
+    class CTile : IComponent
+    {
+        public Components Component => Components.Tile;
 
-    struct CGameObject : Component { }
+        public CTile() { }
+    }
+
+    class CGameObject : IComponent
+    {
+        public Components Component => Components.GameObject;
+
+        public CGameObject() { }
+    }
 
     enum Faction { PC, NPC }
-    struct CFaction : Component
+    class CFaction : IComponent
     {
         public Faction Faction { get; }
+        public Components Component => Components.Faction;
 
         public CFaction(Faction faction)
         {
             Faction = faction;
         }
+
+        public CFaction() { }
     }
 
-    struct CFeeler : Component
+    class CFeeler : IComponent
     {
         public Vector Offset { get; }
+        public Components Component => Components.Feeler;
 
         public CFeeler(Vector offset)
         {
             Offset = offset;
         }
+
+        public CFeeler() { }
     }
 
-    struct CAttacker : Component
+    class CAttacker : IComponent
     {
         public EntityHandle Target;
+        public Components Component => Components.Attacker;
 
         public CAttacker(EntityHandle target)
         {
             Target = target;
         }
+
+        public CAttacker() { }
     }
 
-    struct CBurning : Component
+    class CBurning : IComponent
     {
         public double Spread { get; }
+        public Components Component => Components.Burning;
 
         public CBurning(double spread)
         {
             Spread = spread;
         }
+
+        public CBurning() { }
     }
-    struct CFlammable: Component
+    class CFlammable: IComponent
     {
         public Image Image;
+        public Components Component => Components.Flammable;
 
         public CFlammable(Image image)
         {
             Image = image;
         }
+
+        public CFlammable() { }
     }
 
-    struct CMeleeWeapon : Component
+    class CHasMeleeWeapon : IComponent
     {
         public int Range;
         public int RateOfAttack;
         public int Damage;
         public bool CanAttack;
+        public Components Component => Components.HasMeleeWeapon;
 
-        public CMeleeWeapon(int range, int rateOfAttack, int damage, bool canAttack)
+        public CHasMeleeWeapon(int range, int rateOfAttack, int damage, bool canAttack)
         {
             Range = range;
             RateOfAttack = rateOfAttack;
             Damage = damage;
             CanAttack = canAttack;
         }
+
+        public CHasMeleeWeapon() { }
     }
 
-    struct CMeleeAttackEvent : Component
+    class CMeleeAttackEvent : IComponent
     {
         public EntityHandle Target { get; }
+        public Components Component => Components.MeleeAttackEvent;
 
         public CMeleeAttackEvent(EntityHandle target)
         {
             Target = target;
         }
+
+        public CMeleeAttackEvent() { }
     }
 
-    struct CAvoidObstaclesBehavior : Component
+    class CAvoidObstaclesBehavior : IComponent
     {
         public int Prediction;
         public int ReactionSpeed;
         public List<(EntityHandle, int)> Feelers;
+        public Components Component => Components.AvoidObstaclesBehavior;
 
         public CAvoidObstaclesBehavior(int prediction, int reactionSpeed, List<(EntityHandle, int)> feelers)
         {
@@ -319,29 +439,47 @@ namespace Crimson.Components
             ReactionSpeed = reactionSpeed;
             Feelers = feelers;
         }
+
+        public CAvoidObstaclesBehavior() { }
     }
 
-    struct CWet : Component
+    class CWet : IComponent
     {
         public double Spread { get; }
+        public Components Component => Components.Wet;
 
         public CWet(double spread)
         {
             Spread = spread;
         }
+
+        public CWet() { }
     }
 
-    struct CCLeanup : Component { }
+    class CCLeanup : IComponent
+    {
+        public Components Component => Components.Cleanup;
 
-    struct CSumbergable : Component
+        public CCLeanup() { }
+    }
+
+    class CSumbergable : IComponent
     {
         public Image Image;
+        public Components Component => Components.Submergeable;
 
         public CSumbergable(Image image)
         {
             Image = image;
         }
+
+        public CSumbergable() { }
     }
 
-    struct CAbove : Component { }
+    class CAbove : IComponent
+    {
+        public Components Component => Components.Above;
+
+        public CAbove() { }
+    }
 }

@@ -32,18 +32,18 @@ namespace Crimson.Systems
             {
                 if (adder.TimeLeft <= 0)
                 {
-                    if (!_adders.TryGetValue(adder.Component.GetType(), out MethodInfo m))
+                    if (!_adders.TryGetValue(adder.ToRemove.GetType(), out MethodInfo m))
                     {
                         MethodInfo addComponent = typeof(EntityHandle).GetMethod("AddComponent");
-                        m = addComponent.MakeGenericMethod(adder.Component.GetType());
-                        _adders[adder.Component.GetType()] = m;
+                        m = addComponent.MakeGenericMethod(adder.ToRemove.GetType());
+                        _adders[adder.ToRemove.GetType()] = m;
                     }
-                    _ = m.Invoke(entity, new object[1] { adder.Component });
+                    _ = m.Invoke(entity, new object[1] { adder.ToRemove });
                     toRemove.Add(entity);
                 }
                 else
                 {
-                    entity.AddComponent(new CScheduledAdd(adder.Component, adder.TimeLeft - 1));
+                    entity.AddComponent(new CScheduledAdd(adder.ToRemove, adder.TimeLeft - 1));
                 }
             }
             toRemove.ForEach(e => e.RemoveComponent<CScheduledAdd>());

@@ -9,12 +9,12 @@ namespace Crimson.Systems
 {
     class GunSystem : GameSystem
     {
-        readonly EntityGroup<CGun, CTransform, CShootEvent, CFaction> _shootingEntities;
+        readonly EntityGroup<CHasGun, CTransform, CShootEvent, CFaction> _shootingEntities;
 
         public GunSystem(World world)
         {
             _world = world;
-            _shootingEntities = _world.GetGroup<EntityGroup<CGun, CTransform, CShootEvent, CFaction>>();
+            _shootingEntities = _world.GetGroup<EntityGroup<CHasGun, CTransform, CShootEvent, CFaction>>();
         }
 
         public override void Update()
@@ -41,14 +41,14 @@ namespace Crimson.Systems
 
                 switch (gun.Type)
                 {
-                    case CGun.ShootingPattern.Pistol:
+                    case CHasGun.ShootingPattern.Pistol:
                         var bullet = ShootBullet(startingLocation, direction, gun, faction);
-                        bullet.AddComponent(new COnCollisionAdder(new System.Collections.Generic.List<Component> { new CBurning(3), new CScheduledRemove(typeof(CBurning), 100) } ));
+                        bullet.AddComponent(new COnCollisionAdder(new System.Collections.Generic.List<IComponent> { new CBurning(3), new CScheduledRemove(typeof(CBurning), 100) } ));
                         break;
-                    case CGun.ShootingPattern.SMG:
+                    case CHasGun.ShootingPattern.SMG:
                         ShootBullet(startingLocation, direction, gun, faction);
                         break;
-                    case CGun.ShootingPattern.Shotgun:
+                    case CHasGun.ShootingPattern.Shotgun:
                         var spread = direction.Orthogonalized().Normalized(8);
                         foreach (var i in Enumerable.Range(-2, 5))
                         {
@@ -62,7 +62,7 @@ namespace Crimson.Systems
             }
         }
 
-        EntityHandle ShootBullet(Vector startPosition, Vector direction, CGun gun, CFaction faction)
+        EntityHandle ShootBullet(Vector startPosition, Vector direction, CHasGun gun, CFaction faction)
         {
             var bullet = _world.CreateEntity();
             var inaccuracy = new Vector(Inaccuracy(gun.Inaccuracy), Inaccuracy(gun.Inaccuracy));
@@ -82,7 +82,7 @@ namespace Crimson.Systems
             return rnd.Next(2) == 0 ? -rnd.Next(upperBound + 1) : rnd.Next(upperBound + 1);
         }
 
-        async void CoolDown(CGun gun, EntityHandle entity)
+        async void CoolDown(CHasGun gun, EntityHandle entity)
         {
             gun.CanShoot = false;
             entity.AddComponent(gun);

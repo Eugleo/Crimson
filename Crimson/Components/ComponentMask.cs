@@ -8,61 +8,53 @@ namespace Crimson.Components
 {
     class ComponentMask
     {
-        // TODO vyměnit za bitmask (kdy každý komponent má hodnotu mocniny dvojky a maska je součet komponentů)
-        public HashSet<Type> IncludedComponents { get; set; } = new HashSet<Type>();
-        public HashSet<Type> ExcludedComponents { get; set; } = new HashSet<Type>();
+        public Components IncludedComponents { get; set; } = Components.None;
+        public Components ExcludedComponents { get; set; } = Components.None;
 
         public ComponentMask() { }
 
-        public void IncludeComponent(Type componentType)
+        public void IncludeComponent(Components component)
         {
-            IncludedComponents.Add(componentType);
+            IncludedComponents |= component;
+            ExcludedComponents &= ~component;
         }
 
-        public void IncludeComponent<T>() where T : Component
+        public void ExcludeComponent(Components component)
         {
-            IncludedComponents.Add(typeof(T));
-            ExcludedComponents.Remove(typeof(T));
+            IncludedComponents &= ~component;
+            ExcludedComponents |= component; 
         }
 
-        public void ExcludeComponent(Type componentType)
+        public void RemoveComponent(Components component)
         {
-            ExcludedComponents.Add(componentType);
+            IncludedComponents &= ~component;
+            ExcludedComponents &= ~component;
         }
 
-        public void ExcludeComponent<T>() where T : Component
+        public bool CompatibleWith(ComponentMask other)
         {
-            IncludedComponents.Remove(typeof(T));
-            ExcludedComponents.Add(typeof(T));
+            return ((IncludedComponents & other.IncludedComponents) == IncludedComponents) &&
+                   ((ExcludedComponents & other.ExcludedComponents) == ExcludedComponents);
         }
 
-        public void RemoveComponent<T>() where T : Component
+        public bool DoesIncludeComponent(Components component)
         {
-            IncludedComponents.Remove(typeof(T));
-            ExcludedComponents.Remove(typeof(T));
+            return IncludedComponents.HasFlag(component);
         }
 
-        public bool CompatibleWith(ComponentMask componentMask)
+        public bool DoesExcludeComponent(Components component)
         {
-            return IncludedComponents.All(c => componentMask.IncludedComponents.Contains(c)) &&
-                   ExcludedComponents.All(c => !componentMask.IncludedComponents.Contains(c));
-        }
-
-        public bool DoesIncludeComponent<T>() where T : Component
-        {
-            return IncludedComponents.Contains(typeof(T));
-        }
-
-        public bool DoesExcludeComponent<T>() where T : Component
-        {
-            return ExcludedComponents.Contains(typeof(T));
+            return ExcludedComponents.HasFlag(component);
         }
 
         public ComponentMask Clone()
         {
-            var mask = new ComponentMask();
-            foreach (var component in IncludedComponents) { mask.IncludeComponent(component); }
-            foreach (var component in ExcludedComponents) { mask.ExcludeComponent(component); }
+            var mask = new ComponentMask()
+            {
+                IncludedComponents = IncludedComponents,
+                ExcludedComponents = ExcludedComponents
+            };
+
             return mask;
         }
     }

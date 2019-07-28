@@ -8,21 +8,30 @@ namespace Crimson.Components
     // TODO: Existuje nějaký lepší způsob přidělování ID jednotlivým ComponentManagerům než toto?
     static class ComponentManagerDB
     {
-        public static Dictionary<int, Type> ComponentManagers = new Dictionary<int, Type>();
+        public static List<IComponentManager> ComponentManagers = new List<IComponentManager>();
     }
 
-    interface IComponentManager { }
+    interface IComponentManager
+    {
+        Type Component { get; }
+        Components ComponentID { get; }
+    }
 
-    class ComponentManager<T> : IComponentManager where T : Component
+    class ComponentManager<T> : IComponentManager where T : IComponent, new ()
     {
         public static ComponentManager<T> Instance = new ComponentManager<T>();
         public int ID;
+        public Components ComponentID { get; }
+        public Type Component { get; }
 
         readonly Dictionary<Entity, T> _components = new Dictionary<Entity, T>();
 
-        ComponentManager() {
+        ComponentManager()
+        {
             ID = ComponentManagerDB.ComponentManagers.Count;
-            ComponentManagerDB.ComponentManagers[ID] = typeof(T);
+            ComponentManagerDB.ComponentManagers.Add(this);
+            ComponentID = new T().Component;
+            Component = typeof(T);
         }
 
         public void AddComponentToEntity(Entity e, T c)

@@ -43,7 +43,7 @@ namespace Crimson.Entities
             _world = world;
         }
 
-        public void AddComponent<T>(T c) where T : Component
+        public void AddComponent<T>(T c) where T : IComponent, new()
         {
             _world.AddComponentToEntity(Entity, c);
         }
@@ -83,17 +83,17 @@ namespace Crimson.Entities
             ScheduleComponentForRemoval(component, 0);
         }
 
-        public void RemoveComponent<T>() where T : Component
+        public void RemoveComponent<T>() where T : IComponent, new()
         {
             _world.RemoveComponentFromEntity<T>(Entity);
         }
 
-        public T GetComponent<T>() where T : Component
+        public T GetComponent<T>() where T : IComponent, new ()
         {
             return _world.GetComponentForEntity<T>(Entity);
         }
 
-        public bool HasComponent<T>() where T : Component
+        public bool HasComponent<T>() where T : IComponent, new()
         {
             return _world.EntityHasComponent<T>(Entity);
         }
@@ -103,7 +103,7 @@ namespace Crimson.Entities
             _world.RemoveEntity(Entity);
         }
 
-        public bool TryGetComponent<T>(out T component) where T : Component
+        public bool TryGetComponent<T>(out T component) where T : IComponent, new()
         {
 
             if (HasComponent<T>())

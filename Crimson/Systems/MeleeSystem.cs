@@ -11,13 +11,13 @@ namespace Crimson.Systems
 {
     class MeleeSystem : GameSystem
     {
-        readonly EntityGroup<CTransform, CMeleeWeapon, CMeleeAttackEvent> _attackers;
+        readonly EntityGroup<CTransform, CHasMeleeWeapon, CMeleeAttackEvent> _attackers;
         readonly int MELEE_RANGE = 8;
 
         public MeleeSystem(World world)
         {
             _world = world;
-            _attackers = _world.GetGroup<EntityGroup<CTransform, CMeleeWeapon, CMeleeAttackEvent>>();
+            _attackers = _world.GetGroup<EntityGroup<CTransform, CHasMeleeWeapon, CMeleeAttackEvent>>();
         }
 
         public override void Update()
@@ -34,7 +34,7 @@ namespace Crimson.Systems
                 CoolDown(weapon, entity);
             }
         }
-        async void CoolDown(CMeleeWeapon weapon, EntityHandle entity)
+        async void CoolDown(CHasMeleeWeapon weapon, EntityHandle entity)
         {
             weapon.CanAttack = false;
             entity.AddComponent(weapon);

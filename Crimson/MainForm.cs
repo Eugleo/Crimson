@@ -17,15 +17,15 @@ namespace Crimson
         Map map;
         readonly World _world = new World();
         readonly EntityHandle _player;
-        readonly Dictionary<CGun.ShootingPattern, CGun> _guns = new Dictionary<CGun.ShootingPattern, CGun>();
+        readonly Dictionary<CHasGun.ShootingPattern, CHasGun> _guns = new Dictionary<CHasGun.ShootingPattern, CHasGun>();
 
         public MainForm()
         {
             InitializeComponent();
 
-            _guns[CGun.ShootingPattern.Pistol] = new CGun(CGun.ShootingPattern.Pistol, 15, 700, 5, 300, 25, 350);
-            _guns[CGun.ShootingPattern.Shotgun] = new CGun(CGun.ShootingPattern.Shotgun, 20, 800, 0, 700, 20, 200);
-            _guns[CGun.ShootingPattern.SMG] = new CGun(CGun.ShootingPattern.SMG, 10, 700, 2, 50, 30, 600);
+            _guns[CHasGun.ShootingPattern.Pistol] = new CHasGun(CHasGun.ShootingPattern.Pistol, 15, 700, 5, 300, 25, 350);
+            _guns[CHasGun.ShootingPattern.Shotgun] = new CHasGun(CHasGun.ShootingPattern.Shotgun, 20, 800, 0, 700, 20, 200);
+            _guns[CHasGun.ShootingPattern.SMG] = new CHasGun(CHasGun.ShootingPattern.SMG, 10, 700, 2, 50, 30, 600);
 
             map = LevelGenerator.Generate(_world, 30, 30, 64);
 
@@ -53,7 +53,7 @@ namespace Crimson
             _player.AddComponent(new CTransform(mainPanel.Width / 2, mainPanel.Height / 2));
             _player.AddComponent(new CGraphics(playerImage));
             _player.AddComponent(new CGameObject());
-            _player.AddComponent(_guns[CGun.ShootingPattern.Pistol]);
+            _player.AddComponent(_guns[CHasGun.ShootingPattern.Pistol]);
             _player.AddComponent(new CCollidable(32));
             _player.AddComponent(new CFaction(Faction.PC));
             _player.AddComponent(new CHealth(150, 150));
@@ -83,13 +83,13 @@ namespace Crimson
             switch (e.KeyCode)
             {
                 case Keys.D1:
-                    _player.AddComponent(_guns[CGun.ShootingPattern.Pistol]);
+                    _player.AddComponent(_guns[CHasGun.ShootingPattern.Pistol]);
                     break;
                 case Keys.D2:
-                    _player.AddComponent(_guns[CGun.ShootingPattern.Shotgun]);
+                    _player.AddComponent(_guns[CHasGun.ShootingPattern.Shotgun]);
                     break;
                 case Keys.D3:
-                    _player.AddComponent(_guns[CGun.ShootingPattern.SMG]);
+                    _player.AddComponent(_guns[CHasGun.ShootingPattern.SMG]);
                     break;
                 case Keys.U:
                     var enemy = _world.CreateEntity();
@@ -104,7 +104,7 @@ namespace Crimson
                     enemy.AddComponent(new CHealth(50, 50));
                     enemy.AddComponent(new CAvoidObstaclesBehavior(5, 2, MakeFeelers(new int[] { 0, 20, 40, 60, 80 })));
                     enemy.AddComponent(new CAttacker(_player));
-                    enemy.AddComponent(new CMeleeWeapon(70, 300, 100, true));
+                    enemy.AddComponent(new CHasMeleeWeapon(70, 300, 100, true));
                     enemy.AddComponent(new CFlammable(ResizeImage(Properties.Resources.ohen, 64, 64)));
                     enemy.AddComponent(new CSumbergable(ResizeImage(Properties.Resources.water, 64, 64)));
                     break;

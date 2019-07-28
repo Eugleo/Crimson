@@ -25,58 +25,49 @@ namespace Crimson
             return _entityManager.CreateEntity();
         }
 
-        readonly Dictionary<Type, MethodInfo> _includeCheckers = new Dictionary<Type, MethodInfo>();
         readonly Dictionary<Type, MethodInfo> _removers = new Dictionary<Type, MethodInfo>();
         public void RemoveEntity(Entity e)
         {
-            _entityManager.RemoveEntity(e);
-            foreach (var cm in ComponentManagerDB.ComponentManagers.Values)
-            {
-                if (!_includeCheckers.TryGetValue(cm, out MethodInfo m))
+            foreach (var cm in ComponentManagerDB.ComponentManagers)
+            {               
+                if (_entityManager.GetComponentMask(e).DoesIncludeComponent(cm.ComponentID))
                 {
-                    MethodInfo method = typeof(ComponentMask).GetMethod("DoesIncludeComponent");
-                    m = method.MakeGenericMethod(cm);
-                    _includeCheckers[cm] = m;
-                }
-               
-                if (Convert.ToBoolean(m.Invoke(_entityManager.GetComponentMask(e), new object[0])))
-                {
-                    if (!_removers.TryGetValue(cm, out MethodInfo m2))
+                    if (!_removers.TryGetValue(cm.Component, out MethodInfo m2))
                     {
                         MethodInfo method = typeof(World).GetMethod("RemoveComponentFromEntity");
-                        m2 = method.MakeGenericMethod(cm);
-                        _removers[cm] = m2;
+                        m2 = method.MakeGenericMethod(cm.Component);
+                        _removers[cm.Component] = m2;
                     }
                     m2.Invoke(this, new object[1] { e });
                 }
             }
         }
 
-        public T GetComponentForEntity<T>(Entity e) where T : Component
+        public T GetComponentForEntity<T>(Entity e) where T : IComponent, new ()
         {
             return ComponentManager<T>.Instance.LookupComponentForEntity(e);
         }
 
-        public void AddComponentToEntity<T>(Entity e, T c) where T : Component
+        public void AddComponentToEntity<T>(Entity e, T c) where T : IComponent, new ()
         {
             ComponentManager<T>.Instance.AddComponentToEntity(e, c);
             var mask = _entityManager.GetComponentMask(e);
             var oldMask = mask.Clone();
-            mask.IncludeComponent<T>();
+            mask.IncludeComponent(c.Component);
             UpdateGroupsForEntity(e, mask, oldMask);
         }
 
-        public bool EntityHasComponent<T>(Entity e) where T : Component
+        public bool EntityHasComponent<T>(Entity e) where T : IComponent, new ()
         {
-            return _entityManager.GetComponentMask(e).DoesIncludeComponent<T>();
+            return _entityManager.GetComponentMask(e).DoesIncludeComponent(ComponentManager<T>.Instance.ComponentID);
         }
 
-        public void RemoveComponentFromEntity<T>(Entity e) where T : Component
+        public void RemoveComponentFromEntity<T>(Entity e) where T : IComponent, new ()
         {
-            ComponentManager<Component>.Instance.RemoveComponentFromEntity(e);
+            ComponentManager<T>.Instance.RemoveComponentFromEntity(e);
             var mask = _entityManager.GetComponentMask(e);
             var oldMask = mask.Clone();
-            mask.RemoveComponent<T>();
+            mask.RemoveComponent(ComponentManager<T>.Instance.ComponentID);
             UpdateGroupsForEntity(e, mask, oldMask);
         }
 
@@ -104,11 +95,11 @@ namespace Crimson
             }
         }
 
-        public void ForEachEntityWithComponents<T>(Action<Entity> f) where T : Component
+        public void ForEachEntityWithComponents<T>(Action<Entity> f) where T : IComponent, new ()
         { 
             foreach (var entity in _entityManager.Entities)
             {
-                if (_entityManager.GetComponentMask(entity).DoesIncludeComponent<T>())
+                if (_entityManager.GetComponentMask(entity).DoesIncludeComponent(ComponentManager<T>.Instance.ComponentID))
                 {
                     f(entity);
                 }

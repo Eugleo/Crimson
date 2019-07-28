@@ -49,7 +49,7 @@ namespace Crimson.Systems
             RenderAll(_tiles, e);
         }
 
-        void RenderAll<T>(EntityGroup<CTransform, CGraphics, T> group, PaintEventArgs e) where T : Component
+        void RenderAll<T>(EntityGroup<CTransform, CGraphics, T> group, PaintEventArgs e) where T : IComponent, new ()
         {
             if (_cameras.Count == 0) { return; }
 
