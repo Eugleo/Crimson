@@ -25,11 +25,11 @@ namespace Crimson.Systems
 
             var cloud = Properties.Resources.cloud;
             images03 = new List<(Image Img, int Size)>() { (cloud, 55), (cloud, 58), (cloud, 60), (cloud, 64), (cloud, 69) }
-                .Select(i => MainForm.ResizeImage(i.Img, i.Size, i.Size))
+                .Select(i => Utilities.ResizeImage(i.Img, i.Size, i.Size))
                 .Select(i => (Image)ChangeOpacity(i, 0.25f))
                 .ToList();
             images08 = new List<(Image Img, int Size)>() { (cloud, 55), (cloud, 58), (cloud, 60), (cloud, 64), (cloud, 69) }
-                .Select(i => MainForm.ResizeImage(i.Img, i.Size, i.Size))
+                .Select(i => Utilities.ResizeImage(i.Img, i.Size, i.Size))
                 .Select(i => (Image)ChangeOpacity(i, 0.6f))
                 .ToList();
         }

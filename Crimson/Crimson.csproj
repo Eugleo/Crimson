@@ -81,7 +81,7 @@
     <Compile Include="Systems\GameSystem.cs" />
     <Compile Include="Systems\SteamSystem.cs" />
     <Compile Include="Systems\WaterSystem.cs" />
-    <Compile Include="Ultilities.cs" />
+    <Compile Include="Utilities.cs" />
     <Compile Include="Vector.cs" />
     <Compile Include="World.cs" />
     <EmbeddedResource Include="MainForm.resx">

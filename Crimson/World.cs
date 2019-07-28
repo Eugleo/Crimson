@@ -134,13 +134,9 @@ namespace Crimson
             _systems.Add(system);
         }
 
-
-        public uint Tick()
+        public void Tick()
         {
             _systems.ForEach(s => s.Update());
-            return 1;
         }
-
-
     }
 }

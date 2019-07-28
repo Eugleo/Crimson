@@ -136,7 +136,7 @@ namespace Crimson.Components
 
     class CInputEvent : IComponent
     {
-        public List<KeyEventArgs> KeyEventArgs { get; }
+        public List<KeyEventArgs> KeyEventArgs { get; set; }
         public Components Component => Components.InputEvent;
 
         public CInputEvent(List<KeyEventArgs> keyEventArgs)

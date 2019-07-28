@@ -53,8 +53,8 @@ namespace Crimson
                     tile.AddComponent(new CTile());
                     tile.AddComponent(new CTransform(i * ts, j * ts));
                     tile.AddComponent(new CSumbergable(Properties.Resources.pond));
-                    tile.AddComponent(new CGraphics(MainForm.ResizeImage(Properties.Resources.desert, ts, ts)));
-                    //tile.AddComponent(new CFlammable(MainForm.ResizeImage(Properties.Resources.ohen, Map.TileSize, Map.TileSize)));
+                    tile.AddComponent(new CGraphics(Utilities.ResizeImage(Properties.Resources.desert, ts, ts)));
+                    //tile.AddComponent(new CFlammable(Utilities.ResizeImage(Properties.Resources.ohen, Map.TileSize, Map.TileSize)));
                 }
             }
         }
@@ -68,8 +68,8 @@ namespace Crimson
                     var correction = (rnd.Next(2) == 0 ? -1 : 1) * rnd.Next((int)Math.Floor(sensitivity / 4));
                     if (IsNearGrass((i, j), sensitivity + correction))
                     {
-                        Map.Plan[i, j].AddComponent(new CGraphics(MainForm.ResizeImage(Properties.Resources.Grass, Map.TileSize, Map.TileSize)));
-                        Map.Plan[i, j].AddComponent(new CFlammable(MainForm.ResizeImage(Properties.Resources.ohen, Map.TileSize, Map.TileSize)));
+                        Map.Plan[i, j].AddComponent(new CGraphics(Utilities.ResizeImage(Properties.Resources.Grass, Map.TileSize, Map.TileSize)));
+                        Map.Plan[i, j].AddComponent(new CFlammable(Utilities.ResizeImage(Properties.Resources.ohen, Map.TileSize, Map.TileSize)));
                     }
                 }
             }
@@ -189,11 +189,11 @@ namespace Crimson
             {
                 case 0:
                     size = ts * 1;
-                    treeImage = MainForm.ResizeImage(Properties.Resources.baobab, size, size);
+                    treeImage = Utilities.ResizeImage(Properties.Resources.baobab, size, size);
                     break;
                 default:
                     size = ts * 1;
-                    treeImage = MainForm.ResizeImage(Properties.Resources.smrk, size, size);
+                    treeImage = Utilities.ResizeImage(Properties.Resources.smrk, size, size);
                     break;
             }
             var x = X * ts; //- size / 4;
@@ -207,14 +207,14 @@ namespace Crimson
             tree.AddComponent(new CGameObject());
             tree.AddComponent(new CCollidable(size / 2));
             tree.AddComponent(new CHealth(100, 100));
-            tree.AddComponent(new CFlammable(MainForm.ResizeImage(Properties.Resources.ohen, size, size)));
-            tree.AddComponent(new CSumbergable(MainForm.ResizeImage(Properties.Resources.water, 64, 64)));
+            tree.AddComponent(new CFlammable(Utilities.ResizeImage(Properties.Resources.ohen, size, size)));
+            tree.AddComponent(new CSumbergable(Utilities.ResizeImage(Properties.Resources.water, 64, 64)));
         }
 
         void MakeBush(int X, int Y)
         {
             var ts = Map.TileSize;
-            Image image = MainForm.ResizeImage(Properties.Resources.bush, ts, ts);
+            Image image = Utilities.ResizeImage(Properties.Resources.bush, ts, ts);
             var x = X * ts;
             var y = Y * ts;
 
@@ -224,8 +224,8 @@ namespace Crimson
             tree.AddComponent(new CGameObject());
             tree.AddComponent(new CCollidable(ts / 2));
             tree.AddComponent(new CHealth(100, 100));
-            tree.AddComponent(new CFlammable(MainForm.ResizeImage(Properties.Resources.ohen, ts, ts)));
-            tree.AddComponent(new CSumbergable(MainForm.ResizeImage(Properties.Resources.water, ts, ts)));
+            tree.AddComponent(new CFlammable(Utilities.ResizeImage(Properties.Resources.ohen, ts, ts)));
+            tree.AddComponent(new CSumbergable(Utilities.ResizeImage(Properties.Resources.water, ts, ts)));
         }
 
         void AddBoulders(double probability)
@@ -249,7 +249,7 @@ namespace Crimson
         void MakeBoulder(int X, int Y)
         {
             var ts = Map.TileSize;
-            Image image = MainForm.ResizeImage(Properties.Resources.boulder, ts / 2, ts / 2);
+            Image image = Utilities.ResizeImage(Properties.Resources.boulder, ts / 2, ts / 2);
             var x = X * ts;
             var y = Y * ts;
             var boulder = _world.CreateEntity();
@@ -258,7 +258,7 @@ namespace Crimson
             boulder.AddComponent(new CGameObject());
             boulder.AddComponent(new CCollidable(ts / 4));
             boulder.AddComponent(new CHealth(1000, 1000));
-            boulder.AddComponent(new CSumbergable(MainForm.ResizeImage(Properties.Resources.water, 64, 64)));
+            boulder.AddComponent(new CSumbergable(Utilities.ResizeImage(Properties.Resources.water, 64, 64)));
         }
     }
 }
