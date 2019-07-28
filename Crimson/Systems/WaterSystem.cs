@@ -38,24 +38,24 @@ namespace Crimson.Systems
 
                 if (water.Spread - 1 >= 0)
                 {
-                    new List<(int X, int Y)>() { (x - 1, y), (x + 1, y), (x, y - 1), (x, y + 1) }
-                   .Where(t => t.X >= 0 && t.Y >= 0 && t.X < _map.Height && t.Y < _map.Width)
-                   .Select(t => _map.Plan[t.X, t.Y])
-                   .Where(t => t.HasComponent<CSumbergable>())
-                   .Where(t => !t.TryGetComponent(out CWet neighborWater) || neighborWater.Spread < water.Spread - 1)
-                   .ToList()
-                   .ForEach(t => t.AddComponent(new CWet(water.Spread - 1)));
+                    var neighbors = new List<(int X, int Y)>() { (x - 1, y), (x + 1, y), (x, y - 1), (x, y + 1) }
+                       .Where(t => t.X >= 0 && t.Y >= 0 && t.X < _map.Height && t.Y < _map.Width)
+                       .Select(t => _map.Plan[t.X, t.Y])
+                       .Where(t => t.HasComponent<CSumbergable>())
+                       .Where(t => !t.TryGetComponent(out CWet neighborWater) || neighborWater.Spread < water.Spread - 1);
+
+                    foreach (var t in neighbors) { t.AddComponent(new CWet(water.Spread - 1)); }
                 }
 
                 if (water.Spread - Math.Sqrt(2) >= 0)
                 {
-                    new List<(int X, int Y)>() { (x - 1, y - 1), (x + 1, y + 1), (x + 1, y - 1), (x - 1, y + 1) }
-                   .Where(t => t.X >= 0 && t.Y >= 0 && t.X < _map.Height && t.Y < _map.Width)
-                   .Select(t => _map.Plan[t.X, t.Y])
-                   .Where(t => t.HasComponent<CSumbergable>())
-                   .Where(t => !t.TryGetComponent(out CWet neighborWater) || neighborWater.Spread < water.Spread - Math.Sqrt(2))
-                   .ToList()
-                   .ForEach(t => t.AddComponent(new CWet(water.Spread - Math.Sqrt(2))));
+                    var neighbors = new List<(int X, int Y)>() { (x - 1, y - 1), (x + 1, y + 1), (x + 1, y - 1), (x - 1, y + 1) }
+                       .Where(t => t.X >= 0 && t.Y >= 0 && t.X < _map.Height && t.Y < _map.Width)
+                       .Select(t => _map.Plan[t.X, t.Y])
+                       .Where(t => t.HasComponent<CSumbergable>())
+                       .Where(t => !t.TryGetComponent(out CWet neighborWater) || neighborWater.Spread < water.Spread - Math.Sqrt(2));
+
+                    foreach (var t in neighbors) { t.AddComponent(new CWet(water.Spread - Math.Sqrt(2))); }
                 }
             }
         }

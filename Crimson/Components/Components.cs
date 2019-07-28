@@ -24,7 +24,7 @@ namespace Crimson.Components
         }
     }
 
-    struct CMovement : Component
+    class CMovement : Component
     {
         public Vector Velocity;
         public double MaxSpeed;
@@ -36,7 +36,7 @@ namespace Crimson.Components
         }
     }
 
-    struct CTransform : Component
+    class CTransform : Component
     {
         public Vector Location;
 
@@ -145,27 +145,27 @@ namespace Crimson.Components
         }
     }
 
-    class CTimedRemover : Component
+    class CScheduledRemove : Component
     {
         public List<(Type Component, double TimeLeft)> Components { get; set; }
 
-        public CTimedRemover(List<(Type, double)> components)
+        public CScheduledRemove(List<(Type, double)> components)
         {
             Components = components;
         }
 
-        public CTimedRemover(Type component, double timeLeft)
+        public CScheduledRemove(Type component, double timeLeft)
         {
             Components = new List<(Type, double)>() { (component, timeLeft) };
         }
     }
 
-    struct CTimedAdder : Component
+    struct CScheduledAdd : Component
     {
         public double TimeLeft { get; }
         public Component Component { get; }
 
-        public CTimedAdder(Component component, double timeLeft)
+        public CScheduledAdd(Component component, double timeLeft)
         {
             Component = component;
             TimeLeft = timeLeft;

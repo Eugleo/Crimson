@@ -50,7 +50,7 @@ namespace Crimson.Entities
 
         public void ScheduleForDeletion(double timeLeft)
         {
-            AddComponent(new CTimedAdder(new CCLeanup(), timeLeft));
+            AddComponent(new CScheduledAdd(new CCLeanup(), timeLeft));
         }
 
         public void ScheduleForDeletion()
@@ -60,7 +60,7 @@ namespace Crimson.Entities
 
         public void ScheduleComponentForRemoval(Type component, double timeLeft)
         {
-            if (TryGetComponent(out CTimedRemover remover))
+            if (TryGetComponent(out CScheduledRemove remover))
             {
                 var index = remover.Components.FindIndex(f => f.Component == component);
                 if (index != -1 && remover.Components[index].TimeLeft > timeLeft)
@@ -74,7 +74,7 @@ namespace Crimson.Entities
             }
             else
             {
-                AddComponent(new CTimedRemover(component, timeLeft));
+                AddComponent(new CScheduledRemove(component, timeLeft));
             }
         }
 

@@ -13,38 +13,46 @@ namespace Crimson.Systems
     class MetaSystem : GameSystem
     {
         readonly EntityGroup<CCLeanup> _toDelete;
-        readonly EntityGroup<CTimedRemover> _toRemoveComponent;
-        readonly EntityGroup<CTimedAdder> _toAddComponent;
+        readonly EntityGroup<CScheduledRemove> _toRemoveComponent;
+        readonly EntityGroup<CScheduledAdd> _toAddComponent;
 
         public MetaSystem(World world)
         {
             _world = world;
             _toDelete = _world.GetGroup<EntityGroup<CCLeanup>>();
-            _toRemoveComponent = _world.GetGroup<EntityGroup<CTimedRemover>>();
-            _toAddComponent = _world.GetGroup<EntityGroup<CTimedAdder>>();
+            _toRemoveComponent = _world.GetGroup<EntityGroup<CScheduledRemove>>();
+            _toAddComponent = _world.GetGroup<EntityGroup<CScheduledAdd>>();
         }
 
-        public override void Update()
+        readonly Dictionary<Type, MethodInfo> _adders = new Dictionary<Type, MethodInfo>();
+        void Adder()
         {
-            MethodInfo addComponent = typeof(EntityHandle).GetMethod("AddComponent");
-            var toRemoveAdder = new List<EntityHandle>();
+            var toRemove = new List<EntityHandle>();
             foreach (var (entity, adder) in _toAddComponent)
             {
                 if (adder.TimeLeft <= 0)
                 {
-                    var m = addComponent.MakeGenericMethod(adder.Component.GetType());
+                    if (!_adders.TryGetValue(adder.Component.GetType(), out MethodInfo m))
+                    {
+                        MethodInfo addComponent = typeof(EntityHandle).GetMethod("AddComponent");
+                        m = addComponent.MakeGenericMethod(adder.Component.GetType());
+                        _adders[adder.Component.GetType()] = m;
+                    }
                     _ = m.Invoke(entity, new object[1] { adder.Component });
-                    toRemoveAdder.Add(entity);
+                    toRemove.Add(entity);
                 }
                 else
                 {
-                    entity.AddComponent(new CTimedAdder(adder.Component, adder.TimeLeft - 1));
+                    entity.AddComponent(new CScheduledAdd(adder.Component, adder.TimeLeft - 1));
                 }
             }
-            toRemoveAdder.ForEach(e => e.RemoveComponent<CTimedAdder>());
+            toRemove.ForEach(e => e.RemoveComponent<CScheduledAdd>());
+        }
 
-            MethodInfo removeComponent = typeof(EntityHandle).GetMethod("RemoveComponent");
-            var toRemoveRemover = new List<EntityHandle>();
+        readonly Dictionary<Type, MethodInfo> _removers = new Dictionary<Type, MethodInfo>();
+        void Remover()
+        {
+            var toRemove = new List<EntityHandle>();
             foreach (var (entity, remove) in _toRemoveComponent)
             {
                 foreach (var i in Enumerable.Range(0, remove.Components.Count))
@@ -52,9 +60,14 @@ namespace Crimson.Systems
                     var (component, timeleft) = remove.Components[i];
                     if (timeleft <= 0)
                     {
-                        var m = removeComponent.MakeGenericMethod(component);
+                        if (!_removers.TryGetValue(component, out MethodInfo m))
+                        {
+                            MethodInfo removeComponent = typeof(EntityHandle).GetMethod("RemoveComponent");
+                            m = removeComponent.MakeGenericMethod(component);
+                            _removers[component] = m;
+                        }
                         _ = m.Invoke(entity, new object[0]);
-                        toRemoveRemover.Add(entity);
+                        toRemove.Add(entity);
                     }
                     else
                     {
@@ -62,8 +75,11 @@ namespace Crimson.Systems
                     }
                 }
             }
-            toRemoveRemover.ForEach(e => e.RemoveComponent<CTimedRemover>());
+            toRemove.ForEach(e => e.RemoveComponent<CScheduledRemove>());
+        }
 
+        void Deleter()
+        {
             var toDelete = new List<EntityHandle>();
             foreach (var (entity, _) in _toDelete)
             {
@@ -74,6 +90,13 @@ namespace Crimson.Systems
                 }
             }
             toDelete.ForEach(e => e.Delete());
+        }
+
+        public override void Update()
+        {
+            Adder();
+            Remover();
+            Deleter();
         }
     }
 }

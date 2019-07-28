@@ -73,30 +73,32 @@ namespace Crimson.Systems
 
                 if (fire.Spread - 1 >= 0)
                 {
-                    new List<(int X, int Y)>() { (x - 1, y), (x + 1, y), (x, y - 1), (x, y + 1) }
-                    .Where(t => t.X >= 0 && t.Y >= 0 && t.X < _map.Height && t.Y < _map.Width)
-                    .Select(t => _map.Plan[t.X, t.Y])
-                    .Where(t => t.HasComponent<CFlammable>())
-                    .Where(t => !t.TryGetComponent(out CBurning neighborFire) || neighborFire.Spread < fire.Spread - 1)
-                    .ToList()
-                    .ForEach(t => {
+                    var neighbors = new List<(int X, int Y)>() { (x - 1, y), (x + 1, y), (x, y - 1), (x, y + 1) }
+                        .Where(t => t.X >= 0 && t.Y >= 0 && t.X < _map.Height && t.Y < _map.Width)
+                        .Select(t => _map.Plan[t.X, t.Y])
+                        .Where(t => t.HasComponent<CFlammable>())
+                        .Where(t => !t.TryGetComponent(out CBurning neighborFire) || neighborFire.Spread < fire.Spread - 1);
+
+                    foreach (var t in neighbors)
+                    {
                         t.AddComponent(new CBurning(fire.Spread - 1));
                         t.ScheduleComponentForRemoval(typeof(CBurning), 50);
-                    });
+                    }
                 }
 
                 if (fire.Spread - Math.Sqrt(2) >= 0)
                 {
-                    new List<(int X, int Y)>() { (x - 1, y - 1), (x + 1, y + 1), (x + 1, y - 1), (x - 1, y + 1) }
-                    .Where(t => t.X >= 0 && t.Y >= 0 && t.X < _map.Height && t.Y < _map.Width)
-                    .Select(t => _map.Plan[t.X, t.Y])
-                    .Where(t => t.HasComponent<CFlammable>())
-                    .Where(t => !t.TryGetComponent(out CBurning neighborFire) || neighborFire.Spread < fire.Spread - Math.Sqrt(2))
-                    .ToList()
-                    .ForEach(t => {
+                    var neighbors = new List<(int X, int Y)>() { (x - 1, y - 1), (x + 1, y + 1), (x + 1, y - 1), (x - 1, y + 1) }
+                        .Where(t => t.X >= 0 && t.Y >= 0 && t.X < _map.Height && t.Y < _map.Width)
+                        .Select(t => _map.Plan[t.X, t.Y])
+                        .Where(t => t.HasComponent<CFlammable>())
+                        .Where(t => !t.TryGetComponent(out CBurning neighborFire) || neighborFire.Spread < fire.Spread - Math.Sqrt(2));
+
+                    foreach (var t in neighbors)
+                    {
                         t.AddComponent(new CBurning(fire.Spread - Math.Sqrt(2)));
                         t.ScheduleComponentForRemoval(typeof(CBurning), 50);
-                    });
+                    }
                 }
             }
         }

@@ -25,18 +25,29 @@ namespace Crimson
             return _entityManager.CreateEntity();
         }
 
+        readonly Dictionary<Type, MethodInfo> _includeCheckers = new Dictionary<Type, MethodInfo>();
+        readonly Dictionary<Type, MethodInfo> _removers = new Dictionary<Type, MethodInfo>();
         public void RemoveEntity(Entity e)
         {
             _entityManager.RemoveEntity(e);
             foreach (var cm in ComponentManagerDB.ComponentManagers.Values)
             {
-                MethodInfo method = typeof(ComponentMask).GetMethod("DoesIncludeComponent");
-                method = method.MakeGenericMethod(cm);
-                if (Convert.ToBoolean(method.Invoke(_entityManager.GetComponentMask(e), new object[0])))
+                if (!_includeCheckers.TryGetValue(cm, out MethodInfo m))
                 {
-                    MethodInfo method2 = typeof(World).GetMethod("RemoveComponentFromEntity");
-                    method2 = method2.MakeGenericMethod(cm);
-                    method2.Invoke(this, new object[1] { e });
+                    MethodInfo method = typeof(ComponentMask).GetMethod("DoesIncludeComponent");
+                    m = method.MakeGenericMethod(cm);
+                    _includeCheckers[cm] = m;
+                }
+               
+                if (Convert.ToBoolean(m.Invoke(_entityManager.GetComponentMask(e), new object[0])))
+                {
+                    if (!_removers.TryGetValue(cm, out MethodInfo m2))
+                    {
+                        MethodInfo method = typeof(World).GetMethod("RemoveComponentFromEntity");
+                        m2 = method.MakeGenericMethod(cm);
+                        _removers[cm] = m2;
+                    }
+                    m2.Invoke(this, new object[1] { e });
                 }
             }
         }

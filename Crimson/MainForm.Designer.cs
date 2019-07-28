@@ -40,7 +40,7 @@ namespace Crimson
             // 
             // gameTimer
             // 
-            this.gameTimer.Interval = 10;
+            this.gameTimer.Interval = 20;
             this.gameTimer.Tick += new System.EventHandler(this.GameTimer_Tick);
             // 
             // fpsTimer

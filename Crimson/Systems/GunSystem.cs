@@ -43,7 +43,7 @@ namespace Crimson.Systems
                 {
                     case CGun.ShootingPattern.Pistol:
                         var bullet = ShootBullet(startingLocation, direction, gun, faction);
-                        bullet.AddComponent(new COnCollisionAdder(new System.Collections.Generic.List<Component> { new CBurning(3), new CTimedRemover(typeof(CBurning), 100) } ));
+                        bullet.AddComponent(new COnCollisionAdder(new System.Collections.Generic.List<Component> { new CBurning(3), new CScheduledRemove(typeof(CBurning), 100) } ));
                         break;
                     case CGun.ShootingPattern.SMG:
                         ShootBullet(startingLocation, direction, gun, faction);

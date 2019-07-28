@@ -26,11 +26,11 @@ namespace Crimson.Systems
             var cloud = Properties.Resources.cloud;
             images03 = new List<(Image Img, int Size)>() { (cloud, 55), (cloud, 58), (cloud, 60), (cloud, 64), (cloud, 69) }
                 .Select(i => MainForm.ResizeImage(i.Img, i.Size, i.Size))
-                .Select(i => (Image)ChangeOpacity(i, 0.3f))
+                .Select(i => (Image)ChangeOpacity(i, 0.25f))
                 .ToList();
             images08 = new List<(Image Img, int Size)>() { (cloud, 55), (cloud, 58), (cloud, 60), (cloud, 64), (cloud, 69) }
                 .Select(i => MainForm.ResizeImage(i.Img, i.Size, i.Size))
-                .Select(i => (Image)ChangeOpacity(i, 0.8f))
+                .Select(i => (Image)ChangeOpacity(i, 0.6f))
                 .ToList();
         }
 
@@ -38,7 +38,12 @@ namespace Crimson.Systems
         {
             foreach (var (entity, fire, transform) in _steamingHot)
             {
-                CreateCloud(transform.Location, images03);
+                switch (rnd.Next(3))
+                {
+                    case 0:
+                        CreateCloud(transform.Location, images03, 20);
+                        break;
+                }
             }
 
             foreach (var (entity, water, fire, transform) in _wetHot_InYourArea)
@@ -46,38 +51,29 @@ namespace Crimson.Systems
                 entity.ScheduleComponentForRemoval(typeof(CBurning));
                 entity.ScheduleComponentForRemoval(typeof(CWet));
                 var count = 0;
-                switch (rnd.Next(6))
+                switch (rnd.Next(5))
                 {
                     case 0:
-                    case 1:
                         count = 1;
                         break;
-                    case 2:
-                    case 3:
-                    case 4:
-                        count = 2;
-                        break;
-                    case 5:
-                        count = 3;
+                    default:
+                        count = 0;
                         break;
                 }
-                foreach (var _ in Enumerable.Range(0, count)) { CreateCloud(transform.Location, images08); }
+                foreach (var _ in Enumerable.Range(0, count)) { CreateCloud(transform.Location, images08, 25); }
             }
         }
-
-        Image image03 = ChangeOpacity(Properties.Resources.cloud, 0.3f);
-        Image image08 = ChangeOpacity(Properties.Resources.cloud, 0.8f);
 
         List<Image> images08;
         List<Image> images03;
 
-        void CreateCloud(Vector location, List<Image> images)
+        void CreateCloud(Vector location, List<Image> images, int lifeTIme)
         {
             var cloud = _world.CreateEntity();
             cloud.AddComponent(new CAbove());
             cloud.AddComponent(new CGraphics(images[rnd.Next(images.Count)]));
             cloud.AddComponent(new CTransform(location + new Vector(Sign() * rnd.Next(10), Sign() * rnd.Next(10))));
-            cloud.ScheduleForDeletion(5);
+            cloud.ScheduleForDeletion(lifeTIme);
         }
 
         int Sign()
