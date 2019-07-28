@@ -52,6 +52,9 @@
     <Compile Include="Entities\Entity.cs" />
     <Compile Include="Components\ComponentMask.cs" />
     <Compile Include="LevelGenerator.cs" />
+    <Compile Include="PercentageBar.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="Systems\AttackSystem.cs" />
     <Compile Include="Systems\AvoidObstaclesSystem.cs" />
     <Compile Include="Systems\BulletSystem.cs" />

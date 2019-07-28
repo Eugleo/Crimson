@@ -111,6 +111,23 @@ namespace Crimson
                 case Keys.U:
                     MakeEnemy();
                     break;
+                case Keys.Escape:
+                    Pause();
+                    break;
+            }
+        }
+
+        void Pause()
+        {
+            if (gameTimer.Enabled)
+            {
+                gameTimer.Enabled = false;
+                pauseLabel.Show();
+            }
+            else
+            {
+                gameTimer.Enabled = true;
+                pauseLabel.Hide();
             }
         }
 
@@ -163,7 +180,22 @@ namespace Crimson
 
             if (_player.TryGetComponent(out CHasGun gun))
             {
-                Text = string.Format(" Ammo: {0}", gun.Ammo);
+                if (gun.IsBeingReloaded)
+                {
+                    reloadingLabel.Show();
+                }
+                else
+                {
+                    reloadingLabel.Hide();
+                }
+                ammoBar.Maximum = gun.MagazineSize;
+                ammoBar.Val = gun.Ammo;
+            }
+
+            if (_player.TryGetComponent(out CHealth health))
+            {
+                healthBar.Maximum = health.MaxHealth;
+                healthBar.Val = (int)Math.Round(health.CurrentHealth);
             }
 
             if (_isShooting)
