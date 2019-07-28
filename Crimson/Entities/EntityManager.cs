@@ -1,9 +1,5 @@
-﻿using System;
+﻿using Crimson.Components;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Crimson.Components;
 
 namespace Crimson.Entities
 {
@@ -16,7 +12,7 @@ namespace Crimson.Entities
         {
             _world = world;
         }
-        
+
         public EntityHandle CreateEntity()
         {
             var e = new Entity(Entities.Count);

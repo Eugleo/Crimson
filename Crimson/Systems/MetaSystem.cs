@@ -1,12 +1,9 @@
-﻿using System;
+﻿using Crimson.Components;
+using Crimson.Entities;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Reflection;
-
-using Crimson.Entities;
-using Crimson.Components;
 
 namespace Crimson.Systems
 {
@@ -15,13 +12,17 @@ namespace Crimson.Systems
         readonly EntityGroup<CCLeanup> _toDelete;
         readonly EntityGroup<CScheduledRemove> _toRemoveComponent;
         readonly EntityGroup<CScheduledAdd> _toAddComponent;
+        readonly Action _pcDied;
+        readonly Action _npcDied;
 
-        public MetaSystem(World world)
+        public MetaSystem(World world, Action pcDied, Action npcDied)
         {
             _world = world;
             _toDelete = _world.GetGroup<EntityGroup<CCLeanup>>();
             _toRemoveComponent = _world.GetGroup<EntityGroup<CScheduledRemove>>();
             _toAddComponent = _world.GetGroup<EntityGroup<CScheduledAdd>>();
+            _pcDied = pcDied;
+            _npcDied = npcDied;
         }
 
         readonly Dictionary<Type, MethodInfo> _adders = new Dictionary<Type, MethodInfo>();
@@ -87,6 +88,18 @@ namespace Crimson.Systems
                 if (entity.TryGetComponent(out CAvoidObstaclesBehavior avoid))
                 {
                     toDelete.Concat(avoid.Feelers.Select(f => f.Item1));
+                }
+                if (!entity.HasComponent<CBullet>() && entity.TryGetComponent(out CFaction faction))
+                {
+                    switch (faction.Faction)
+                    {
+                        case Faction.NPC:
+                            _npcDied();
+                            break;
+                        case Faction.PC:
+                            _pcDied();
+                            break;
+                    }
                 }
             }
             toDelete.ForEach(e => e.Delete());

@@ -1,20 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Crimson.Components;
-using Crimson.Systems;
+﻿using Crimson.Components;
 using Crimson.Entities;
-using System.Drawing.Imaging;
+using Crimson.Systems;
+using System;
+using System.Collections.Generic;
 using System.Drawing;
+using System.Linq;
 
 namespace Crimson
 {
     class LevelGenerator
     {
 
-        World _world;
+        readonly World _world;
         public Map Map { get; }
 
         readonly Random rnd = new Random();
@@ -36,7 +33,7 @@ namespace Crimson
             }
             lg.AddGrass(7);
             lg.AddTrees(0.1);
-            lg.AddBushes(0.15);
+            lg.AddBushes(0.05);
             return lg.Map;
         }
 
@@ -86,7 +83,7 @@ namespace Crimson
             {
                 foreach (var j in Enumerable.Range(0, Map.Height))
                 {
-                    if (Distance(point, (i, j)) <= distance && Map.Plan[i, j].HasComponent<CWet>()) { return true; } 
+                    if (Distance(point, (i, j)) <= distance && Map.Plan[i, j].HasComponent<CWet>()) { return true; }
                 }
             }
             return false;
@@ -137,7 +134,11 @@ namespace Crimson
                         switch (rnd.Next((int)Math.Round(1 / probability)))
                         {
                             case 0:
-                                MakeBush(i, j);
+                                var bush = MakeBush(i, j);
+                                if (bush != default)
+                                {
+                                    Map.Plan[i, j].GetComponent<CTile>().Occupied = true;
+                                }
                                 break;
                             default:
                                 break;
@@ -158,8 +159,9 @@ namespace Crimson
             }
         }
 
-        void AddTrees(double probability)
+        List<EntityHandle> AddTrees(double probability)
         {
+            var trees = new List<EntityHandle>();
             foreach (var i in Enumerable.Range(0, Map.Width))
             {
                 foreach (var j in Enumerable.Range(0, Map.Height))
@@ -170,7 +172,12 @@ namespace Crimson
                         switch (rnd.Next((int)Math.Round(1 / probability)))
                         {
                             case 0:
-                                MakeTree(i, j);
+                                var tree = MakeTree(i, j);
+                                if (tree != default)
+                                {
+                                    trees.Add(tree);
+                                    Map.Plan[i, j].GetComponent<CTile>().Occupied = true;
+                                }
                                 break;
                             default:
                                 break;
@@ -178,9 +185,10 @@ namespace Crimson
                     }
                 }
             }
+            return trees;
         }
 
-        void MakeTree(int X, int Y)
+        EntityHandle MakeTree(int X, int Y)
         {
             var ts = Map.TileSize;
             Image treeImage;
@@ -199,7 +207,7 @@ namespace Crimson
             var x = X * ts; //- size / 4;
             var y = Y * ts; //- size / 2;
 
-            if (x < 0 || y < 0 || x + size >= Map.Width * ts || y + size >= Map.Height * ts) { return; }
+            if (x < 0 || y < 0 || x + size >= Map.Width * ts || y + size >= Map.Height * ts) { return default; }
 
             var tree = _world.CreateEntity();
             tree.AddComponent(new CTransform(x, y));
@@ -209,23 +217,25 @@ namespace Crimson
             tree.AddComponent(new CHealth(100, 100));
             tree.AddComponent(new CFlammable(Utilities.ResizeImage(Properties.Resources.ohen, size, size)));
             tree.AddComponent(new CSumbergable(Utilities.ResizeImage(Properties.Resources.water, 64, 64)));
+            return tree;
         }
 
-        void MakeBush(int X, int Y)
+        EntityHandle MakeBush(int X, int Y)
         {
             var ts = Map.TileSize;
             Image image = Utilities.ResizeImage(Properties.Resources.bush, ts, ts);
             var x = X * ts;
             var y = Y * ts;
 
-            var tree = _world.CreateEntity();
-            tree.AddComponent(new CTransform(x, y));
-            tree.AddComponent(new CGraphics(image));
-            tree.AddComponent(new CGameObject());
-            tree.AddComponent(new CCollidable(ts / 2));
-            tree.AddComponent(new CHealth(100, 100));
-            tree.AddComponent(new CFlammable(Utilities.ResizeImage(Properties.Resources.ohen, ts, ts)));
-            tree.AddComponent(new CSumbergable(Utilities.ResizeImage(Properties.Resources.water, ts, ts)));
+            var bush = _world.CreateEntity();
+            bush.AddComponent(new CTransform(x, y));
+            bush.AddComponent(new CGraphics(image));
+            bush.AddComponent(new CGameObject());
+            bush.AddComponent(new CCollidable(ts / 2));
+            bush.AddComponent(new CHealth(100, 100));
+            bush.AddComponent(new CFlammable(Utilities.ResizeImage(Properties.Resources.ohen, ts, ts)));
+            bush.AddComponent(new CSumbergable(Utilities.ResizeImage(Properties.Resources.water, ts, ts)));
+            return bush;
         }
 
         void AddBoulders(double probability)
@@ -238,6 +248,7 @@ namespace Crimson
                     {
                         case 0:
                             MakeBoulder(i, j);
+                            Map.Plan[i, j].GetComponent<CTile>().Occupied = true;
                             break;
                         default:
                             break;

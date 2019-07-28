@@ -1,12 +1,11 @@
-﻿using System;
-using System.Windows.Forms;
-using System.Diagnostics;
+﻿using Crimson.Components;
 using Crimson.Entities;
-using Crimson.Components;
+using System;
+using System.Windows.Forms;
 
 namespace Crimson.Systems
 {
-    class InputSystem: GameSystem
+    class InputSystem : GameSystem
     {
         readonly EntityGroup<CInputEvent, CMovement, CKeyboardNavigation> _inputable;
 

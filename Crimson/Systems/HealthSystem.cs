@@ -1,13 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Crimson.Components;
 using Crimson.Entities;
-using Crimson.Components;
-using System.Drawing;
-using System.Drawing.Imaging;
-using System.Diagnostics;
 
 namespace Crimson.Systems
 {
@@ -27,13 +19,6 @@ namespace Crimson.Systems
                 if (health.CurrentHealth <= 0)
                 {
                     entity.ScheduleForDeletion();
-                    if (entity.TryGetComponent(out CDropGun dropped))
-                    {
-                        var drop = _world.CreateEntity();
-                        drop.AddComponent(new CGraphics(Properties.Resources.gun));
-                        drop.AddComponent(new CAddOnStep(dropped.Gun));
-                        drop.AddComponent(new CTransform(entity.GetComponent<CTransform>().Location));
-                    }
                 }
             }
         }

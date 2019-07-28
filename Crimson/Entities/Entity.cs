@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Crimson.Components;
+﻿using Crimson.Components;
+using System;
 
 namespace Crimson.Entities
 {
@@ -90,7 +86,7 @@ namespace Crimson.Entities
             _world.RemoveComponentFromEntity<T>(Entity);
         }
 
-        public T GetComponent<T>() where T : IComponent, new ()
+        public T GetComponent<T>() where T : IComponent, new()
         {
             return _world.GetComponentForEntity<T>(Entity);
         }

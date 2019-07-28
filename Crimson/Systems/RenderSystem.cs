@@ -1,11 +1,10 @@
-﻿using System.Diagnostics;
-using System.Windows.Forms;
+﻿using Crimson.Components;
 using Crimson.Entities;
-using Crimson.Components;
+using System.Windows.Forms;
 
 namespace Crimson.Systems
 {
-    class RenderSystem: GameSystem
+    class RenderSystem : GameSystem
     {
         readonly Control _mapControl;
         readonly EntityGroup<CTransform, CGraphics, CGameObject> _renderable;
@@ -41,7 +40,7 @@ namespace Crimson.Systems
             RenderAll(_flying, e);
         }
 
-        void RenderAll<T>(EntityGroup<CTransform, CGraphics, T> group, PaintEventArgs e) where T : class, IComponent, new ()
+        void RenderAll<T>(EntityGroup<CTransform, CGraphics, T> group, PaintEventArgs e) where T : class, IComponent, new()
         {
             if (_cameras.Count == 0) { return; }
 

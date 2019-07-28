@@ -1,7 +1,6 @@
-﻿using System;
+﻿using Crimson.Entities;
+using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using Crimson.Entities;
 
 namespace Crimson.Components
 {
@@ -17,7 +16,7 @@ namespace Crimson.Components
         Components ComponentID { get; }
     }
 
-    class ComponentManager<T> : IComponentManager where T : IComponent, new ()
+    class ComponentManager<T> : IComponentManager where T : IComponent, new()
     {
         public static ComponentManager<T> Instance = new ComponentManager<T>();
         public int ID;

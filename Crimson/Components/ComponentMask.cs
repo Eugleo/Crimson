@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Crimson.Components
+﻿namespace Crimson.Components
 {
     class ComponentMask
     {
@@ -22,7 +16,7 @@ namespace Crimson.Components
         public void ExcludeComponent(Components component)
         {
             IncludedComponents &= ~component;
-            ExcludedComponents |= component; 
+            ExcludedComponents |= component;
         }
 
         public void RemoveComponent(Components component)

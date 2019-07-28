@@ -1,12 +1,8 @@
-﻿using System;
+﻿using Crimson.Entities;
+using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Drawing;
 using System.Windows.Forms;
-using System.Diagnostics;
-using Crimson.Entities;
 
 namespace Crimson.Components
 {
@@ -44,8 +40,7 @@ namespace Crimson.Components
         Tile = 268435456,
         GameObject = 536870912,
         Health = 1073741824,
-        DropGun = 2147483648,
-        CAddOnStep = 4294967296
+        Spawner = 2147483648
     }
 
     interface IComponent
@@ -53,30 +48,19 @@ namespace Crimson.Components
         Components Component { get; }
     }
 
-    class CAddOnStep : IComponent
+    class CSpawner : IComponent
     {
-        public Components Component => Components.CAddOnStep;
-        public IComponent Comp;
+        public bool CanSpawn { get; set; } = true;
+        public Components Component => Components.Spawner;
 
-        public CAddOnStep(IComponent comp)
+        public int SpawnRate { get; }
+
+        public CSpawner(int spawnRate)
         {
-            Comp = comp;
+            SpawnRate = spawnRate;
         }
 
-        public CAddOnStep() { }
-    }
-
-    class CDropGun : IComponent
-    {
-        public Components Component => Components.DropGun;
-        public CGun Gun;
-
-        public CDropGun(CGun gun)
-        {
-            Gun = gun;
-        }
-
-        public CDropGun() { }
+        public CSpawner() { }
     }
 
     class CHealth : IComponent
@@ -351,6 +335,7 @@ namespace Crimson.Components
 
     class CTile : IComponent
     {
+        public bool Occupied { get; set; } = false;
         public Components Component => Components.Tile;
 
         public CTile() { }
@@ -415,7 +400,7 @@ namespace Crimson.Components
 
         public CBurning() { }
     }
-    class CFlammable: IComponent
+    class CFlammable : IComponent
     {
         public Image Image;
         public Components Component => Components.Flammable;

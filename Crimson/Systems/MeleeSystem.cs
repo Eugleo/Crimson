@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Crimson.Components;
 using Crimson.Entities;
-using Crimson.Components;
+using System.Threading.Tasks;
 
 
 namespace Crimson.Systems

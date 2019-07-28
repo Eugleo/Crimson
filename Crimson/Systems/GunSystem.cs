@@ -1,9 +1,8 @@
-﻿using System;
+﻿using Crimson.Components;
+using Crimson.Entities;
+using System;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Diagnostics;
-using Crimson.Entities;
-using Crimson.Components;
 
 namespace Crimson.Systems
 {
@@ -31,7 +30,7 @@ namespace Crimson.Systems
 
             foreach (var (entity, gun, transform, shot, faction) in _shootingEntities)
             {
-                if (!gun.CanShoot || gun.Ammo <= 0) { return; }
+                if (!gun.CanShoot || gun.Ammo <= 0) { continue; }
 
                 Vector startingLocation;
                 Vector direction;

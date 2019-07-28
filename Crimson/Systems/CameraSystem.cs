@@ -1,7 +1,6 @@
-﻿using System;
-using System.Diagnostics;
+﻿using Crimson.Components;
 using Crimson.Entities;
-using Crimson.Components;
+using System;
 
 namespace Crimson.Systems
 {
@@ -31,7 +30,7 @@ namespace Crimson.Systems
                     double xOffset = 0;
                     double yOffset = 0;
 
-                    if (!camera.Target.TryGetComponent(out CMovement targetMovement)) { targetMovement = movement;  }
+                    if (!camera.Target.TryGetComponent(out CMovement targetMovement)) { targetMovement = movement; }
 
                     var distanceX = X - targetLocation.X;
                     if (Math.Abs(distanceX) > camera.FollowDistance)

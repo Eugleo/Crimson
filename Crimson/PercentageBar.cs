@@ -1,11 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Drawing;
 using System.Windows.Forms;
-using System.Diagnostics;
 
 namespace Crimson
 {
@@ -44,7 +39,7 @@ namespace Crimson
         protected override void OnPaint(PaintEventArgs e)
         {
             e.Graphics.DrawRectangle(Pens.Black, new Rectangle(0, 0, Width - 1, Height - 1));
-            e.Graphics.FillRectangle(_brush, new Rectangle(6, 6, (int)Math.Round((Width - 12) * (_value / Maximum)), Height - 12));
+            e.Graphics.FillRectangle(_brush, new Rectangle(2, 2, (int)Math.Round((Width - 4) * (_value / Maximum)), Height - 4));
         }
     }
 }

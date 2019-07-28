@@ -51,9 +51,20 @@
     <Compile Include="Entities\EntityGroup.cs" />
     <Compile Include="Entities\Entity.cs" />
     <Compile Include="Components\ComponentMask.cs" />
+    <Compile Include="MainMenu.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="MainMenu.Designer.cs">
+      <DependentUpon>MainMenu.cs</DependentUpon>
+    </Compile>
     <Compile Include="LevelGenerator.cs" />
     <Compile Include="PercentageBar.cs">
       <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
     <Compile Include="Systems\AttackSystem.cs" />
     <Compile Include="Systems\AvoidObstaclesSystem.cs" />
@@ -82,6 +93,7 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Systems\GameSystem.cs" />
+    <Compile Include="Systems\SpawnerSystem.cs" />
     <Compile Include="Systems\SteamSystem.cs" />
     <Compile Include="Systems\WaterSystem.cs" />
     <Compile Include="Utilities.cs" />
@@ -90,16 +102,14 @@
     <EmbeddedResource Include="MainForm.resx">
       <DependentUpon>MainForm.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="MainMenu.resx">
+      <DependentUpon>MainMenu.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
       <SubType>Designer</SubType>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-    <Compile Include="Properties\Resources.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Resources.resx</DependentUpon>
-      <DesignTime>True</DesignTime>
-    </Compile>
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -141,9 +151,6 @@
     <None Include="Resources\shooter.png" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\Top-Down-Shooter-SurvivalPLAYERART.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\rogue.png" />
   </ItemGroup>
   <ItemGroup>
@@ -180,9 +187,6 @@
     <None Include="Resources\cloud.png" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\cloud-removebg-preview.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\enemy.jpg" />
   </ItemGroup>
   <ItemGroup>
@@ -192,16 +196,22 @@
     <None Include="Resources\bush.png" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\enemy-dead.jpg" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\enemy-dead.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\enemy-dead-removebg-preview.png" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\gun%281%29.png" />
+    <None Include="Resources\ranger-removebg-preview.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\warrior-removebg-preview.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\cloud-removebg-preview.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\header.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Crimsonland.jpg" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

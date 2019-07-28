@@ -1,10 +1,8 @@
-﻿using System;
+﻿using Crimson.Components;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Crimson.Components;
 
 namespace Crimson.Entities
 {
@@ -21,8 +19,8 @@ namespace Crimson.Entities
         public abstract void UpdateComponent(Entity entity, IComponent component);
     }
 
-    class EntityGroup<Component1> : EntityGroup, IEnumerable<(EntityHandle, Component1)>, IReadOnlyList<(EntityHandle, Component1)> 
-        where Component1 : class, IComponent, new ()
+    class EntityGroup<Component1> : EntityGroup, IEnumerable<(EntityHandle, Component1)>, IReadOnlyList<(EntityHandle, Component1)>
+        where Component1 : class, IComponent, new()
     {
         public List<Component1> Components1 = new List<Component1>();
 
@@ -76,9 +74,9 @@ namespace Crimson.Entities
         }
     }
 
-    class EntityGroup<Component1, Component2> : 
-        EntityGroup, 
-        IEnumerable<(EntityHandle, Component1, Component2)>, 
+    class EntityGroup<Component1, Component2> :
+        EntityGroup,
+        IEnumerable<(EntityHandle, Component1, Component2)>,
         IReadOnlyList<(EntityHandle, Component1, Component2)>
         where Component1 : class, IComponent, new()
         where Component2 : class, IComponent, new()
@@ -122,7 +120,8 @@ namespace Crimson.Entities
             {
                 var i = _entities.FindIndex(e => e.Entity == entity);
                 Components1[i] = component as Component1;
-            } else if (t == typeof(Component2))
+            }
+            else if (t == typeof(Component2))
             {
                 var i = _entities.FindIndex(e => e.Entity == entity);
                 Components2[i] = component as Component2;
@@ -143,9 +142,9 @@ namespace Crimson.Entities
         }
     }
 
-    class EntityGroup<Component1, Component2, Component3> : 
-        EntityGroup, 
-        IEnumerable<(EntityHandle, Component1, Component2, Component3)>, 
+    class EntityGroup<Component1, Component2, Component3> :
+        EntityGroup,
+        IEnumerable<(EntityHandle, Component1, Component2, Component3)>,
         IReadOnlyList<(EntityHandle, Component1, Component2, Component3)>
         where Component1 : class, IComponent, new()
         where Component2 : class, IComponent, new()
@@ -157,7 +156,7 @@ namespace Crimson.Entities
 
         public int Count => Entities.Count;
 
-        public (EntityHandle, Component1, Component2, Component3) this[int index] => 
+        public (EntityHandle, Component1, Component2, Component3) this[int index] =>
             (Entities[index], Components1[index], Components2[index], Components3[index]);
 
         public EntityGroup()

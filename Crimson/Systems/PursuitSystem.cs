@@ -1,21 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Crimson.Components;
 using Crimson.Entities;
-using Crimson.Components;
 
 namespace Crimson.Systems
 {
-    class PursuitSystem: GameSystem
+    class PursuitSystem : GameSystem
     {
         readonly EntityGroup<CTransform, CMovement, CPursuitBehavior> _pursuing;
 
         public PursuitSystem(World world)
         {
             _world = world;
-            _pursuing = _world.GetGroup <EntityGroup<CTransform, CMovement, CPursuitBehavior>>();
+            _pursuing = _world.GetGroup<EntityGroup<CTransform, CMovement, CPursuitBehavior>>();
         }
 
         public override void Update()

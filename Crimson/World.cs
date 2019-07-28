@@ -1,10 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Diagnostics;
-using Crimson.Components;
+﻿using Crimson.Components;
 using Crimson.Entities;
 using Crimson.Systems;
+using System;
+using System.Collections.Generic;
 using System.Reflection;
 
 namespace Crimson
@@ -29,7 +27,7 @@ namespace Crimson
         public void RemoveEntity(Entity e)
         {
             foreach (var cm in ComponentManagerDB.ComponentManagers)
-            {               
+            {
                 if (_entityManager.GetComponentMask(e).DoesIncludeComponent(cm.ComponentID))
                 {
                     if (!_removers.TryGetValue(cm.Component, out MethodInfo m2))
@@ -43,12 +41,12 @@ namespace Crimson
             }
         }
 
-        public T GetComponentForEntity<T>(Entity e) where T : IComponent, new ()
+        public T GetComponentForEntity<T>(Entity e) where T : IComponent, new()
         {
             return ComponentManager<T>.Instance.LookupComponentForEntity(e);
         }
 
-        public void AddComponentToEntity<T>(Entity e, T c) where T : IComponent, new ()
+        public void AddComponentToEntity<T>(Entity e, T c) where T : IComponent, new()
         {
             ComponentManager<T>.Instance.AddComponentToEntity(e, c);
             var mask = _entityManager.GetComponentMask(e);
@@ -57,12 +55,12 @@ namespace Crimson
             UpdateGroupsForEntity(e, mask, oldMask, c);
         }
 
-        public bool EntityHasComponent<T>(Entity e) where T : IComponent, new ()
+        public bool EntityHasComponent<T>(Entity e) where T : IComponent, new()
         {
             return _entityManager.GetComponentMask(e).DoesIncludeComponent(ComponentManager<T>.Instance.ComponentID);
         }
 
-        public void RemoveComponentFromEntity<T>(Entity e) where T : IComponent, new ()
+        public void RemoveComponentFromEntity<T>(Entity e) where T : IComponent, new()
         {
             ComponentManager<T>.Instance.RemoveComponentFromEntity(e);
             var mask = _entityManager.GetComponentMask(e);
@@ -95,8 +93,8 @@ namespace Crimson
             }
         }
 
-        public void ForEachEntityWithComponents<T>(Action<Entity> f) where T : IComponent, new ()
-        { 
+        public void ForEachEntityWithComponents<T>(Action<Entity> f) where T : IComponent, new()
+        {
             foreach (var entity in _entityManager.Entities)
             {
                 if (_entityManager.GetComponentMask(entity).DoesIncludeComponent(ComponentManager<T>.Instance.ComponentID))
@@ -128,9 +126,10 @@ namespace Crimson
 
                 return group as Group;
             }
-        } 
+        }
 
-        public void AddSystem(GameSystem system) {
+        public void AddSystem(GameSystem system)
+        {
             _systems.Add(system);
         }
 

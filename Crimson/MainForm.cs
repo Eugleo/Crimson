@@ -1,12 +1,11 @@
-﻿using System;
+﻿using Crimson.Components;
+using Crimson.Entities;
+using Crimson.Systems;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
-using System.Diagnostics;
-using Crimson.Components;
-using Crimson.Systems;
-using Crimson.Entities;
 
 namespace Crimson
 {
@@ -15,33 +14,49 @@ namespace Crimson
         readonly Map _map;
         readonly World _world = new World();
         readonly EntityHandle _player;
+        readonly EntityHandle _camera;
         readonly Dictionary<CGun.ShootingPattern, CGun> _guns = new Dictionary<CGun.ShootingPattern, CGun>();
         readonly Dictionary<CGun.ShootingPattern, Label> _gunLabels = new Dictionary<CGun.ShootingPattern, Label>();
+        readonly EntityGroup<CTransform, CTile> _tiles;
 
         public MainForm()
         {
             InitializeComponent();
 
-            group = _world.GetGroup<EntityGroup<CKeyboardNavigation>>();
+            _keyboardNavigable = _world.GetGroup<EntityGroup<CKeyboardNavigation>>();
+            _tiles = _world.GetGroup<EntityGroup<CTransform, CTile>>();
 
             DefineGuns();
             _map = LevelGenerator.Generate(_world, 30, 30, 64);
+            var freeLocations = _tiles
+                .Where(t => !t.Item3.Occupied)
+                .Select(t => t.Item2.Location)
+                .Where(t => t.X > mapPanel.Width / 2 && t.X < 30 * 64 - mapPanel.Width / 2 && t.Y > mapPanel.Height / 2 && t.Y < 30 * 64 - mapPanel.Height / 2)
+                .ToList();
+            var location = freeLocations[rnd.Next(freeLocations.Count)];
+            _player = MakePlayer(location);
             AddSystemsToWorld();
-            _player = MakePlayer();
-            MakeCamera();
+            _camera = MakeCamera(location);
+            AddSpawner();
 
             gameTimer.Enabled = true;
         }
 
+        void AddSpawner()
+        {
+            var spawner = _world.CreateEntity();
+            spawner.AddComponent(new CSpawner(5500));
+        }
+
         void DefineGuns()
         {
-            _guns[CGun.ShootingPattern.Pistol] = new CGun(CGun.ShootingPattern.Pistol, 15, 1000, 5, 600, 35, 350, 8);
+            _guns[CGun.ShootingPattern.Pistol] = new CGun(CGun.ShootingPattern.Pistol, 18, 1000, 5, 600, 35, 250, 8);
             _gunLabels[CGun.ShootingPattern.Pistol] = gun1Label;
-            _guns[CGun.ShootingPattern.Shotgun] = new CGun(CGun.ShootingPattern.Shotgun, 20, 1600, 0, 900, 30, 200, 2);
+            _guns[CGun.ShootingPattern.Shotgun] = new CGun(CGun.ShootingPattern.Shotgun, 8, 1800, 0, 900, 30, 200, 2);
             _gunLabels[CGun.ShootingPattern.Shotgun] = gun2Label;
-            _guns[CGun.ShootingPattern.SMG] = new CGun(CGun.ShootingPattern.SMG, 10, 500, 3, 150, 40, 400, 30);
+            _guns[CGun.ShootingPattern.SMG] = new CGun(CGun.ShootingPattern.SMG, 10, 1200, 3, 150, 40, 400, 30);
             _gunLabels[CGun.ShootingPattern.SMG] = gun3Label;
-            _guns[CGun.ShootingPattern.Grenade] = new CGun(CGun.ShootingPattern.Grenade, 3, 3000, 0, 400, 15, 600, 1);
+            _guns[CGun.ShootingPattern.Grenade] = new CGun(CGun.ShootingPattern.Grenade, 3, 4000, 0, 400, 15, 500, 1);
             _gunLabels[CGun.ShootingPattern.Grenade] = gun4Label;
         }
 
@@ -62,33 +77,35 @@ namespace Crimson
             _world.AddSystem(new FireSystem(_world, _map));
             _world.AddSystem(new WaterSystem(_world, _map));
             _world.AddSystem(new SteamSystem(_world));
-            _world.AddSystem(new MetaSystem(_world));
+            _world.AddSystem(new SpawnerSystem(_world, _player));
+            _world.AddSystem(new MetaSystem(_world, PlayerDied, KilledEnemy));
         }
 
-        EntityHandle MakePlayer()
+        EntityHandle MakePlayer(Vector location)
         {
             Image playerImage = Utilities.ResizeImage(Properties.Resources.Player, 64, 64);
             var player = _world.CreateEntity();
             player.AddComponent(new CKeyboardNavigation());
             player.AddComponent(new CMovement(6, new Vector(0, 0)));
-            player.AddComponent(new CTransform(mapPanel.Width / 2, mapPanel.Height / 2));
+            player.AddComponent(new CTransform(location));
             player.AddComponent(new CGraphics(playerImage));
             player.AddComponent(new CGameObject());
             player.AddComponent(_guns[CGun.ShootingPattern.Pistol]);
             player.AddComponent(new CCollidable(32));
             player.AddComponent(new CFaction(Faction.PC));
-            player.AddComponent(new CHealth(150, 150));
+            //player.AddComponent(new CHealth(150, 150));
             player.AddComponent(new CFlammable(Utilities.ResizeImage(Properties.Resources.ohen, 64, 64)));
             player.AddComponent(new CSumbergable(Utilities.ResizeImage(Properties.Resources.water, 64, 64)));
             return player;
         }
 
-        void MakeCamera()
+        EntityHandle MakeCamera(Vector location)
         {
             var camera = _world.CreateEntity();
             camera.AddComponent(new CCamera(20, _player, (mapPanel.Width, mapPanel.Height)));
-            camera.AddComponent(new CTransform(mapPanel.Width / 2 + 1, mapPanel.Height / 2 + 1));
+            camera.AddComponent(new CTransform(location));
             camera.AddComponent(new CMovement(5, new Vector(0, 0)));
+            return camera;
         }
 
         readonly Random rnd = new Random();
@@ -99,7 +116,7 @@ namespace Crimson
             ke[e.KeyCode] = e;
             if (ke.Count > 0)
             {
-                _world.ForEachEntityWithComponents<CKeyboardNavigation>(en => 
+                _world.ForEachEntityWithComponents<CKeyboardNavigation>(en =>
                     _world.AddComponentToEntity(en, new CInputEvent(ke.Values.ToList()))
                 );
             }
@@ -116,9 +133,6 @@ namespace Crimson
                     break;
                 case Keys.D4:
                     _player.AddComponent(_guns[CGun.ShootingPattern.Grenade]);
-                    break;
-                case Keys.U:
-                    MakeEnemy();
                     break;
                 case Keys.Escape:
                     Pause();
@@ -140,64 +154,31 @@ namespace Crimson
             }
         }
 
-        void MakeEnemy()
-        {
-            var enemy = _world.CreateEntity();
-            Image image = Utilities.ResizeImage(Properties.Resources.enemy, 64, 64);
-            enemy.AddComponent(new CTransform(rnd.Next(5, 64 * 30 - 5 - 64), rnd.Next(5, 64 * 30 - 5 - 64)));
-            enemy.AddComponent(new CGraphics(image));
-            enemy.AddComponent(new CGameObject());
-            enemy.AddComponent(new CMovement(5, new Vector(0, 0)));
-            enemy.AddComponent(new CPursuitBehavior(_player, 5, 1, 30));
-            enemy.AddComponent(new CCollidable(32));
-            enemy.AddComponent(new CFaction(Faction.NPC));
-            enemy.AddComponent(new CHealth(50, 50));
-            enemy.AddComponent(new CAvoidObstaclesBehavior(5, 2, MakeFeelers(new int[] { 0, 20, 40, 60, 80 })));
-            enemy.AddComponent(new CAttacker(_player));
-            enemy.AddComponent(new CHasMeleeWeapon(70, 300, 100, true));
-            enemy.AddComponent(new CFlammable(Utilities.ResizeImage(Properties.Resources.ohen, 64, 64)));
-            enemy.AddComponent(new CSumbergable(Utilities.ResizeImage(Properties.Resources.water, 64, 64)));
-        }
-
-        List<(EntityHandle, int)> MakeFeelers(int[] distances)
-        {
-            var acc = new List<(EntityHandle, int)>();
-            foreach (var d in distances)
-            {
-                acc.Add((MakeFeeler(new Vector(32, 0)), d));
-                acc.Add((MakeFeeler(new Vector(32, 64)), d));
-                acc.Add((MakeFeeler(new Vector(64, 32)), d));
-                acc.Add((MakeFeeler(new Vector(0, 32)), d));
-            }
-            return acc;
-        }
-
-        EntityHandle MakeFeeler(Vector offset)
-        {
-            var feeler = _world.CreateEntity();
-            feeler.AddComponent(new CMovement(0, new Vector(0, 0)));
-            feeler.AddComponent(new CTransform(0, 0));
-            feeler.AddComponent(new CFeeler(offset));
-            return feeler;
-        }
-
         void UpdateGunLabel(Label label, CGun gun)
         {
             if (gun.IsBeingReloaded)
             {
-                label.ForeColor = Color.LightGray;
+                label.BackColor = Color.DarkGray;
             }
             else
             {
-                label.ForeColor = Color.Black;
+                label.BackColor = Color.MidnightBlue;
             }
         }
 
-        uint ticks;
         private void GameTimer_Tick(object sender, EventArgs e)
         {
             _world.Tick();
-            ticks += 1;
+            killCounterBar.Maximum = KILL_COUNT;
+            killCounterBar.Val = KILL_COUNT - killCounter;
+
+            if (_isShooting)
+            {
+                var absoluteCenterLocation = _camera.GetComponent<CTransform>().Location;
+                var relativeOffset = new Vector(mapPanel.Width / 2, mapPanel.Height / 2);
+                var targetLocation = _mouseLocation + absoluteCenterLocation - relativeOffset;
+                _player.AddComponent(new CShootEvent(targetLocation));
+            }
 
             foreach (var g in _guns.Values)
             {
@@ -218,7 +199,7 @@ namespace Crimson
                 }
             }
 
-            _gunLabels.Values.ToList().ForEach(l => l.BackColor = Color.Transparent);
+            _gunLabels.Values.ToList().ForEach(l => l.ForeColor = Color.White);
             if (_player.TryGetComponent(out CGun gun))
             {
                 if (gun.IsBeingReloaded)
@@ -231,7 +212,7 @@ namespace Crimson
                 }
                 ammoBar.Maximum = gun.MagazineSize;
                 ammoBar.Val = gun.Ammo;
-                _gunLabels[gun.Type].BackColor = Color.DarkGreen;
+                _gunLabels[gun.Type].ForeColor = Color.LightBlue;
             }
 
             if (_player.TryGetComponent(out CHealth health))
@@ -239,22 +220,14 @@ namespace Crimson
                 healthBar.Maximum = health.MaxHealth;
                 healthBar.Val = (int)Math.Round(health.CurrentHealth);
             }
-
-            if (_isShooting)
-            {
-                var absoluteCenterLocation = _world.GetGroup<EntityGroup<CCamera, CMovement, CTransform>>().Components3[0].Location;
-                var relativeOffset = new Vector(mapPanel.Width / 2, mapPanel.Height / 2);
-                var targetLocation = _mouseLocation + absoluteCenterLocation - relativeOffset;
-                _player.AddComponent(new CShootEvent(targetLocation));
-            }
         }
 
-        readonly EntityGroup<CKeyboardNavigation> group;
+        readonly EntityGroup<CKeyboardNavigation> _keyboardNavigable;
         private void MainForm_KeyUp(object sender, KeyEventArgs e)
         {
             ke.Remove(e.KeyCode);
 
-            foreach (var (entity, _) in group)
+            foreach (var (entity, _) in _keyboardNavigable)
             {
                 if (ke.Count == 0)
                 {
@@ -282,7 +255,7 @@ namespace Crimson
         {
             _mouseLocation = Vector.FromPoint(e.Location);
             _isShooting = true;
-            var absoluteCenterLocation = _world.GetGroup<EntityGroup<CCamera, CMovement, CTransform>>().Components3[0].Location;
+            var absoluteCenterLocation = _camera.GetComponent<CTransform>().Location;
             var relativeOffset = new Vector(mapPanel.Width / 2, mapPanel.Height / 2);
             _player.AddComponent(new CShootEvent(Vector.FromPoint(e.Location) + absoluteCenterLocation - relativeOffset));
         }
@@ -298,10 +271,62 @@ namespace Crimson
             _mouseLocation = Vector.FromPoint(e.Location);
         }
 
+        uint ticks;
         private void FpsTimer_Tick(object sender, EventArgs e)
         {
-            Text = string.Format("FPS: {0}", ticks);
-            ticks = 0;
+            ticks += 1;
+            if (ticks > 5)
+            {
+                enemiesLeftLabel.Hide();
+                ammoLabel.Hide();
+                healthLabel.Hide();
+                weaponLabel.Hide();
+            }
+        }
+
+        readonly int KILL_COUNT = 25;
+        int killCounter = 0;
+        void KilledEnemy()
+        {
+            killCounter += 1;
+
+            if (killCounter >= KILL_COUNT)
+            {
+                EndGame(true);
+            }
+        }
+
+        void PlayerDied()
+        {
+            EndGame(false);
+        }
+
+        void EndGame(bool won)
+        {
+            _camera.RemoveComponent<CMovement>();
+
+            string message;
+            string caption;
+            if (won)
+            {
+                message = string.Format("You WIN! You fought for: {0}min {1}sec. Would you like to retry?", ticks / 60, ticks % 60);
+                caption = "Congratulations!";
+            }
+            else
+            {
+                message = string.Format("You LOSE! You struggled for: {0}min {1}sec", ticks / 60, ticks % 60);
+                caption = "Oh no!";
+            }
+            MessageBoxButtons buttons = MessageBoxButtons.RetryCancel;
+            var result = MessageBox.Show(message, caption, buttons);
+            if (result == DialogResult.Retry)
+            {
+
+            }
+            else
+            {
+                Close();
+            }
         }
     }
 }
