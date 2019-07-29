@@ -93,7 +93,7 @@ namespace Crimson
             player.AddComponent(_guns[CGun.ShootingPattern.Pistol]);
             player.AddComponent(new CCollidable(32));
             player.AddComponent(new CFaction(Faction.PC));
-            //player.AddComponent(new CHealth(150, 150));
+            player.AddComponent(new CHealth(150, 150));
             player.AddComponent(new CFlammable(Utilities.ResizeImage(Properties.Resources.ohen, 64, 64)));
             player.AddComponent(new CSumbergable(Utilities.ResizeImage(Properties.Resources.water, 64, 64)));
             return player;
@@ -284,7 +284,7 @@ namespace Crimson
             }
         }
 
-        readonly int KILL_COUNT = 10;
+        readonly int KILL_COUNT = 15;
         int killCounter = 0;
         void KilledEnemy()
         {
