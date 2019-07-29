@@ -13,6 +13,7 @@ namespace Crimson
         private void LaunchButton_Click(object sender, EventArgs e)
         {
             launchButton.Enabled = false;
+            genLevel.Show();
             var frm = new MainForm
             {
                 Location = Location,

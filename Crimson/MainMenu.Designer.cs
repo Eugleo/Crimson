@@ -86,6 +86,7 @@
             this.genLevel.Size = new System.Drawing.Size(451, 37);
             this.genLevel.TabIndex = 3;
             this.genLevel.Text = "Generating level, please wait...";
+            this.genLevel.Visible = false;
             // 
             // MainMenu
             // 
