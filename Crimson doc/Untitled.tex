@@ -1,0 +1,54 @@
+\documentclass[BCOR=0pt]{scrartcl}
+%% Write cleaner and modern LaTeX
+\usepackage[l2tabu]{nag}
+%% Setup the page layout
+\usepackage{microtype} % micro adjustments to fonts
+\usepackage{setspace} % set the line spacing
+\onehalfspacing % the right 1.5 spacing between lines
+\frenchspacing % no double space after full stop
+\recalctypearea
+\usepackage{dirtytalk}
+\usepackage{tgpagella}
+\usepackage[utf8]{inputenc}
+\usepackage{graphicx}
+\graphicspath{{./Ostaní/}}
+\usepackage[T1]{fontenc}
+\usepackage[version=4]{mhchem}
+
+\usepackage{amsmath}
+\usepackage{setspace}
+\usepackage{xcolor}
+\title{Crimson}
+\author{Evžen Wybitul}
+\date{}
+\renewcommand*\contentsname{Obsah}
+
+\KOMAoption{abstract}{true}
+\setkomafont{author}{\sffamily}
+\KOMAoption{DIV=12} 
+
+\begin{document}
+
+\maketitle
+
+Crimson je 2D top-down střílečka, ve které máte jednoduchý cíl: zabít 15 nepřátel. \footnote{Číslo 15 je zvoleno hlavně proto, aby bylo možné rychle hru dohrát; ideální počet, který bude pro hráče opravdu výzvou, se pohybuje kolem 30.} Ti se ale samozřejmě zase snaží zabít vás; jde tedy o to, kdo to zvládne dříve.
+
+\section{Návod}
+
+Po herní mapě se můžete pohybovat volně, vyjma stromů a jiných objektů, které bude nutné obejít. Stromy, keře a tráva jsou hořlavé, naopak v četných vodních plochách je možné najít před ohněm útočiště (...nebo se uhasit). Mapy jsou generovány náhodně.
+
+Máte k dispozici čtyři zbraně: pistoli, brokovnici, SMG a ohnivé granáty --- SMG je vhodné pro boj na dálku, brokovnice pro boj na blízku, pistole, když se obě zmíněné zbraně zrovna přebíjejí, a granáty mohou způsobit velké škody v případě, kdy stojí více nepřátel na hořlavých plochách. Počet zbývajících nábojů v zásobníku je zobrazen na pravé straně obrazovky; po vyprázdnění zásobníku automaticky dojde k jeho výměně, daná zbraň je ale v tomto čase nepoužitelná. Počet zásobníků není omezen.
+
+Stejně jako vy, i nepřátelé mají k dispozici arsenál různých zbraní; kromě toho se ale ve hře vyskytují i speciální jednotky vycvičené na boj zblízka. Noví nepřátelé se objevují periodicky na náhodném místě herního světa, cestu k vám si však zaručeně najdou. Počet nepřátel, který vám ještě zbývá k zabití, je znázorněn v levé části obrazovky, stejně jako vaše zbývající životy.
+
+\subsection{Ovládání}
+
+Pohyb pomocí WASD nebo šipek, výměna zbraní pomocí kláves 1--4. Pozastavit hru lze pomocí Esc. Míří se klasicky myší, střílí se pomocí levého tlačítka.
+
+\section{Architektura}
+
+Místo klasické objektově orientované architektury jsem zvolil Entity-Component-System architekturu. Všechny herní objekty jsou v ní chápány jako stejné entity, které se liší pouze svými vlastnostmi; tyto vlastnosti jsou pak určeny jednotlivými komponenty. Proto strom je entita s komponenty pozice a obrázku, zatímco nepřítel je entita s komponenty pozice, obrázku, pohybu, střílení atp. Samotné komponenty však ukládají pouze data, zatímco reálná funkcionalita celé hry je uložena v systémech. Každý systém implementuje určitou herní funkcionalitu (například v mé hře je pohybový systém, renderovací systém, ohňový systém, vodní systém...) tak, že pracuje s entitami, které mají určitou kombinaci komponentů. Například pohybový systém pracuje s entitami, které mají komponenty pozice a pohybu a je mu jedno, jestli tyto entity mají nějaké další komponenty.
+
+Díky ECS bylo jednoduché postupně přidávat jednotlivé featury a také je všechny odděleně testovat a debugovat. Potýkal jsem se sice trochu s výkonem, nakonec ale hra většinou dosahuje kolem 30 fps. Architektonicky bylo nejsložitější vymyslet, jakým způsobem zařídit, aby systémy věděly, jaké entity jsou pro ně relevantní --- samozřejmě totiž nejde každý herní ``tik'' v každém systému procházet všechny entity a filtrovat z nich ty s určitými komponenty. Nakonec jsem k entitám přidal bitovou masku, která udává, jaké komponenty daná entita má, a podobné bitové masky jsem přidal i ke všem systémům. Vždy, když jsou komponenty nějaké entity upraveny, stačí pro tuto jednu entitu rozhodnout, do jakých systémů patří na základě porovnání bitových masek; každý systém si pak drží seznam všech ``svých'' entit, který se automaticky updatuje.
+
+\end{document}
